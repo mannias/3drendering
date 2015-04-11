@@ -1,19 +1,17 @@
 package edu.ar.itba.raytracer.properties;
 
+import edu.ar.itba.raytracer.Material;
+
 public class ShapeProperties {
 
-	private final Color color;
+	private final Material material;
 
-	public ShapeProperties(final Color color) {
-		this.color = color;
+	public ShapeProperties(final Material material) {
+		this.material = material;
 	}
 
-	public ShapeProperties() {
-		this(new Color());
-	}
-
-	public Color getColor() {
-		return color;
+	public Material getMaterial() {
+		return material;
 	}
 	
 }

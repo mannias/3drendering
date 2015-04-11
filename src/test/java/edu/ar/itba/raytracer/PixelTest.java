@@ -21,50 +21,6 @@ public class PixelTest {
 		final int height = 480;
 		final int width = 640;
 		Camera camera = createScene(width, height);
-		//
-		// final int pixels = width * height;
-		// final int cores = Runtime.getRuntime().availableProcessors();
-		// // final int pixelsPerCore = pixels / cores;
-		//
-		// final ForkJoinTask<?>[] threads = new ForkJoinTask[cores];
-		// final Runnable[] runnables = new Runnable[cores];
-		// // final AtomicInteger pixel = new AtomicInteger();
-		// for (int i = 0; i < cores; i++) {
-		// final int startPixel = i * pixels / cores;
-		// final int endPixel;
-		// if (i == cores - 1) {
-		// endPixel = pixels;
-		// } else {
-		// endPixel = (i + 1) * pixels / cores;
-		// }
-		// runnables[i] = new Runnable() {
-		// @Override
-		// public void run() {
-		// final long start = System.currentTimeMillis();
-		// for (int i = startPixel; i < endPixel; i++) {
-		// camera.castRay(i % width, i / width);
-		// // j++;
-		// // assertEquals(plane.getColor(), color);
-		// }
-		// System.out.println("TIME THREAD "
-		// + (System.currentTimeMillis() - start) + " FOR "
-		// + (endPixel - startPixel));
-		// }
-		// };
-		// threads[i] = ForkJoinTask.adapt(runnables[i]);
-		// }
-		// final long start = System.currentTimeMillis();
-		// for (ForkJoinTask<?> fjt : threads) {
-		// fjt.fork();
-		// }
-		//
-		// for (ForkJoinTask<?> fjt : threads) {
-		// fjt.join();
-		// }
-		// System.out.println(System.currentTimeMillis() - start);
-		//
-		// final BufferedImage image = camera.takePicture();
-
 		final BufferedImage image = camera.render(width, height);
 
 		ImageIO.write(image, "png", new File("pic.png"));
@@ -73,7 +29,7 @@ public class PixelTest {
 	private Camera createScene(final int width, final int height) {
 		final Scene scene = new Scene(new Color(0.2, 0.2, 0.2));
 		final Transform cameraTransform = new Transform();
-		cameraTransform.setPosition(new Vector3(-1, 0, -20));
+		cameraTransform.setPosition(new Vector3(-1, 0, -40));
 		cameraTransform.setRotation(new Vector3(4, 0, 0));
 		final Camera camera = scene.addCamera(width, height, 50,
 				cameraTransform);
@@ -81,17 +37,17 @@ public class PixelTest {
 		final Transform planeTransform = new Transform();
 		planeTransform.setPosition(new Vector3(0, -5, 0));
 		planeTransform.setRotation(new Vector3(0, 0, 0));
-		scene.addPlane(planeTransform, new ShapeProperties(new Color(.1f, .1f,
-				1f)));
+		scene.addPlane(planeTransform, new ShapeProperties(new Material(
+				new Color(.1f, .1f, 1f), 1, 1, 0, 0)));
 		// scene.addPlane(new Vector3(0, -2, 0), new Vector3(0, 1, 0),
 		// new ShapeProperties(new Color(0, 255, 0)));
 
-		final ShapeProperties sphereProperties = new ShapeProperties(new Color(
-				1f, .1f, 1f));
+		final ShapeProperties sphereProperties = new ShapeProperties(
+				new Material(new Color(1f, .1f, 1f), 1, 1, 1, 999));
 		scene.addSphere(new Vector3(-5, 0, 2), 2, sphereProperties);
 
 		final ShapeProperties sphere2Properties = new ShapeProperties(
-				new Color(1f, .1f, 1f));
+				new Material(new Color(1f, .1f, 1f), 1, 1, 1, 999));
 		scene.addSphere(new Vector3(-1, 0f, -3), 2, sphere2Properties);
 
 		// final ShapeProperties boxProperties = new ShapeProperties(new
@@ -137,13 +93,13 @@ public class PixelTest {
 		final LightProperties lightProperties = new LightProperties(new Color(
 				1f, 1f, 1f));
 		scene.addLight(lightTransform, lightProperties);
-		
+
 		final Transform lightTransform2 = new Transform();
 		lightTransform2.setPosition(new Vector3(-5, 5, -2));
 		final LightProperties lightProperties2 = new LightProperties(new Color(
 				0, 1f, 0));
 		scene.addLight(lightTransform2, lightProperties2);
-		
+
 		return camera;
 	}
 }

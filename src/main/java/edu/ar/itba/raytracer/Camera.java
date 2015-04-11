@@ -198,29 +198,28 @@ public class Camera extends SceneElement {
 		if (!collision.collisionDetected()) {
 			return Color.DEFAULT_COLOR;
 		}
-		
+
 		final SceneShape obj = collision.getObj();
 
 		final Vector3 collisionPoint = collision.getCollisionPoint();
 		final Vector3 normal = obj.normal(collisionPoint).normalize();
 		final Vector3 collisionPointWithDelta = collisionPoint.add(normal
 				.scalarMult(.001f));
-		final double kd = 1;
-		final double ks = 1;
-		final double alpha = 999;
 
 		// Invert the ray direction to get the view versor. The direction is
 		// already normalized, so there is no need to normalize again.
 		final Vector3 v = ray.getDir().scalarMult(-1);
 
-		Color color = collision.getObj().getProperties().getColor();
+		final Material objectMaterial = collision.getObj().getProperties()
+				.getMaterial();
+		final Color objectColor = objectMaterial.color;
+		final double ka = objectMaterial.ka;
+		final double kd = objectMaterial.kd;
+		final double ks = objectMaterial.ks;
+		final double shininess = objectMaterial.shininess;
 
-		Color ambient = scene.getAmbientLight();
-		final double ambientRed = ambient.getRed() * color.getRed();
-		final double ambientGreen = ambient.getGreen() * color.getGreen();
-		final double ambientBlue = ambient.getBlue() * color.getBlue();
-		
-		Color intensity = new Color(ambientRed, ambientGreen, ambientBlue);
+		Color intensity = scene.getAmbientLight().scalarMult(ka)
+				.mult(objectColor);
 
 		for (final Light light : scene.getLights()) {
 			// Move the from point a little in the direction of the normal
@@ -233,25 +232,25 @@ public class Camera extends SceneElement {
 			final Vector3 lightVersor = light.getTransform().getPosition()
 					.sub(collisionPoint).normalize();
 			final double ln = lightVersor.dot(normal);
-			final Color lightColor = light.getProperties().getColor();
 
-			final double diffuseRed = lightColor.getRed() * ln * color.getRed();
-			final double diffuseGreen = lightColor.getGreen() * ln
-					* color.getGreen();
-			final double diffuseBlue = lightColor.getBlue() * ln
-					* color.getBlue();
+			if (ln > 0) {
+				final Color lightColor = light.getProperties().getColor();
 
-			// final Color diffuse = lightColor.scalarMult(ln).scalarMult(kd);
+				final Color diffuse = lightColor.scalarMult(ln).scalarMult(kd)
+						.mult(objectColor);
 
-			final Color diffuse = new Color(diffuseRed, diffuseGreen,
-					diffuseBlue);
-			intensity = intensity.add(diffuse);
+				// final Color diffuse = new Color(diffuseRed, diffuseGreen,
+				// diffuseBlue);
+				intensity = intensity.add(diffuse);
 
-			final Vector3 r = normal.scalarMult(2 * ln).sub(lightVersor);
-
-			final Color specular = lightColor.scalarMult(Math.pow(r.dot(v),
-					alpha) * ks);
-			intensity = intensity.add(specular);
+				final Vector3 r = normal.scalarMult(2 * ln).sub(lightVersor);
+				final double rv = r.dot(v);
+				if (rv > 0) {
+					final Color specular = lightColor.scalarMult(Math.pow(rv,
+							shininess) * ks);
+					intensity = intensity.add(specular);
+				}
+			}
 		}
 
 		if (rayDepth > 0) {
@@ -261,12 +260,11 @@ public class Camera extends SceneElement {
 					reflectedDir);
 
 			final Color reflectedColor = shade(reflectedRay, rayDepth - 1)
-					.scalarMult(1);
+					.scalarMult(shininess / Material.MAX_SHININESS);
 
 			intensity = intensity.add(reflectedColor);
 		}
 
-		// return collision.getObj().getProperties().getColor().mult(intensity);
 		return intensity;
 	}
 
