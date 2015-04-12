@@ -268,7 +268,7 @@ public class Camera extends SceneElement {
 			double cosThetaI = nv;
 			double eta = objectMaterial.refractionIndex;
 			if (nv < 0) {
-				eta = 1 / objectMaterial.refractionIndex;
+				eta = 1 / eta;
 				tNormal = tNormal.scalarMult(-1);
 				cosThetaI = -cosThetaI;
 			}

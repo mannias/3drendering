@@ -56,7 +56,7 @@ public class PixelTest {
 
 		final ShapeProperties sphere4Properties = new ShapeProperties(
 				new Material(new Color(1f, 1f, 0f), 1, 1, 1, 999, 0, 1.52));
-		scene.addSphere(new Vector3(13, 0f, -10), 2, sphere4Properties);
+		scene.addSphere(new Vector3(13, 5f, -10), 2, sphere4Properties);
 		
 		// final ShapeProperties boxProperties = new ShapeProperties(new
 		// Color(1f,
