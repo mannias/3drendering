@@ -18,8 +18,8 @@ public class PixelTest {
 
 	@Test
 	public void testPicture() throws IOException, InterruptedException {
-		final int height = 1080;
-		final int width = 1920;
+		final int height = 480;
+		final int width = 640;
 		Camera camera = createScene(width, height);
 		final BufferedImage image = camera.render(width, height);
 

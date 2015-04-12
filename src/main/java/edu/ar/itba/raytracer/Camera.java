@@ -72,10 +72,15 @@ public class Camera extends SceneElement {
 		this(scene, pictureWidth, pictureHeight, fov, new Transform());
 	}
 
-	private Ray getPrimaryRay(final int x, final int y) {
+	private Ray getPrimaryRay(final double x, final double y) {
 		final Vector3 position = getTransform().getPosition();
-		return new Ray(position,
-				pixelPoints[y * pictureWidth + x].sub(position));
+		return new Ray(position, forwardVector.add(heightVector.scalarMult(y))
+				.add(widthVector.scalarMult(x)));
+		// return new Ray(position, forwardVector.add(
+		// heightVector.scalarMult(-y + pictureHeight / 2)).add(
+		// widthVector.scalarMult(x - pictureWidth / 2)));
+		// return new Ray(position,
+		// pixelPoints[y * pictureWidth + x].sub(position));
 	}
 
 	/**
@@ -166,11 +171,35 @@ public class Camera extends SceneElement {
 			runnables[i] = new Runnable() {
 				@Override
 				public void run() {
+					final int n = 5;
+
 					final long start = System.currentTimeMillis();
 					for (int i = startPixel; i < endPixel; i++) {
 						final int x = i % width;
 						final int y = i / width;
-						picture[y][x] = shade(getPrimaryRay(x, y), 12);
+						double pixelRed = 0;
+						double pixelGreen = 0;
+						double pixelBlue = 0;
+						for (int p = 0; p < n; p++) {
+							for (int q = 0; q < n; q++) {
+								final double ppx = x - .5 * pictureWidth
+										+ (q + Math.random()) / n;
+								final double ppy = - y + .5 * pictureHeight
+										+ (p + Math.random()) / n;
+								Color c = shade(getPrimaryRay(ppx, ppy), 12);
+								pixelRed += c.getRed();
+								pixelGreen += c.getGreen();
+								pixelBlue += c.getBlue();
+								// if (c.getRed() != 0) {
+								// System.out.println("STAHP");
+								// }
+							}
+						}
+						// picture[y][x] = shade(getPrimaryRay(x, y), 50);
+						double n2 = n * n;
+						picture[y][x] = new Color(pixelRed / n2, pixelGreen
+								/ n2, pixelBlue / n2);
+
 					}
 					System.out.println("TIME THREAD "
 							+ (System.currentTimeMillis() - start) + " FOR "
@@ -272,7 +301,7 @@ public class Camera extends SceneElement {
 				tNormal = tNormal.scalarMult(-1);
 				cosThetaI = -cosThetaI;
 			}
-			
+
 			final double xx = 1 - (1 - cosThetaI * cosThetaI) / (eta * eta);
 			if (xx >= 0) {
 				final Vector3 refractedDir = v.scalarMult(-1 / eta).sub(
