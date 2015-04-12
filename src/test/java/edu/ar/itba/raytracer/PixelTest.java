@@ -18,8 +18,8 @@ public class PixelTest {
 
 	@Test
 	public void testPicture() throws IOException, InterruptedException {
-		final int height = 480;
-		final int width = 640;
+		final int height = 1080;
+		final int width = 1920;
 		Camera camera = createScene(width, height);
 		final BufferedImage image = camera.render(width, height);
 
@@ -29,8 +29,8 @@ public class PixelTest {
 	private Camera createScene(final int width, final int height) {
 		final Scene scene = new Scene(new Color(0.2, 0.2, 0.2));
 		final Transform cameraTransform = new Transform();
-		cameraTransform.setPosition(new Vector3(-1, 0, -40));
-		cameraTransform.setRotation(new Vector3(4, 0, 0));
+		cameraTransform.setPosition(new Vector3(10, 0, -10));
+		cameraTransform.setRotation(new Vector3(0, -70, 0));
 		final Camera camera = scene.addCamera(width, height, 50,
 				cameraTransform);
 
@@ -38,17 +38,21 @@ public class PixelTest {
 		planeTransform.setPosition(new Vector3(0, -5, 0));
 		planeTransform.setRotation(new Vector3(0, 0, 0));
 		scene.addPlane(planeTransform, new ShapeProperties(new Material(
-				new Color(.1f, .1f, 1f), 1, 1, 0, 0)));
+				new Color(.1f, .1f, 1f), 1, 1, 0, 0, 0, 1.52)));
 		// scene.addPlane(new Vector3(0, -2, 0), new Vector3(0, 1, 0),
 		// new ShapeProperties(new Color(0, 255, 0)));
 
 		final ShapeProperties sphereProperties = new ShapeProperties(
-				new Material(new Color(1f, .1f, 1f), 1, 1, 1, 999));
-		scene.addSphere(new Vector3(-5, 0, 2), 2, sphereProperties);
+				new Material(new Color(1f, .1f, 1f), 1, 1, 1, 999, 0, 1.52));
+		scene.addSphere(new Vector3(-3, 0, 0), 2, sphereProperties);
 
 		final ShapeProperties sphere2Properties = new ShapeProperties(
-				new Material(new Color(1f, .1f, 1f), 1, 1, 1, 999));
-		scene.addSphere(new Vector3(-1, 0f, -3), 2, sphere2Properties);
+				new Material(new Color(0f, 0f, 0f), 1, 1, 0, 50, 1, 1.52));
+		scene.addSphere(new Vector3(-1, 0f, -5), 2, sphere2Properties);
+		
+		final ShapeProperties sphere3Properties = new ShapeProperties(
+				new Material(new Color(0f, 1f, 0f), 1, 1, 1, 999, 0, 1.52));
+		scene.addSphere(new Vector3(1, 0f, -10), 2, sphere3Properties);
 
 		// final ShapeProperties boxProperties = new ShapeProperties(new
 		// Color(1f,

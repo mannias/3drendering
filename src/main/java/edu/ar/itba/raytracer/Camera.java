@@ -170,7 +170,7 @@ public class Camera extends SceneElement {
 					for (int i = startPixel; i < endPixel; i++) {
 						final int x = i % width;
 						final int y = i / width;
-						picture[y][x] = shade(getPrimaryRay(x, y), 50);
+						picture[y][x] = shade(getPrimaryRay(x, y), 12);
 					}
 					System.out.println("TIME THREAD "
 							+ (System.currentTimeMillis() - start) + " FOR "
@@ -203,7 +203,7 @@ public class Camera extends SceneElement {
 
 		final Vector3 collisionPoint = collision.getCollisionPoint();
 		final Vector3 normal = obj.normal(collisionPoint).normalize();
-		final Vector3 collisionPointWithDelta = collisionPoint.add(normal
+		final Vector3 collisionPointPlusDelta = collisionPoint.add(normal
 				.scalarMult(.001f));
 
 		// Invert the ray direction to get the view versor. The direction is
@@ -225,7 +225,7 @@ public class Camera extends SceneElement {
 			// Move the from point a little in the direction of the normal
 			// vector, to avoid rounding problems and intersecting with the same
 			// object we're starting from.
-			if (!scene.isIlluminati(collisionPointWithDelta, light)) {
+			if (!scene.isIlluminati(collisionPointPlusDelta, light)) {
 				continue;
 			}
 
@@ -254,15 +254,37 @@ public class Camera extends SceneElement {
 		}
 
 		if (rayDepth > 0) {
-			final Vector3 reflectedDir = normal.scalarMult(2 * v.dot(normal))
-					.sub(v);
-			final Ray reflectedRay = new Ray(collisionPointWithDelta,
+			final double nv = normal.dot(v);
+			final Vector3 reflectedDir = normal.scalarMult(2 * nv).sub(v);
+			final Ray reflectedRay = new Ray(collisionPointPlusDelta,
 					reflectedDir);
 
 			final Color reflectedColor = shade(reflectedRay, rayDepth - 1)
 					.scalarMult(shininess / Material.MAX_SHININESS);
 
 			intensity = intensity.add(reflectedColor);
+
+			Vector3 tNormal = normal;
+			double cosThetaI = nv;
+			double eta = objectMaterial.refractionIndex;
+			if (nv < 0) {
+				eta = 1 / objectMaterial.refractionIndex;
+				tNormal = tNormal.scalarMult(-1);
+				cosThetaI = -cosThetaI;
+			}
+			
+			final double xx = 1 - (1 - cosThetaI * cosThetaI) / (eta * eta);
+			if (xx >= 0) {
+				final Vector3 refractedDir = v.scalarMult(-1 / eta).sub(
+						tNormal.scalarMult(Math.sqrt(xx) - cosThetaI / eta));
+				final Ray refractedRay = new Ray(collisionPoint.sub(tNormal
+						.scalarMult(.001f)), refractedDir);
+
+				final Color refractedColor = shade(refractedRay, rayDepth - 1)
+						.scalarMult(objectMaterial.transparency);
+
+				intensity = intensity.add(refractedColor);
+			}
 		}
 
 		return intensity;

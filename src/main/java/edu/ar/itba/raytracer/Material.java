@@ -23,13 +23,20 @@ public class Material {
 
 	public final double shininess;
 
+	public final double transparency;
+
+	public final double refractionIndex;
+
 	public Material(final Color color, final double ka, final double kd,
-			final double ks, final double shininess) {
+			final double ks, final double shininess, final double transparency,
+			final double refractionIndex) {
 		this.color = color;
 		this.ka = ka;
 		this.kd = kd;
 		this.ks = ks;
 		this.shininess = shininess;
+		this.transparency = transparency;
+		this.refractionIndex = refractionIndex;
 	}
 
 }
