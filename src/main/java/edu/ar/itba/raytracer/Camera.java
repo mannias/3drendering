@@ -190,12 +190,9 @@ public class Camera extends SceneElement {
 								pixelRed += c.getRed();
 								pixelGreen += c.getGreen();
 								pixelBlue += c.getBlue();
-								// if (c.getRed() != 0) {
-								// System.out.println("STAHP");
-								// }
 							}
 						}
-						// picture[y][x] = shade(getPrimaryRay(x, y), 50);
+
 						double n2 = n * n;
 						picture[y][x] = new Color(pixelRed / n2, pixelGreen
 								/ n2, pixelBlue / n2);
