@@ -3,12 +3,17 @@ package edu.ar.itba.raytracer;
 import java.awt.image.BufferedImage;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinTask;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import edu.ar.itba.raytracer.properties.Color;
 import edu.ar.itba.raytracer.properties.Transform;
+import edu.ar.itba.raytracer.shape.CustomStack;
+import edu.ar.itba.raytracer.shape.Plane;
 import edu.ar.itba.raytracer.shape.SceneShape;
-import edu.ar.itba.raytracer.vector.Vector3;
+import edu.ar.itba.raytracer.shape.Sphere;
+import edu.ar.itba.raytracer.vector.Vector4;
 
 public class Camera extends SceneElement {
 
@@ -34,11 +39,11 @@ public class Camera extends SceneElement {
 	private final double distToPixels;
 	private final Color[][] picture;
 
-	private final Vector3 forwardVector;
-	private final Vector3 heightVector;
-	private final Vector3 widthVector;
+	private final Vector4 forwardVector;
+	private final Vector4 heightVector;
+	private final Vector4 widthVector;
 
-	private final Vector3[] pixelPoints;
+	private final Vector4[] pixelPoints;
 
 	private final Scene scene;
 
@@ -51,19 +56,24 @@ public class Camera extends SceneElement {
 		this.distToPixels = calculateDistanceToPixels(fov);
 		picture = new Color[pictureHeight][pictureWidth];
 		initPicture();
-		forwardVector = new Vector3(0, 0, 1).rotate(
-				getTransform().getRotation()).scalarMult((double) distToPixels);
-		heightVector = new Vector3(0, 1, 0)
+		forwardVector = new Vector4(0, 0, 1,0).rotate(
+				getTransform().getRotation());
+		forwardVector.scalarMult((double) distToPixels);
+		heightVector = new Vector4(0, 1, 0,0)
 				.rotate(getTransform().getRotation());
-		widthVector = new Vector3(1, 0, 0).rotate(getTransform().getRotation());
+		widthVector = new Vector4(1, 0, 0,0).rotate(getTransform().getRotation());
 
-		pixelPoints = new Vector3[pictureHeight * pictureWidth];
+		pixelPoints = new Vector4[pictureHeight * pictureWidth];
 		for (int i = 0; i < pictureHeight * pictureWidth; i++) {
 			final int x = i % pictureWidth;
 			final int y = i / pictureWidth;
-			pixelPoints[i] = forwardVector.add(
-					heightVector.scalarMult(-y + pictureHeight / 2)).add(
-					widthVector.scalarMult(x - pictureWidth / 2));
+			pixelPoints[i] = new Vector4(forwardVector);
+			final Vector4 aux1 = new Vector4(heightVector);
+			aux1.scalarMult(-y + pictureHeight / 2);
+			final Vector4 aux2 = new Vector4(widthVector);
+			aux2.scalarMult(x - pictureWidth / 2);
+			pixelPoints[i].add(aux1);
+			pixelPoints[i].add(aux2);
 		}
 	}
 
@@ -73,9 +83,15 @@ public class Camera extends SceneElement {
 	}
 
 	private Ray getPrimaryRay(final double x, final double y) {
-		final Vector3 position = getTransform().getPosition();
-		return new Ray(position, forwardVector.add(heightVector.scalarMult(y))
-				.add(widthVector.scalarMult(x)));
+		final Vector4 position = getTransform().getPosition();
+		final Vector4 dir = new Vector4(forwardVector);
+		final Vector4 aux1 = new Vector4(heightVector);
+		aux1.scalarMult(y);
+		final Vector4 aux2 = new Vector4(widthVector);
+		aux2.scalarMult(x);
+		dir.add(aux1);
+		dir.add(aux2);
+		return new Ray(position, dir);
 		// return new Ray(position, forwardVector.add(
 		// heightVector.scalarMult(-y + pictureHeight / 2)).add(
 		// widthVector.scalarMult(x - pictureWidth / 2)));
@@ -155,59 +171,75 @@ public class Camera extends SceneElement {
 	}
 
 	public BufferedImage render(final int width, final int height) {
+		try {
+			Thread.sleep(10000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		final int pixels = width * height;
 		final int cores = Runtime.getRuntime().availableProcessors();
 
+		final int pixelsPerTask = 32 * 32;
+		// final int pixelsPerTask = pixels;
+
 		final ForkJoinTask<?>[] threads = new ForkJoinTask[cores];
 		final Runnable[] runnables = new Runnable[cores];
+		final AtomicInteger startPixel = new AtomicInteger();
 		for (int i = 0; i < cores; i++) {
-			final int startPixel = i * pixels / cores;
-			final int endPixel;
-			if (i == cores - 1) {
-				endPixel = pixels;
-			} else {
-				endPixel = (i + 1) * pixels / cores;
-			}
+			// final int startPixel = i * pixelsPerCore;
+			// final int endPixel;
+			// if (i == cores - 1) {
+			// endPixel = pixels;
+			// } else {
+			// endPixel = (i + 1) * pixelsPerCore;
+			// }
 			runnables[i] = new Runnable() {
 				@Override
 				public void run() {
-					final int n = 5;
-
+					final CustomStack stack = new CustomStack();
+					final int n = 3;
 					final long start = System.currentTimeMillis();
-					for (int i = startPixel; i < endPixel; i++) {
-						final int x = i % width;
-						final int y = i / width;
-						double pixelRed = 0;
-						double pixelGreen = 0;
-						double pixelBlue = 0;
-						for (int p = 0; p < n; p++) {
-							for (int q = 0; q < n; q++) {
-								final double ppx = x - .5 * pictureWidth
-										+ (q + Math.random()) / n;
-								final double ppy = - y + .5 * pictureHeight
-										+ (p + Math.random()) / n;
-								Color c = shade(getPrimaryRay(ppx, ppy), 12);
-								pixelRed += c.getRed();
-								pixelGreen += c.getGreen();
-								pixelBlue += c.getBlue();
+					int currentStart;
+					while ((currentStart = startPixel.getAndAdd(pixelsPerTask)) < pixels) {
+						final int endPixel = currentStart + pixelsPerTask;
+						for (int i = currentStart; i < endPixel; i++) {
+							final int x = i % width;
+							final int y = i / width;
+							double pixelRed = 0;
+							double pixelGreen = 0;
+							double pixelBlue = 0;
+							for (int p = 0; p < n; p++) {
+								for (int q = 0; q < n; q++) {
+									final double ppx = x - .5 * pictureWidth
+											+ (q + Math.random()) / n;
+									final double ppy = -y + .5 * pictureHeight
+											+ (p + Math.random()) / n;
+									stack.reset();
+									Color c = shade(getPrimaryRay(ppx, ppy), 5, stack, x ==500 && y == 250);
+									pixelRed += c.getRed();
+									pixelGreen += c.getGreen();
+									pixelBlue += c.getBlue();
+								}
 							}
+
+							double n2 = n * n;
+							picture[y][x] = new Color(pixelRed / n2, pixelGreen
+									/ n2, pixelBlue / n2);
 						}
-
-						double n2 = n * n;
-						picture[y][x] = new Color(pixelRed / n2, pixelGreen
-								/ n2, pixelBlue / n2);
-
 					}
 					System.out.println("TIME THREAD "
-							+ (System.currentTimeMillis() - start) + " FOR "
-							+ (endPixel - startPixel));
+							+ (System.currentTimeMillis() - start));
 				}
 			};
 			threads[i] = ForkJoinTask.adapt(runnables[i]);
 		}
+		final ForkJoinPool fjp = new ForkJoinPool(Runtime.getRuntime()
+				.availableProcessors());
 		final long start = System.currentTimeMillis();
 		for (ForkJoinTask<?> fjt : threads) {
-			fjt.fork();
+			fjp.execute(fjt);
+			// fjt.fork();
 		}
 
 		for (ForkJoinTask<?> fjt : threads) {
@@ -215,11 +247,20 @@ public class Camera extends SceneElement {
 		}
 		System.out.println(System.currentTimeMillis() - start);
 
+		System.out.println(String.format("SPHERE INTERSECTIONS / CALLS %d/%d",
+				Sphere.intersections.get(), Sphere.calls.get()));
+		System.out.println(String.format("RATIO %f",
+				(double) Sphere.intersections.get() / Sphere.calls.get()));
+		System.out.println(String.format("PLANE INTERSECTIONS / CALLS %d/%d",
+				Plane.intersections.get(), Plane.calls.get()));
+		System.out.println(String.format("RATIO %f",
+				(double) Plane.intersections.get() / Plane.calls.get()));
+
 		return takePicture();
 	}
 
-	private Color shade(final Ray ray, final int rayDepth) {
-		final RayCollisionInfo collision = castRay(ray);
+	private Color shade(final Ray ray, final int rayDepth, final CustomStack stack, boolean debug) {
+		final RayCollisionInfo collision = castRay(ray, stack, debug);
 
 		if (!collision.collisionDetected()) {
 			return Color.DEFAULT_COLOR;
@@ -227,14 +268,17 @@ public class Camera extends SceneElement {
 
 		final SceneShape obj = collision.getObj();
 
-		final Vector3 collisionPoint = collision.getCollisionPoint();
-		final Vector3 normal = obj.normal(collisionPoint).normalize();
-		final Vector3 collisionPointPlusDelta = collisionPoint.add(normal
-				.scalarMult(.001f));
+		final Vector4 collisionPoint = collision.getCollisionPoint();
+		final Vector4 normal = obj.normal(collisionPoint);
+		final Vector4 deltaNormal = new Vector4(normal);
+		deltaNormal.scalarMult(.001f);
+		final Vector4 collisionPointPlusDelta = new Vector4(collisionPoint);
+		collisionPointPlusDelta.add(deltaNormal);
 
 		// Invert the ray direction to get the view versor. The direction is
 		// already normalized, so there is no need to normalize again.
-		final Vector3 v = ray.getDir().scalarMult(-1);
+		final Vector4 v = new Vector4(ray.getDir());
+		v.scalarMult(-1);
 
 		final Material objectMaterial = collision.getObj().getProperties()
 				.getMaterial();
@@ -244,35 +288,43 @@ public class Camera extends SceneElement {
 		final double ks = objectMaterial.ks;
 		final double shininess = objectMaterial.shininess;
 
-		Color intensity = scene.getAmbientLight().scalarMult(ka)
-				.mult(objectColor);
+		Color intensity = new Color(scene.getAmbientLight());
+		intensity.scalarMult(ka);
+		intensity.mult(objectColor);
 
 		for (final Light light : scene.getLights()) {
 			// Move the from point a little in the direction of the normal
 			// vector, to avoid rounding problems and intersecting with the same
 			// object we're starting from.
-			if (!scene.isIlluminati(collisionPointPlusDelta, light)) {
+			if (!scene.isIlluminati(collisionPointPlusDelta, light, stack)) {
 				continue;
 			}
 
-			final Vector3 lightVersor = light.getTransform().getPosition()
-					.sub(collisionPoint).normalize();
+			final Vector4 lightVersor = new Vector4(light.getTransform().getPosition());
+			lightVersor.sub(collisionPoint);
+			lightVersor.normalize();
+			
 			final double ln = lightVersor.dot(normal);
 
 			if (ln > 0) {
 				final Color lightColor = light.getProperties().getColor();
 
-				final Color diffuse = lightColor.scalarMult(ln).scalarMult(kd)
-						.mult(objectColor);
+				final Color diffuse = new Color(lightColor);
+				diffuse.scalarMult(ln);
+				diffuse.scalarMult(kd);
+				diffuse.mult(objectColor);
 
 				// final Color diffuse = new Color(diffuseRed, diffuseGreen,
 				// diffuseBlue);
 				intensity = intensity.add(diffuse);
 
-				final Vector3 r = normal.scalarMult(2 * ln).sub(lightVersor);
+				final Vector4 r = new Vector4(normal);
+				r.scalarMult(2 * ln);
+				r.sub(lightVersor);
 				final double rv = r.dot(v);
 				if (rv > 0) {
-					final Color specular = lightColor.scalarMult(Math.pow(rv,
+					final Color specular = new Color(lightColor);
+					specular.scalarMult(Math.pow(rv,
 							shininess) * ks);
 					intensity = intensity.add(specular);
 				}
@@ -281,33 +333,40 @@ public class Camera extends SceneElement {
 
 		if (rayDepth > 0) {
 			final double nv = normal.dot(v);
-			final Vector3 reflectedDir = normal.scalarMult(2 * nv).sub(v);
+			final Vector4 reflectedDir = new Vector4(normal);
+			reflectedDir.scalarMult(2 * nv);
+			reflectedDir.sub(v);
 			final Ray reflectedRay = new Ray(collisionPointPlusDelta,
 					reflectedDir);
 
-			final Color reflectedColor = shade(reflectedRay, rayDepth - 1)
-					.scalarMult(shininess / Material.MAX_SHININESS);
+			final Color reflectedColor = shade(reflectedRay, rayDepth - 1, stack, false);
+			reflectedColor.scalarMult(shininess / Material.MAX_SHININESS);
 
 			intensity = intensity.add(reflectedColor);
 
-			Vector3 tNormal = normal;
+			Vector4 tNormal = new Vector4(normal);
 			double cosThetaI = nv;
 			double eta = objectMaterial.refractionIndex;
 			if (nv < 0) {
 				eta = 1 / eta;
-				tNormal = tNormal.scalarMult(-1);
+				tNormal.scalarMult(-1);
 				cosThetaI = -cosThetaI;
 			}
 
 			final double xx = 1 - (1 - cosThetaI * cosThetaI) / (eta * eta);
 			if (xx >= 0) {
-				final Vector3 refractedDir = v.scalarMult(-1 / eta).sub(
-						tNormal.scalarMult(Math.sqrt(xx) - cosThetaI / eta));
-				final Ray refractedRay = new Ray(collisionPoint.sub(tNormal
-						.scalarMult(.001f)), refractedDir);
+				final Vector4 aux = new Vector4(tNormal);
+				aux.scalarMult(Math.sqrt(xx) - cosThetaI / eta);
+				final Vector4 refractedDir = new Vector4(v);
+				refractedDir.scalarMult(-1 / eta);
+				refractedDir.sub(aux);
+				final Vector4 aux2 = new Vector4(collisionPoint);
+				tNormal.scalarMult(.001f);
+				aux2.sub(tNormal);
+				final Ray refractedRay = new Ray(aux2, refractedDir);
 
-				final Color refractedColor = shade(refractedRay, rayDepth - 1)
-						.scalarMult(objectMaterial.transparency);
+				final Color refractedColor = shade(refractedRay, rayDepth - 1, stack, false);
+				refractedColor.scalarMult(objectMaterial.transparency);
 
 				intensity = intensity.add(refractedColor);
 			}
@@ -316,26 +375,28 @@ public class Camera extends SceneElement {
 		return intensity;
 	}
 
-	private RayCollisionInfo castRay(final Vector3 from, final Vector3 through) {
-		return castRay(new Ray(from, through.sub(from)));
-	}
+//	private RayCollisionInfo castRay(final Vector33 from, final Vector33 through) {
+//		return castRay(new Ray(from, through.sub(from)));
+//	}
 
-	private RayCollisionInfo castRay(final Ray ray) {
-		double minDistance = -1;
-		SceneShape intersected = null;
-		for (final SceneShape obj : scene.getObjects()) {
-			final double distance = obj.intersect(ray);
-			if (distance != -1 && (distance < minDistance || minDistance == -1)) {
-				minDistance = distance;
-				intersected = obj;
-			}
-		}
+	private RayCollisionInfo castRay(final Ray ray, final CustomStack stack, boolean debug) {
+		// double minDistance = Double.MAX_VALUE;
+		// SceneShape intersected = null;
+		// for (final SceneShape obj : scene.getObjects()) {
+		// final double distance = obj.intersect(ray);
+		// if (distance != -1 && (distance < minDistance)) {
+		// minDistance = distance;
+		// intersected = obj;
+		// }
+		// }
+		//
+		// if (intersected == null) {
+		// return RayCollisionInfo.noCollision(ray);
+		// }
+		//
+		// return new RayCollisionInfo(intersected, ray, minDistance);
 
-		if (intersected == null) {
-			return RayCollisionInfo.noCollision(ray);
-		}
-
-		return new RayCollisionInfo(intersected, ray, minDistance);
+		return scene.getTree().getCollision(Double.MAX_VALUE, ray, stack);
 	}
 
 }

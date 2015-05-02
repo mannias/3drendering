@@ -1,7 +1,7 @@
 package edu.ar.itba.raytracer;
 
 import edu.ar.itba.raytracer.shape.SceneShape;
-import edu.ar.itba.raytracer.vector.Vector3;
+import edu.ar.itba.raytracer.vector.Vector4;
 
 public class RayCollisionInfo {
 
@@ -12,17 +12,18 @@ public class RayCollisionInfo {
 	private final SceneShape obj;
 	private final Ray ray;
 	private final double distance;
-	private final Vector3 collisionPoint;
+	private final Vector4 collisionPoint;
+	public  Vector4 normal;
 
 	public RayCollisionInfo(SceneShape obj, Ray ray, double distance) {
 		this.obj = obj;
 		this.ray = ray;
 		this.distance = distance;
-		final Vector3 raySource = ray.getSource();
-		final Vector3 rayDir = ray.getDir();
-		collisionPoint = new Vector3(raySource.x + distance * rayDir.x,
+		final Vector4 raySource = ray.getSource();
+		final Vector4 rayDir = ray.getDir();
+		collisionPoint = new Vector4(raySource.x + distance * rayDir.x,
 				raySource.y + distance * rayDir.y, raySource.z + distance
-						* rayDir.z);
+						* rayDir.z, 0);
 	}
 
 	public boolean collisionDetected() {
@@ -41,7 +42,7 @@ public class RayCollisionInfo {
 		return distance;
 	}
 
-	public Vector3 getCollisionPoint() {
+	public Vector4 getCollisionPoint() {
 		return collisionPoint;
 	}
 

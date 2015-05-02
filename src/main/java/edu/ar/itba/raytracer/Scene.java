@@ -1,5 +1,7 @@
 package edu.ar.itba.raytracer;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -8,11 +10,12 @@ import edu.ar.itba.raytracer.properties.ShapeProperties;
 import edu.ar.itba.raytracer.properties.Transform;
 import edu.ar.itba.raytracer.shape.BoundedPlane;
 import edu.ar.itba.raytracer.shape.Box;
+import edu.ar.itba.raytracer.shape.CustomStack;
 import edu.ar.itba.raytracer.shape.Plane;
 import edu.ar.itba.raytracer.shape.SceneShape;
 import edu.ar.itba.raytracer.shape.Sphere;
 import edu.ar.itba.raytracer.shape.Triangle;
-import edu.ar.itba.raytracer.vector.Vector3;
+import edu.ar.itba.raytracer.vector.Vector4;
 
 public class Scene {
 
@@ -22,11 +25,14 @@ public class Scene {
 
 	private final Color ambientLight;
 
-	private final KdTree tree;
+	private KdTree tree;
 
 	public Scene(final Color ambientLight) {
 		this.ambientLight = ambientLight;
-		tree = new KdTree();
+	}
+
+	public void setTree(KdTree tree) {
+		this.tree = tree;
 	}
 
 	public Scene() {
@@ -72,18 +78,16 @@ public class Scene {
 		return plane;
 	}
 
-	public Sphere addSphere(final Vector3 center, final double radius) {
+	public Sphere addSphere(final Vector4 center, final double radius) {
 		final Sphere sphere = new Sphere(center, radius);
 		objects.add(sphere);
-		tree.add(sphere);
 		return sphere;
 	}
 
-	public Sphere addSphere(final Vector3 center, final double radius,
+	public Sphere addSphere(final Vector4 center, final double radius,
 			final ShapeProperties properties) {
 		final Sphere sphere = new Sphere(center, radius, properties);
 		objects.add(sphere);
-		tree.add(sphere);
 		return sphere;
 	}
 
@@ -94,8 +98,8 @@ public class Scene {
 		return box;
 	}
 
-	public Triangle addTriangle(final Vector3 point0, final Vector3 point1,
-			final Vector3 point2) {
+	public Triangle addTriangle(final Vector4 point0, final Vector4 point1,
+			final Vector4 point2) {
 		final Triangle triangle = new Triangle(point0, point1, point2);
 		objects.add(triangle);
 		return triangle;
@@ -108,8 +112,14 @@ public class Scene {
 		return light;
 	}
 
+	private Collection<Instance> gobjects = new ArrayList<>();
+
 	public Set<SceneShape> getObjects() {
 		return objects;
+	}
+	
+	public Collection<Instance> getGObjects() {
+		return gobjects;
 	}
 
 	public Set<Camera> getCameras() {
@@ -120,42 +130,54 @@ public class Scene {
 		return lights;
 	}
 
-	public RayCollisionInfo traceRay(final Vector3 from, final Vector3 through) {
-		final Ray ray = new Ray(from, through.sub(from));
+	// public RayCollisionInfo traceRay(final Vector33 from, final Vector33
+	// through) {
+	// final Ray ray = new Ray(from, through.sub(from));
+	//
+	// double minDistance = -1;
+	// SceneShape intersected = null;
+	// for (final SceneShape obj : getObjects()) {
+	// final double distance = obj.intersect(ray);
+	// if (distance != -1 && (distance < minDistance || minDistance == -1)) {
+	// minDistance = distance;
+	// intersected = obj;
+	// }
+	// }
+	//
+	// if (intersected == null) {
+	// return RayCollisionInfo.noCollision(ray);
+	// }
+	//
+	// return new RayCollisionInfo(intersected, ray, minDistance);
+	// }
 
-		double minDistance = -1;
-		SceneShape intersected = null;
-		for (final SceneShape obj : getObjects()) {
-			final double distance = obj.intersect(ray);
-			if (distance != -1 && (distance < minDistance || minDistance == -1)) {
-				minDistance = distance;
-				intersected = obj;
-			}
-		}
+	public boolean isIlluminati(final Vector4 point, Light light,
+			CustomStack stack) {
 
-		if (intersected == null) {
-			return RayCollisionInfo.noCollision(ray);
-		}
+		// final RayCollisionInfo rci = traceRay(point, light.getTransform()
+		// .getPosition());
+		// return !rci.collisionDetected()
+		// || rci.getDistance() > point.distanceTo(light.getTransform()
+		// .getPosition());
 
-		return new RayCollisionInfo(intersected, ray, minDistance);
-	}
-
-	public boolean isIlluminati(final Vector3 point, Light light) {
-
-		final RayCollisionInfo rci = traceRay(point, light.getTransform()
-				.getPosition());
-		return !rci.collisionDetected()
-				|| rci.getDistance() > point.distanceTo(light.getTransform()
-						.getPosition());
-
-		// Ray ray = new Ray(point,
-		// light.getTransform().getPosition().sub(point));
-		// return !tree.intersectionExists(
-		// point.distanceTo(light.getTransform().getPosition()), ray);
+		Vector4 aux = new Vector4(light.getTransform().getPosition());
+		aux.sub(point);
+		Ray ray = new Ray(point, aux);
+		return !tree.intersectionExists(
+				point.distanceTo(light.getTransform().getPosition()), ray,
+				stack);
 	}
 
 	public Color getAmbientLight() {
 		return ambientLight;
+	}
+
+	public KdTree getTree() {
+		return tree;
+	}
+
+	public void add(final Instance obj) {
+		gobjects.add(obj);
 	}
 
 }

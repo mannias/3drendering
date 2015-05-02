@@ -1,23 +1,24 @@
 package edu.ar.itba.raytracer;
 
-import edu.ar.itba.raytracer.vector.Vector3;
+import edu.ar.itba.raytracer.vector.Vector4;
 
 
 public class Ray {
 
-	private final Vector3 source;
-	private final Vector3 dir;
+	private final Vector4 source;
+	private final Vector4 dir;
 
-	public Ray(final Vector3 source, final Vector3 dir) {
+	public Ray(final Vector4 source, final Vector4 dir) {
 		this.source = source;
-		this.dir = dir.normalize();
+		this.dir = dir;
+		dir.normalize();
 	}
 
-	public Vector3 getSource() {
+	public Vector4 getSource() {
 		return source;
 	}
 
-	public Vector3 getDir() {
+	public Vector4 getDir() {
 		return dir;
 	}
 
