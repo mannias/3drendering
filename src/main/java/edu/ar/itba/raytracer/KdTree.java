@@ -3,13 +3,10 @@ package edu.ar.itba.raytracer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
+import edu.ar.itba.raytracer.GeometricObject.AABB;
 import edu.ar.itba.raytracer.shape.CustomStack;
-import edu.ar.itba.raytracer.shape.SceneShape;
 import edu.ar.itba.raytracer.shape.SceneShape.BB;
-import edu.ar.itba.raytracer.shape.Sphere;
-import edu.ar.itba.raytracer.shape.Triangle;
 import edu.ar.itba.raytracer.vector.Vector4;
 
 public class KdTree {
@@ -35,9 +32,9 @@ public class KdTree {
 	}
 
 	private static class KdLeafNode extends KdNode {
-		private final Collection<SceneShape> shapes;
+		private final Collection<Instance> shapes;
 
-		public KdLeafNode(final Collection<SceneShape> shapes) {
+		public KdLeafNode(final Collection<Instance> shapes) {
 			this.shapes = shapes;
 		}
 
@@ -45,30 +42,10 @@ public class KdTree {
 
 	private KdNode root;
 
-	// public void add(final SceneShape shape) {
-	// Collection<SceneShape> sl = new ArrayList<>();
-	// if (root.left == null) {
-	// root.left = new KdNode(1, 0, sl);
-	// } else {
-	// sl = root.left.shapes;
-	// }
-	// sl.add(shape);
-	// if (root.right == null) {
-	// root.right = new KdNode(1, 0, new ArrayList<SceneShape>());
-	// }
-	// }
-
 	public static class StackElement {
 		public KdNode node;
-		private int depth;
 		public double start;
 		public double end;
-
-		private double entryT;
-		private double exitT;
-
-		// private Vector3 entryPt;
-		// private Vector3 exitPt;
 
 		public StackElement() {
 
@@ -81,18 +58,12 @@ public class KdTree {
 			this.end = end;
 		}
 
-		// public StackElement(final KdNode node, final Vector3 entryPt,
-		// final Vector3 exitPt) {
-		// this.node = node;
-		// this.entryPt = entryPt;
-		// this.exitPt = exitPt;
-		// }
 	}
 
 	private static double EPSILON = 0.00001;
 
 	public static KdTree from(Scene scene) {
-		final Collection<SceneShape> sceneObjects = scene.getObjects();
+		final Collection<Instance> sceneObjects = scene.getGObjects();
 		double minX = Double.POSITIVE_INFINITY;
 		double maxX = Double.NEGATIVE_INFINITY;
 		double minY = Double.POSITIVE_INFINITY;
@@ -100,8 +71,8 @@ public class KdTree {
 		double minZ = Double.POSITIVE_INFINITY;
 		double maxZ = Double.NEGATIVE_INFINITY;
 
-		for (SceneShape shape : sceneObjects) {
-			BB bb = shape.getBB();
+		for (Instance instance : sceneObjects) {
+			AABB bb = instance.getAABB();
 			if (bb.minX < minX) {
 				minX = bb.minX;
 			}
@@ -140,84 +111,13 @@ public class KdTree {
 	private static double depth;
 
 	private static KdNode recBuild(final int depth,
-			Collection<SceneShape> shapes, BB bb) {
-		// if (shapes.size() <= 1 || depth >= 15) {
-		// leaves++;
-		// amount += shapes.size();
-		// KdTree.depth += depth;
-		// return new KdLeafNode(shapes);
-		// }
-		//
-		// final int axis = depth % 3;
-		// final double splitPosition;
-		// final BB leftBB, rightBB;
-		// switch (axis) {
-		// case 0:
-		// splitPosition = (bb.minX + bb.maxX) / 2;
-		// leftBB = new BB(bb.minX, splitPosition, bb.minY, bb.maxY, bb.minZ,
-		// bb.maxZ);
-		// rightBB = new BB(splitPosition, bb.maxX, bb.minY, bb.maxY, bb.minZ,
-		// bb.maxZ);
-		// break;
-		// case 1:
-		// splitPosition = (bb.minY + bb.maxY) / 2;
-		// leftBB = new BB(bb.minX, bb.maxX, bb.minY, splitPosition, bb.minZ,
-		// bb.maxZ);
-		// rightBB = new BB(bb.minX, bb.maxX, splitPosition, bb.maxY, bb.minZ,
-		// bb.maxZ);
-		// break;
-		// case 2:
-		// splitPosition = (bb.minZ + bb.maxZ) / 2;
-		// leftBB = new BB(bb.minX, bb.maxX, bb.minY, bb.maxY, bb.minZ,
-		// splitPosition);
-		// rightBB = new BB(bb.minX, bb.maxX, bb.minY, bb.maxY, splitPosition,
-		// bb.maxZ);
-		// break;
-		// default:
-		// throw new AssertionError();
-		// }
-		// final Collection<SceneShape> leftShapes = new ArrayList<>();
-		// final Collection<SceneShape> rightShapes = new ArrayList<>();
-		//
-		// for (SceneShape s : shapes) {
-		// BB sbb = s.getBB();
-		// switch (axis) {
-		// case 0:
-		// if (splitPosition < sbb.maxX && splitPosition > sbb.minX) {
-		// leftShapes.add(s);
-		// rightShapes.add(s);
-		// } else if (splitPosition >= sbb.maxX) {
-		// leftShapes.add(s);
-		// } else {
-		// rightShapes.add(s);
-		// }
-		// break;
-		// case 1:
-		// if (splitPosition < sbb.maxY && splitPosition > sbb.minY) {
-		// leftShapes.add(s);
-		// rightShapes.add(s);
-		// } else if (splitPosition >= sbb.maxY) {
-		// leftShapes.add(s);
-		// } else {
-		// rightShapes.add(s);
-		// }
-		// break;
-		// case 2:
-		// if (splitPosition < sbb.maxZ && splitPosition > sbb.minZ) {
-		// leftShapes.add(s);
-		// rightShapes.add(s);
-		// } else if (splitPosition >= sbb.maxZ) {
-		// leftShapes.add(s);
-		// } else {
-		// rightShapes.add(s);
-		// }
-		// break;
-		// }
-		// }
+			Collection<Instance> shapes, BB bb) {
+		final double cisec = 1;
+		final double ctrav =1;
+		
+		SplitInfo si = naiveSah(shapes, bb, ctrav,cisec);
 
-		SplitInfo si = naiveSah(shapes, bb, 1, 1);
-
-		if (shapes.isEmpty() || si.minCost >= shapes.size() * 1) {
+		if (shapes.isEmpty() || si.minCost >= shapes.size() * cisec) {
 			leaves++;
 			amount += shapes.size();
 			KdTree.depth += depth;
@@ -228,18 +128,13 @@ public class KdTree {
 				depth + 1, si.tl, si.leftVoxel), recBuild(depth + 1, si.tr,
 				si.rightVoxel), bb);
 
-		// return new KdInternalNode(depth % 3, splitPosition, recBuild(depth +
-		// 1,
-		// leftShapes, leftBB), recBuild(depth + 1, rightShapes, rightBB),
-		// bb);
-
 	}
 
 	private static class TriangleClassification {
-		Collection<SceneShape> tl, tr, tp;
+		Collection<Instance> tl, tr, tp;
 
-		public TriangleClassification(final Collection<SceneShape> tl,
-				final Collection<SceneShape> tr, final Collection<SceneShape> tp) {
+		public TriangleClassification(final Collection<Instance> tl,
+				final Collection<Instance> tr, final Collection<Instance> tp) {
 			this.tl = tl;
 			this.tr = tr;
 			this.tp = tp;
@@ -247,17 +142,15 @@ public class KdTree {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static TriangleClassification classify(
-			Collection<SceneShape> shapes, BB leftVoxel, BB rightVoxel,
-			int splitAxis, double splitPosition) {
-		final Collection<SceneShape> tl = new ArrayList<>();
-		final Collection<SceneShape> tr = new ArrayList<>();
-		final Collection<SceneShape> tp = new ArrayList<>();
+	private static TriangleClassification classify(Collection<Instance> shapes,
+			BB leftVoxel, BB rightVoxel, int splitAxis, double splitPosition) {
+		final Collection<Instance> tl = new ArrayList<>();
+		final Collection<Instance> tr = new ArrayList<>();
+		final Collection<Instance> tp = new ArrayList<>();
 
-		for (SceneShape shape : shapes) {
-			Triangle triangle = (Triangle) shape;
-			List<Vector4> vertexes = triangle.getVertexes();
-			// Vector33[] vertexes = triangle.getExtremePoints();
+		for (Instance instance : shapes) {
+			final Collection<Vector4> vertexes = instance.getAABB()
+					.getCorners();
 			boolean isOnPlane = true;
 
 			for (Vector4 vertex : vertexes) {
@@ -268,20 +161,20 @@ public class KdTree {
 				}
 			}
 			if (isOnPlane) {
-				tp.add(triangle);
+				tp.add(instance);
 				continue;
 			}
 
 			for (Vector4 vertex : vertexes) {
 				if (vertex.getElemsAsArray()[splitAxis] < splitPosition) {
-					tl.add(triangle);
+					tl.add(instance);
 					break;
 				}
 			}
 
 			for (Vector4 vertex : vertexes) {
 				if (vertex.getElemsAsArray()[splitAxis] > splitPosition) {
-					tr.add(triangle);
+					tr.add(instance);
 					break;
 				}
 			}
@@ -293,15 +186,15 @@ public class KdTree {
 	private static class SplitInfo {
 		int axis;
 		double splitPosition;
-		Collection<SceneShape> tl;
-		Collection<SceneShape> tr;
+		Collection<Instance> tl;
+		Collection<Instance> tr;
 		BB leftVoxel;
 		BB rightVoxel;
 		double minCost;
 
 		public SplitInfo(int axis, double splitPosition,
-				Collection<SceneShape> tl, Collection<SceneShape> tr,
-				BB leftVoxel, BB rightVoxel, double minCost) {
+				Collection<Instance> tl, Collection<Instance> tr, BB leftVoxel,
+				BB rightVoxel, double minCost) {
 			this.axis = axis;
 			this.splitPosition = splitPosition;
 			this.tl = tl;
@@ -312,7 +205,7 @@ public class KdTree {
 		}
 	}
 
-	private static SplitInfo naiveSah(Collection<SceneShape> shapes, BB voxel,
+	private static SplitInfo naiveSah(Collection<Instance> shapes, BB voxel,
 			final double ctrav, final double cisec) {
 		Boolean toLeft = null;
 		double costAux = Double.MAX_VALUE;
@@ -321,10 +214,10 @@ public class KdTree {
 		int bestAxis = 0;
 		BB[] childVoxels = null;
 
-		for (final SceneShape ss : shapes) {
+		for (final Instance ss : shapes) {
 			// Init vars
-			final Vector4[] splits = ((Triangle) ss).getPerfectSplits()
-					.clipToVoxel(voxel).getAllExtremePoints();
+			final Vector4[] splits = ss.getPerfectSplits().clipToVoxel(voxel)
+					.getAllExtremePoints();
 
 			for (int i = 0; i < splits.length; i++) {
 				final int axis = i / 2;
@@ -471,11 +364,9 @@ public class KdTree {
 			}
 
 			final KdLeafNode leaf = (KdLeafNode) node;
-			SceneShape intersected = null;
-			double minDistance = Double.MAX_VALUE;
-			for (SceneShape ss : leaf.shapes) {
-				final double distance = ss.intersect(ray);
-				if (distance != -1 && distance < tFar) {
+			for (Instance ss : leaf.shapes) {
+				final RayCollisionInfo collision = ss.hit(ray);
+				if (collision != null && collision.getDistance() < tFar) {
 					return true;
 				}
 			}
@@ -858,7 +749,7 @@ public class KdTree {
 		double tFar = tMax;
 
 		if (tNear > tFar) {
-			return RayCollisionInfo.noCollision(ray);
+			return null;
 		}
 
 		KdNode node = root;
@@ -904,25 +795,25 @@ public class KdTree {
 			}
 
 			final KdLeafNode leaf = (KdLeafNode) node;
-			SceneShape intersected = null;
+			RayCollisionInfo minCollision = null;
 			double minDistance = Double.MAX_VALUE;
-			for (SceneShape ss : leaf.shapes) {
-				final double distance = ss.intersect(ray);
-				if (distance != -1 && distance < minDistance) {
-					minDistance = distance;
-					intersected = ss;
+			for (Instance ss : leaf.shapes) {
+				final RayCollisionInfo collision = ss.hit(ray);
+				if (collision != null && collision.getDistance() < minDistance) {
+					minDistance = collision.getDistance();
+					minCollision = collision;
 				}
 			}
 
-			if (minDistance != Double.MAX_VALUE) {
+			if (minCollision != null) {
 				if (minDistance <= tFar) {
-					return new RayCollisionInfo(intersected, ray, minDistance);
+					return minCollision;
 				}
 			}
 
 			// If stack is empty
 			if (stack.top == 0) {
-				return RayCollisionInfo.noCollision(ray);
+				return null;
 			}
 			StackElement e = stack.pop();
 			node = e.node;
@@ -931,257 +822,4 @@ public class KdTree {
 		}
 	}
 
-	// public RayCollisionInfo getCollision(double tMax, Ray[] ray,
-	// CustomStack stack) {
-	// double tNear0 = EPSILON;
-	// double tFar0 = tMax;
-	// double tNear1 = EPSILON;
-	// double tFar1 = tMax;
-	// double tNear2 = EPSILON;
-	// double tFar2 = tMax;
-	// double tNear3 = EPSILON;
-	// double tFar3 = tMax;
-	//
-	// KdNode node = root;
-	//
-	// while (true) {
-	// // while (!node.isLeaf)
-	// while (node instanceof KdInternalNode) {
-	// final KdInternalNode internal = (KdInternalNode) node;
-	// final int axis = internal.splitAxis;
-	// KdNode near, far;
-	// final double dirAxis0 = getAxis(ray[0].getDir(), axis);
-	// final double sourceAxis0 = getAxis(ray[0].getSource(), axis);
-	// final double dirAxis1 = getAxis(ray[1].getDir(), axis);
-	// final double sourceAxis1 = getAxis(ray[1].getSource(), axis);
-	// final double dirAxis2 = getAxis(ray[2].getDir(), axis);
-	// final double sourceAxis2 = getAxis(ray[2].getSource(), axis);
-	// final double dirAxis3 = getAxis(ray[3].getDir(), axis);
-	// final double sourceAxis3 = getAxis(ray[3].getSource(), axis);
-	//
-	// final double d0 = (internal.splitPosition - sourceAxis0)
-	// / dirAxis0;
-	// final double d1 = (internal.splitPosition - sourceAxis1)
-	// / dirAxis1;
-	// final double d2 = (internal.splitPosition - sourceAxis2)
-	// / dirAxis2;
-	// final double d3 = (internal.splitPosition - sourceAxis3)
-	// / dirAxis3;
-	//
-	// final boolean active0 = tNear0 < tFar0;
-	// final boolean active1 = tNear1 < tFar1;
-	// final boolean active2 = tNear2 < tFar2;
-	// final boolean active3 = tNear3 < tFar3;
-	//
-	// if (sourceAxis0 < internal.splitPosition) {
-	// near = internal.left;
-	// far = internal.right;
-	// } else if (sourceAxis0 > internal.splitPosition) {
-	// near = internal.right;
-	// far = internal.left;
-	// } else if (dirAxis0 < 0) {
-	// near = internal.left;
-	// far = internal.right;
-	// } else {
-	// near = internal.right;
-	// far = internal.left;
-	// }
-	//
-	// if ((d0 >= tFar0 || !active0 || d0 < EPSILON)
-	// || (d1 >= tFar1 || !active1 || d1 < EPSILON)
-	// || (d2 >= tFar2 || !active2 || d2 < EPSILON)
-	// || (d3 >= tFar3 || !active3 || d3 < EPSILON)) {
-	// node = near;
-	// } else if ((d0 <= tNear0 || !active0)
-	// || (d1 <= tNear1 || !active1)
-	// || (d2 <= tNear2 || !active2)
-	// || (d3 <= tNear3 || !active3)) {
-	// node = far;
-	// } else {
-	// stack.push(far, d3, tFar3);
-	// stack.push(far, d2, tFar2);
-	// stack.push(far, d1, tFar1);
-	// stack.push(far, d0, tFar0);
-	//
-	// node = near;
-	// tFar0 = Math.min(d0, tNear0);
-	// tFar1 = Math.min(d0, tNear1);
-	// tFar2 = Math.min(d0, tNear2);
-	// tFar3 = Math.min(d0, tNear3);
-	// }
-	// }
-	//
-	// final KdLeafNode leaf = (KdLeafNode) node;
-	// SceneShape intersected = null;
-	// double minDistance = Double.MAX_VALUE;
-	// for (SceneShape ss : leaf.shapes) {
-	// final double distance = ss.intersect(ray);
-	// if (distance != -1 && distance < minDistance) {
-	// minDistance = distance;
-	// intersected = ss;
-	// }
-	// }
-	//
-	// if (minDistance != Double.MAX_VALUE) {
-	// if (minDistance <= tFar) {
-	// return new RayCollisionInfo(intersected, ray, minDistance);
-	// }
-	// }
-	//
-	// // If stack is empty
-	// if (stack.top == 0) {
-	// return RayCollisionInfo.noCollision(ray[0]);
-	// }
-	// StackElement e = stack.pop();
-	// node = e.node;
-	// tNear0 = e.start;
-	// tFar0 = e.end;
-	// e = stack.pop();
-	// tNear1 = e.start;
-	// tFar1 = e.end;
-	// e = stack.pop();
-	// tNear2 = e.start;
-	// tFar2 = e.end;
-	// e = stack.pop();
-	// tNear3 = e.start;
-	// tFar3 = e.end;
-	// }
-	// }
-
-	// Algorithm based on http://dcgi.felk.cvut.cz/home/havran/DISSVH/dissvh.pdf
-	// public boolean intersectionExists2(final double tMax, final Ray ray) {
-	// double a = EPSILON, b = tMax, t;
-	// int depth;
-	// KdNode currentNode, farNode;
-	// Vector3 entryPt;
-	// double entryT = a;
-	// Vector3 exitPt;
-	// double exitT = b;
-	//
-	// if (a >= 0.0) {
-	// entryPt = ray.getSource().add(ray.getDir().scalarMult(a));
-	// } else {
-	// entryPt = ray.getSource();
-	// }
-	//
-	// exitPt = ray.getSource().add(ray.getDir().scalarMult(b));
-	//
-	// depth = 0;
-	//
-	// Stack<StackElement> stack = new Stack<>();
-	//
-	// StackElement first = new StackElement();
-	// first.depth = 0;
-	// first.node = root;
-	// first.entryT = a;
-	// first.exitT = b;
-	// first.entryPt = entryPt;
-	// first.exitPt = exitPt;
-	//
-	// stack.push(first);
-	//
-	// while (!stack.isEmpty()) {
-	// StackElement se = stack.pop();
-	// depth = se.depth;
-	// currentNode = se.node;
-	// entryT = se.entryT;
-	// exitT = se.exitT;
-	// entryPt = se.entryPt;
-	// exitPt = se.exitPt;
-	//
-	// while (!currentNode.isLeaf()) {
-	// KdInteriorNode interiorNode = (KdInteriorNode) currentNode;
-	// double splitPosition = interiorNode.splitPosition;
-	// int axis = depth % 3;
-	//
-	// if (getAxis(entryPt, axis) <= splitPosition) {
-	// if (getAxis(exitPt, axis) <= splitPosition) {
-	// depth++;
-	// currentNode = interiorNode.left;
-	// continue;
-	// }
-	// if (getAxis(exitPt, axis) == splitPosition) {
-	// depth++;
-	// currentNode = interiorNode.right;
-	// continue;
-	// }
-	//
-	// farNode = interiorNode.left;
-	// currentNode = interiorNode.right;
-	// depth++;
-	// } else {
-	// if (splitPosition < getAxis(exitPt, axis)) {
-	// currentNode = interiorNode.right;
-	// depth++;
-	// continue;
-	// }
-	// depth++;
-	// farNode = interiorNode.left;
-	// currentNode = interiorNode.right;
-	// }
-	//
-	// t = (splitPosition - getAxis(ray.getSource(), axis))
-	// / getAxis(ray.getDir(), axis);
-	//
-	// int nextAxis = (axis + 1) % 3;
-	// int prevAxis = (axis + 2) % 3;
-	//
-	// StackElement push = new StackElement();
-	//
-	// push.node = farNode;
-	// push.depth = depth + 1;
-	// push.entryPt = exitPt;
-	// push.entryT = exitT;
-	// push.exitT = t;
-	// switch (axis) {
-	// case 0:
-	// se.exitPt = new Vector3(splitPosition, getAxis(
-	// ray.getSource(), nextAxis)
-	// + t * getAxis(ray.getDir(), nextAxis), getAxis(
-	// ray.getSource(), prevAxis)
-	// + t * getAxis(ray.getDir(), prevAxis));
-	// break;
-	// case 1:
-	// se.exitPt = new Vector3(getAxis(ray.getSource(), prevAxis)
-	// + t * getAxis(ray.getDir(), prevAxis),
-	// splitPosition, getAxis(ray.getSource(), nextAxis)
-	// + t * getAxis(ray.getDir(), nextAxis));
-	// break;
-	// case 2:
-	// se.exitPt = new Vector3(getAxis(ray.getSource(), nextAxis)
-	// + t * getAxis(ray.getDir(), nextAxis), getAxis(
-	// ray.getSource(), prevAxis)
-	// + t * getAxis(ray.getDir(), prevAxis),
-	// splitPosition);
-	// break;
-	// }
-	// }
-	//
-	// KdLeafNode leaf = (KdLeafNode) currentNode;
-	// if (!leaf.shapes.isEmpty()) {
-	// // double minDistance = Double.POSITIVE_INFINITY;
-	// for (final SceneShape ss : leaf.shapes) {
-	// final double distance = ss.intersect(ray);
-	// if (distance != -1 && distance < exitT) {
-	// return true;
-	// }
-	// }
-	// }
-	// }
-	//
-	// return false;
-	// }
-
-	private static double getAxis(final Vector4 vector, final int axis) {
-		switch (axis) {
-		case 0:
-			return vector.x;
-		case 1:
-			return vector.y;
-		case 2:
-			return vector.z;
-		}
-
-		return -1;
-	}
 }

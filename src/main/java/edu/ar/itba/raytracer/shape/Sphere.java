@@ -92,8 +92,8 @@ public class Sphere extends SceneShape {
 		final Vector4 rayDir = ray.getDir();
 		
 		
-		final Vector4 transformedSource = getTransform().invTranslationTransform.multiply(raySource);
-		final Vector4 transformedDir = getTransform().invTranslationTransform.multiply(rayDir);
+		final Vector4 transformedSource = getTransform().invTranslationTransform.multiplyVec(raySource);
+		final Vector4 transformedDir = getTransform().invTranslationTransform.multiplyVec(rayDir);
 		
 		
 		

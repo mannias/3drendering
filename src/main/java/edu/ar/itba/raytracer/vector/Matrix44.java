@@ -2,79 +2,177 @@ package edu.ar.itba.raytracer.vector;
 
 public class Matrix44 {
 
-	private double m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23,
-			m30, m31, m32, m33;
+	// private double m[0][0], m[0][1], m[0][2], m[0][3], m[1][0], m[1][1],
+	// m[1][2], m[1][3], m[2][0], m[2][1], m[2][2], m[2][3],
+	// m[3][0], m[3][1], m[3][2], m[3][3];
+
+	private double[][] m = new double[4][4];
 
 	public Matrix44(double m00, double m01, double m02, double m03, double m10,
 			double m11, double m12, double m13, double m20, double m21,
 			double m22, double m23, double m30, double m31, double m32,
 			double m33) {
-		this.m00 = m00;
-		this.m01 = m01;
-		this.m02 = m02;
-		this.m03 = m03;
-		this.m10 = m10;
-		this.m11 = m11;
-		this.m12 = m12;
-		this.m13 = m13;
-		this.m20 = m20;
-		this.m21 = m21;
-		this.m22 = m22;
-		this.m23 = m23;
-		this.m30 = m30;
-		this.m31 = m31;
-		this.m32 = m32;
-		this.m33 = m33;
+		// this.m[0][0] = m[0][0];
+		// this.m[0][1] = m[0][1];
+		// this.m[0][2] = m[0][2];
+		// this.m[0][3] = m[0][3];
+		// this.m[1][0] = m[1][0];
+		// this.m[1][1] = m[1][1];
+		// this.m[1][2] = m[1][2];
+		// this.m[1][3] = m[1][3];
+		// this.m[2][0] = m[2][0];
+		// this.m[2][1] = m[2][1];
+		// this.m[2][2] = m[2][2];
+		// this.m[2][3] = m[2][3];
+		// this.m[3][0] = m[3][0];
+		// this.m[3][1] = m[3][1];
+		// this.m[3][2] = m[3][2];
+		// this.m[3][3] = m[3][3];
+		m[0][0] = m00;
+		m[0][1] = m01;
+		m[0][2] = m02;
+		m[0][3] = m03;
+		m[1][0] = m10;
+		m[1][1] = m11;
+		m[1][2] = m12;
+		m[1][3] = m13;
+		m[2][0] = m20;
+		m[2][1] = m21;
+		m[2][2] = m22;
+		m[2][3] = m23;
+		m[3][0] = m30;
+		m[3][1] = m31;
+		m[3][2] = m32;
+		m[3][3] = m33;
 	}
 
-	public Vector4 multiply(final Vector4 vec) {
-		final double x = m00 * vec.x + m01 * vec.y + m02 * vec.z + m03 * vec.w;
-		final double y = m10 * vec.x + m11 * vec.y + m12 * vec.z + m13 * vec.w;
-		final double z = m20 * vec.x + m21 * vec.y + m22 * vec.z + m23 * vec.w;
-		final double w = m30 * vec.x + m31 * vec.y + m32 * vec.z + m33 * vec.w;
+	public Vector4 multiplyVec(final Vector4 vec) {
+		final double[] res = new double[4];
 
-		return new Vector4(x, y, z, w);
+		res[0] = m[0][0] * vec.x + m[0][1] * vec.y + m[0][2] * vec.z
+				+ m[0][3] * vec.w;
+		res[1] = m[1][0] * vec.x + m[1][1] * vec.y + m[1][2] * vec.z
+				+ m[1][3] * vec.w;
+		res[2] = m[2][0] * vec.x + m[2][1] * vec.y + m[2][2] * vec.z
+				+ m[2][3] * vec.w;
+		res[3] = m[3][0] * vec.x + m[3][1] * vec.y + m[3][2] * vec.z
+				+ m[3][3] * vec.w;
+
+		return new Vector4(res[0], res[1], res[2], res[3]);
+	}
+
+	public Matrix44() {
+
 	}
 
 	public Matrix44 multiply(final Matrix44 matrix) {
-		final double n00, n01, n02, n03, n10, n11, n12, n13, n20, n21, n22, n23, n30, n31, n32, n33;
+		// final double n00, n01, n02, n03, n10, n11, n12, n13, n20, n21, n22,
+		// n23, n30, n31, n32, n33;
+		//
+		// n00 = m[0][0] * matrix.m[0][0] + m[0][1] * matrix.m[1][0] + m[0][2] *
+		// matrix.m[2][0] + m[0][3]
+		// * matrix.m[3][0];
+		// n01 = m[0][0] * matrix.m[0][1] + m[0][1] * matrix.m[1][1] + m[0][2] *
+		// matrix.m[2][1] + m[0][3]
+		// * matrix.m[3][1];
+		// n02 = m[0][0] * matrix.m[0][2] + m[0][1] * matrix.m[1][2] + m[0][2] *
+		// matrix.m[2][2] + m[0][3]
+		// * matrix.m[3][2];
+		// n03 = m[0][0] * matrix.m[0][3] + m[0][1] * matrix.m[1][3] + m[0][2] *
+		// matrix.m[2][3] + m[0][3]
+		// * matrix.m[3][3];
+		// n10 = m[1][0] * matrix.m[0][0] + m[1][1] * matrix.m[1][0] + m[1][2] *
+		// matrix.m[2][0] + m[1][3]
+		// * matrix.m[3][0];
+		// n11 = m[1][0] * matrix.m[0][1] + m[1][1] * matrix.m[1][1] + m[1][2] *
+		// matrix.m[2][1] + m[1][3]
+		// * matrix.m[3][1];
+		// n12 = m[1][0] * matrix.m[0][2] + m[1][1] * matrix.m[1][2] + m[1][2] *
+		// matrix.m[2][2] + m[1][3]
+		// * matrix.m[3][2];
+		// n13 = m[1][0] * matrix.m[0][3] + m[1][1] * matrix.m[1][3] + m[1][2] *
+		// matrix.m[2][3] + m[1][3]
+		// * matrix.m[3][3];
+		// n20 = m[2][0] * matrix.m[0][0] + m[2][1] * matrix.m[1][0] + m[2][2] *
+		// matrix.m[2][0] + m[2][3]
+		// * matrix.m[3][0];
+		// n21 = m[2][0] * matrix.m[0][1] + m[2][1] * matrix.m[1][1] + m[2][2] *
+		// matrix.m[2][1] + m[2][3]
+		// * matrix.m[3][1];
+		// n22 = m[2][0] * matrix.m[0][2] + m[2][1] * matrix.m[1][2] + m[2][2] *
+		// matrix.m[2][2] + m[2][3]
+		// * matrix.m[3][2];
+		// n23 = m[2][0] * matrix.m[0][3] + m[2][1] * matrix.m[1][3] + m[2][2] *
+		// matrix.m[2][3] + m[2][3]
+		// * matrix.m[3][3];
+		// n30 = m[3][0] * matrix.m[0][0] + m[3][1] * matrix.m[1][0] + m[3][2] *
+		// matrix.m[2][0] + m[3][3]
+		// * matrix.m[3][0];
+		// n31 = m[3][0] * matrix.m[0][1] + m[3][1] * matrix.m[1][1] + m[3][2] *
+		// matrix.m[2][1] + m[3][3]
+		// * matrix.m[3][1];
+		// n32 = m[3][0] * matrix.m[0][2] + m[3][1] * matrix.m[1][2] + m[3][2] *
+		// matrix.m[2][2] + m[3][3]
+		// * matrix.m[3][2];
+		// n33 = m[3][0] * matrix.m[0][3] + m[3][1] * matrix.m[1][3] + m[3][2] *
+		// matrix.m[2][3] + m[3][3]
+		// * matrix.m[3][3];
 
-		n00 = m00 * matrix.m00 + m01 * matrix.m10 + m02 * matrix.m20 + m03
-				* matrix.m30;
-		n01 = m00 * matrix.m01 + m01 * matrix.m11 + m02 * matrix.m21 + m03
-				* matrix.m31;
-		n02 = m00 * matrix.m02 + m01 * matrix.m12 + m02 * matrix.m22 + m03
-				* matrix.m32;
-		n03 = m00 * matrix.m03 + m01 * matrix.m13 + m02 * matrix.m23 + m03
-				* matrix.m33;
-		n10 = m10 * matrix.m00 + m11 * matrix.m10 + m12 * matrix.m20 + m13
-				* matrix.m30;
-		n11 = m10 * matrix.m01 + m11 * matrix.m11 + m12 * matrix.m21 + m13
-				* matrix.m31;
-		n12 = m10 * matrix.m02 + m11 * matrix.m12 + m12 * matrix.m22 + m13
-				* matrix.m32;
-		n13 = m10 * matrix.m03 + m11 * matrix.m13 + m12 * matrix.m23 + m13
-				* matrix.m33;
-		n20 = m20 * matrix.m00 + m21 * matrix.m10 + m22 * matrix.m20 + m23
-				* matrix.m30;
-		n21 = m20 * matrix.m01 + m21 * matrix.m11 + m22 * matrix.m21 + m23
-				* matrix.m31;
-		n22 = m20 * matrix.m02 + m21 * matrix.m12 + m22 * matrix.m22 + m23
-				* matrix.m32;
-		n23 = m20 * matrix.m03 + m21 * matrix.m13 + m22 * matrix.m23 + m23
-				* matrix.m33;
-		n30 = m30 * matrix.m00 + m31 * matrix.m10 + m32 * matrix.m20 + m33
-				* matrix.m30;
-		n31 = m30 * matrix.m01 + m31 * matrix.m11 + m32 * matrix.m21 + m33
-				* matrix.m31;
-		n32 = m30 * matrix.m02 + m31 * matrix.m12 + m32 * matrix.m22 + m33
-				* matrix.m32;
-		n33 = m30 * matrix.m03 + m31 * matrix.m13 + m32 * matrix.m23 + m33
-				* matrix.m33;
+		final Matrix44 n = new Matrix44();
 
-		return new Matrix44(n00, n01, n02, n03, n10, n11, n12, n13, n20, n21,
-				n22, n23, n30, n31, n32, n33);
+		n.m[0][0] = m[0][0] * matrix.m[0][0] + m[0][1] * matrix.m[1][0]
+				+ m[0][2] * matrix.m[2][0] + m[0][3] * matrix.m[3][0];
+		n.m[0][1] = m[0][0] * matrix.m[0][1] + m[0][1] * matrix.m[1][1]
+				+ m[0][2] * matrix.m[2][1] + m[0][3] * matrix.m[3][1];
+		n.m[0][2] = m[0][0] * matrix.m[0][2] + m[0][1] * matrix.m[1][2]
+				+ m[0][2] * matrix.m[2][2] + m[0][3] * matrix.m[3][2];
+		n.m[0][3] = m[0][0] * matrix.m[0][3] + m[0][1] * matrix.m[1][3]
+				+ m[0][2] * matrix.m[2][3] + m[0][3] * matrix.m[3][3];
+		n.m[1][0] = m[1][0] * matrix.m[0][0] + m[1][1] * matrix.m[1][0]
+				+ m[1][2] * matrix.m[2][0] + m[1][3] * matrix.m[3][0];
+		n.m[1][1] = m[1][0] * matrix.m[0][1] + m[1][1] * matrix.m[1][1]
+				+ m[1][2] * matrix.m[2][1] + m[1][3] * matrix.m[3][1];
+		n.m[1][2] = m[1][0] * matrix.m[0][2] + m[1][1] * matrix.m[1][2]
+				+ m[1][2] * matrix.m[2][2] + m[1][3] * matrix.m[3][2];
+		n.m[1][3] = m[1][0] * matrix.m[0][3] + m[1][1] * matrix.m[1][3]
+				+ m[1][2] * matrix.m[2][3] + m[1][3] * matrix.m[3][3];
+		n.m[2][0] = m[2][0] * matrix.m[0][0] + m[2][1] * matrix.m[1][0]
+				+ m[2][2] * matrix.m[2][0] + m[2][3] * matrix.m[3][0];
+		n.m[2][1] = m[2][0] * matrix.m[0][1] + m[2][1] * matrix.m[1][1]
+				+ m[2][2] * matrix.m[2][1] + m[2][3] * matrix.m[3][1];
+		n.m[2][2] = m[2][0] * matrix.m[0][2] + m[2][1] * matrix.m[1][2]
+				+ m[2][2] * matrix.m[2][2] + m[2][3] * matrix.m[3][2];
+		n.m[2][3] = m[2][0] * matrix.m[0][3] + m[2][1] * matrix.m[1][3]
+				+ m[2][2] * matrix.m[2][3] + m[2][3] * matrix.m[3][3];
+		n.m[3][0] = m[3][0] * matrix.m[0][0] + m[3][1] * matrix.m[1][0]
+				+ m[3][2] * matrix.m[2][0] + m[3][3] * matrix.m[3][0];
+		n.m[3][1] = m[3][0] * matrix.m[0][1] + m[3][1] * matrix.m[1][1]
+				+ m[3][2] * matrix.m[2][1] + m[3][3] * matrix.m[3][1];
+		n.m[3][2] = m[3][0] * matrix.m[0][2] + m[3][1] * matrix.m[1][2]
+				+ m[3][2] * matrix.m[2][2] + m[3][3] * matrix.m[3][2];
+		n.m[3][3] = m[3][0] * matrix.m[0][3] + m[3][1] * matrix.m[1][3]
+				+ m[3][2] * matrix.m[2][3] + m[3][3] * matrix.m[3][3];
 
+		return n;
+	}
+
+	@Override
+	public String toString() {
+		final String format = "%g %g %g %g\n";
+		return new StringBuilder(String.format(format, m[0][0], m[0][1],
+				m[0][2], m[0][3]))
+				.append(String.format(format, m[1][0], m[1][1], m[1][2],
+						m[1][3]))
+				.append(String.format(format, m[2][0], m[2][1], m[2][2],
+						m[2][3]))
+				.append(String.format(format, m[3][0], m[3][1], m[3][2],
+						m[3][3])).toString();
+	}
+
+	public Matrix44 traspose() {
+		return new Matrix44(m[0][0], m[1][0], m[2][0], m[3][0], m[0][1],
+				m[1][1], m[2][1], m[3][1], m[0][2], m[1][2], m[2][2], m[3][2],
+				m[0][3], m[1][3], m[2][3], m[3][3]);
 	}
 
 }

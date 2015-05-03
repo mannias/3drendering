@@ -1,7 +1,5 @@
 package edu.ar.itba.raytracer.vector;
 
-import javax.vecmath.Vector4d;
-
 public class Vector4 {
 
 	public double x, y, z, w;
@@ -24,22 +22,24 @@ public class Vector4 {
 		this.x = other.x;
 		this.y = other.y;
 		this.z = other.z;
+		this.w = other.w;
 	}
 
 	public void add(final Vector4 other) {
 		x += other.x;
 		y += other.y;
 		z += other.z;
+		w += other.w;
 	}
 
 	public void sub(final Vector4 other) {
 		x -= other.x;
 		y -= other.y;
 		z -= other.z;
+		w -= other.w;
 	}
 
 	public double dot(final Vector4 other) {
-		Vector4d v;
 		return x * other.x + y * other.y + z * other.z + w * other.w;
 	}
 
@@ -74,9 +74,10 @@ public class Vector4 {
 		final double xDiff = x - point.x;
 		final double yDiff = y - point.y;
 		final double zDiff = z - point.z;
+		final double wDiff = w - point.w;
 
-		return (double) Math
-				.sqrt(xDiff * xDiff + yDiff * yDiff + zDiff * zDiff);
+		return (double) Math.sqrt(xDiff * xDiff + yDiff * yDiff + zDiff * zDiff
+				+ wDiff * wDiff);
 	}
 
 	public Vector4 rotate(final Vector4 rotation) {
