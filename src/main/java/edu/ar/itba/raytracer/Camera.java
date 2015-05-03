@@ -38,9 +38,9 @@ public class Camera extends SceneElement {
 	private final double distToPixels;
 	private final Color[][] picture;
 
-	private final Vector4 forwardVector;
-	private final Vector4 heightVector;
-	private final Vector4 widthVector;
+	private Vector4 forwardVector;
+	private Vector4 heightVector;
+	private Vector4 widthVector;
 
 	private final Vector4[] pixelPoints;
 
@@ -55,6 +55,7 @@ public class Camera extends SceneElement {
 		this.distToPixels = calculateDistanceToPixels(fov);
 		picture = new Color[pictureHeight][pictureWidth];
 		initPicture();
+
 		forwardVector = new Vector4(0, 0, 1, 0).rotate(getTransform()
 				.getRotation());
 		forwardVector.scalarMult((double) distToPixels);
@@ -80,6 +81,14 @@ public class Camera extends SceneElement {
 	public Camera(final Scene scene, final int pictureWidth,
 			final int pictureHeight, final double fov) {
 		this(scene, pictureWidth, pictureHeight, fov, new Transform());
+	}
+
+	public void lookAt(final Vector4 lookAt) {
+
+		final Vector4 forwardVector = new Vector4(lookAt);
+		forwardVector.sub(getTransform().getPosition());
+		forwardVector.normalize();
+
 	}
 
 	private Ray getPrimaryRay(final double x, final double y) {
@@ -173,12 +182,12 @@ public class Camera extends SceneElement {
 	}
 
 	public BufferedImage render(final int width, final int height) {
-//		try {
-//			Thread.sleep(20000);
-//		} catch (InterruptedException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
+		// try {
+		// Thread.sleep(20000);
+		// } catch (InterruptedException e) {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// }
 		final int pixels = width * height;
 		final int cores = Runtime.getRuntime().availableProcessors();
 
@@ -252,14 +261,14 @@ public class Camera extends SceneElement {
 		}
 		System.out.println((System.nanoTime() - start) / 1000000);
 
-		System.out.println(String.format("SPHERE INTERSECTIONS / CALLS %d/%d",
-				Sphere.intersections.get(), Sphere.calls.get()));
-		System.out.println(String.format("RATIO %f",
-				(double) Sphere.intersections.get() / Sphere.calls.get()));
-		System.out.println(String.format("PLANE INTERSECTIONS / CALLS %d/%d",
-				Plane.intersections.get(), Plane.calls.get()));
-		System.out.println(String.format("RATIO %f",
-				(double) Plane.intersections.get() / Plane.calls.get()));
+		// System.out.println(String.format("SPHERE INTERSECTIONS / CALLS %d/%d",
+		// Sphere.intersections.get(), Sphere.calls.get()));
+		// System.out.println(String.format("RATIO %f",
+		// (double) Sphere.intersections.get() / Sphere.calls.get()));
+		// System.out.println(String.format("PLANE INTERSECTIONS / CALLS %d/%d",
+		// Plane.intersections.get(), Plane.calls.get()));
+		// System.out.println(String.format("RATIO %f",
+		// (double) Plane.intersections.get() / Plane.calls.get()));
 
 		return takePicture();
 	}
@@ -387,17 +396,17 @@ public class Camera extends SceneElement {
 
 	public RayCollisionInfo castRay(final Ray ray, final CustomStack stack,
 			boolean debug) {
-//		double minDistance = Double.MAX_VALUE;
-//		RayCollisionInfo minCollision = null;
-//		for (final GeometricObject obj : scene.getGObjects()) {
-//			final RayCollisionInfo collision = obj.hit(ray);
-//			if (collision != null && (collision.getDistance() < minDistance)) {
-//				minCollision = collision;
-//				minDistance = collision.getDistance();
-//			}
-//		}
-//
-//		return minCollision;
+		// double minDistance = Double.MAX_VALUE;
+		// RayCollisionInfo minCollision = null;
+		// for (final GeometricObject obj : scene.getGObjects()) {
+		// final RayCollisionInfo collision = obj.hit(ray);
+		// if (collision != null && (collision.getDistance() < minDistance)) {
+		// minCollision = collision;
+		// minDistance = collision.getDistance();
+		// }
+		// }
+		//
+		// return minCollision;
 
 		return scene.getTree().getCollision(Double.MAX_VALUE, ray, stack);
 	}
