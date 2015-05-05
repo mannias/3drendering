@@ -1,4 +1,4 @@
-package edu.ar.itba.raytracer;
+package edu.ar.itba.raytracer.shape;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -8,34 +8,80 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
-import org.junit.Test;
+import com.beust.jcommander.JCommander;
+import com.beust.jcommander.Parameter;
+import com.beust.jcommander.ParameterException;
+import com.beust.jcommander.Parameters;
 
+import edu.ar.itba.raytracer.Camera;
+import edu.ar.itba.raytracer.Instance;
+import edu.ar.itba.raytracer.KdTree;
+import edu.ar.itba.raytracer.LightProperties;
+import edu.ar.itba.raytracer.Material;
+import edu.ar.itba.raytracer.Scene;
 import edu.ar.itba.raytracer.properties.Color;
 import edu.ar.itba.raytracer.properties.Transform;
-import edu.ar.itba.raytracer.shape.Mesh;
-import edu.ar.itba.raytracer.shape.Sphere2;
-import edu.ar.itba.raytracer.shape.Triangle;
 import edu.ar.itba.raytracer.vector.Vector4;
 
-public class PixelTest {
+public class Main {
 
-	@Test
-	public void testPicture() throws IOException, InterruptedException {
+	@Parameters
+	public static class RayTracerParameters {
+		@Parameter(names = "-i", required = true, description = "Nombre del archivo de entrada (definición de la escena)")
+		private String input;
+		@Parameter(names = "-o", description = "Nombre del archivo de salida, incluyendo su extensión. "
+				+ "En caso de no indicarlo usará el nombre del archivo de input reemplazando la extensión "
+				+ "y usando el formato PNG.")
+		private String output = input;
+		@Parameter(names = "-time", description = "Mostrará el tiempo empleado en el render")
+		private boolean time = false;
+		@Parameter(names = "-aa", required = true, description = "Cantidad de muestras de antialiasing.")
+		private int aaSamples;
+		@Parameter(names = "-benchmark", description = "Realizar el render completo n veces consecutivas.")
+		private int benchmark = 1;
+		@Parameter(names = "-d", description = "Define el ray depth de reflejos y refracciones.")
+		private int rayDepth = 1;
+	}
+
+	public static void main(String[] args) throws IOException {
+		final RayTracerParameters parameters = new RayTracerParameters();
+		final JCommander jCommander = new JCommander(parameters);
+		jCommander.setProgramName("Ray tracer");
+		try {
+			jCommander.parse(args);
+		} catch (final ParameterException e) {
+			jCommander.usage();
+			throw e;
+		}
+
+		if (parameters.output == null) {
+			final String input = parameters.input;
+			final int extension = input.lastIndexOf('.');
+			if (extension == -1) {
+				parameters.output = input + ".png";
+			} else {
+				parameters.output = input.substring(0, extension) + ".png";
+			}
+		}
+
+		System.out.println(parameters.output);
+
 		final int height = 480;
 		final int width = 640;
-		Camera camera = createScene(width, height);
-		final BufferedImage image = camera.render(width, height);
+		BufferedImage image = null;
+		for (int i = 0; i < parameters.benchmark; i++) {
+			image = loadTestScene().render(width, height);
+		}
 
 		ImageIO.write(image, "png", new File("pic.png"));
 	}
 
-	private Camera createScene(final int width, final int height) {
+	private static Camera loadTestScene() {
 		final Scene scene = new Scene(new Color(1, 1, 1));
 		final Transform cameraTransform = new Transform();
 		cameraTransform.setPosition(new Vector4(0, 0, -9, 1));
 		cameraTransform.setRotation(new Vector4(0, 0, 0, 0));
-		final Camera camera = scene.addCamera(width, height, 60,
-				cameraTransform);
+		final Camera camera = scene.addCamera(640, 480, 60, cameraTransform);
 
 		// Instance i = new Instance(new Sphere2());
 		// i.material = new Material(new Color(1, 0, 0), 1, 1, 1, 1, 0, 1);
@@ -130,4 +176,5 @@ public class PixelTest {
 
 		return camera;
 	}
+
 }

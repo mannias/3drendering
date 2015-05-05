@@ -1,12 +1,9 @@
 package edu.ar.itba.raytracer.shape;
 
-import java.util.Arrays;
-import java.util.List;
-
+import edu.ar.itba.raytracer.GeometricObject;
 import edu.ar.itba.raytracer.Ray;
-import edu.ar.itba.raytracer.properties.Color;
-import edu.ar.itba.raytracer.properties.ShapeProperties;
-import edu.ar.itba.raytracer.vector.Vector3;
+import edu.ar.itba.raytracer.RayCollisionInfo;
+import edu.ar.itba.raytracer.vector.Vector4;
 
 /**
  * Shape that represents a triangle.
@@ -16,75 +13,102 @@ import edu.ar.itba.raytracer.vector.Vector3;
  * href="http://www.graphics.cornell.edu/pubs/1997/MT97.pdf"
  * >http://www.graphics.cornell.edu/pubs/1997/MT97.pdf</a>
  */
-public class Triangle extends SceneShape {
+public class Triangle extends GeometricObject {
 
 	private final static double EPSILON = 0.00001;
 
-	private final Vector3 vertex0;
-	private final Vector3 vertex1;
-	private final Vector3 vertex2;
+	private final Vector4 vertex0;
+	private final Vector4 vertex1;
+	private final Vector4 vertex2;
 
-	private final Vector3 e1;
-	private final Vector3 e2;
+	private final Vector4 e1;
+	private final Vector4 e2;
 
-	private final Vector3 normal;
+	private final Vector4 normal;
 
-	public Triangle(final Vector3 vertex0, final Vector3 vertex1,
-			final Vector3 vertex2) {
-		super(new ShapeProperties(new Color(1, 1, 0)));
+	public Triangle(final Vector4 vertex0, final Vector4 vertex1,
+			final Vector4 vertex2, final Vector4 normal) {
 		this.vertex0 = vertex0;
 		this.vertex1 = vertex1;
 		this.vertex2 = vertex2;
 
-		e1 = vertex1.sub(vertex0);
-		e2 = vertex2.sub(vertex0);
-
-		normal = e2.cross(e1);
-	}
-
-	public List<Vector3> getVertexes() {
-		// We do this for simplicity, not efficiency, since this isn't supposed
-		// to be called when the image is being rendered.
-		return Arrays.asList(vertex0, vertex1, vertex2);
+		e1 = new Vector4(vertex1);
+		e1.sub(vertex0);
+		e2 = new Vector4(vertex2);
+		e2.sub(vertex0);
+		
+		this.normal = normal;
 	}
 
 	@Override
-	public double intersect(Ray ray) {
-		final Vector3 d = ray.getDir();
-		final Vector3 p = d.cross(e2);
+	public RayCollisionInfo hit(Ray ray) {
+		final Vector4 d = ray.getDir();
+		final Vector4 p = d.cross(e2);
 		final double div = p.dot(e1);
 		if (div > -EPSILON && div < EPSILON) {
-			return -1;
+			return null;
 		}
 
 		final double invDiv = 1 / div;
 
-		final Vector3 t = ray.getSource().sub(vertex0);
+		final Vector4 t = new Vector4(ray.getSource());
+		t.sub(vertex0);
 
 		final double u = invDiv * t.dot(p);
 
 		if (u < 0 || u > 1) {
-			return -1;
+			return null;
 		}
 
-		final Vector3 q = t.cross(e1);
+		final Vector4 q = t.cross(e1);
 
 		final double v = invDiv * d.dot(q);
 		if (v < 0 || u + v > 1) {
-			return -1;
+			return null;
 		}
 
 		final double dist = invDiv * e2.dot(q);
 		if (dist < -EPSILON) {
-			return -1;
+			return null;
 		}
 
-		return dist;
+		final RayCollisionInfo rci = new RayCollisionInfo(this, ray, dist);
+		rci.normal = normal;
+		return rci;
 	}
 
 	@Override
-	public Vector3 normal(Vector3 point) {
-		return normal;
+	public AABB getAABB() {
+		final Vector4[] vertexes = new Vector4[] { vertex0, vertex1, vertex2 };
+		double minX = Double.MAX_VALUE;
+		double minY = Double.MAX_VALUE;
+		double minZ = Double.MAX_VALUE;
+		double maxX = -Double.MAX_VALUE;
+		double maxY = -Double.MAX_VALUE;
+		double maxZ = -Double.MAX_VALUE;
+
+		for (final Vector4 vertex : vertexes) {
+			if (vertex.x < minX) {
+				minX = vertex.x;
+			}
+			if (vertex.x > maxX) {
+				maxX = vertex.x;
+			}
+			if (vertex.y < minY) {
+				minY = vertex.y;
+			}
+			if (vertex.y > maxY) {
+				maxY = vertex.y;
+			}
+			if (vertex.z < minZ) {
+				minZ = vertex.z;
+			}
+			if (vertex.z > maxZ) {
+				maxZ = vertex.z;
+			}
+		}
+
+		return new AABB(minX, maxX, minY, maxY, minZ, maxZ);
 	}
 
 }
