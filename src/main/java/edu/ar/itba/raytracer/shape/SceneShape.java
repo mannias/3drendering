@@ -21,10 +21,6 @@ public abstract class SceneShape extends SceneElement implements Intersectable {
 		this(new Transform(), properties);
 	}
 
-	public SceneShape() {
-		this(new Transform(), new ShapeProperties());
-	}
-
 	public ShapeProperties getProperties() {
 		return properties;
 	}

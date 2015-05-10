@@ -25,7 +25,6 @@ import edu.ar.itba.raytracer.vector.Vector4;
 
 public class Main {
 
-	@Parameters
 	public static class RayTracerParameters {
 		@Parameter(names = "-i", required = true, description = "Nombre del archivo de entrada (definición de la escena)")
 		private String input;
@@ -149,7 +148,7 @@ public class Main {
 				0)));
 
 		final Instance i7 = new Instance(new Mesh(triangles));
-		i7.material = new Material(new Color(0, 0, 1), 1, 1, 1, 50, 0, 1);
+		i7.material = new Material(new Color(0, 0, 1), new Color(0, 0, 1), new Color(0, 0, 1), 50, 0, 1);
 		// i7.translate(4, 1, 0);
 		i7.rotateX(90);
 		scene.add(i7);

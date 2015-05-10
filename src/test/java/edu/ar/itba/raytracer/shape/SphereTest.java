@@ -3,7 +3,7 @@ package edu.ar.itba.raytracer.shape;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 
-import java.util.Collection;
+import java.util.*;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -21,7 +21,7 @@ public class SphereTest {
 
 	@Test
 	public void testExtremePoints() {
-		final Collection<Vector4> extremePoints = sphere.getExtremePoints();
+		final Vector4[] extremePoints = sphere.getPerfectSplits().getAllExtremePoints();
 		assertThat(extremePoints).hasSize(6);
 		assertThat(extremePoints).extracting("x", "y", "z", "w").contains(
 				tuple(1.0, 0.0, 0.0, 1.0), tuple(-1.0, 0.0, 0.0, 1.0),

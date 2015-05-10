@@ -5,14 +5,14 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import edu.ar.itba.raytracer.GeometricObject;
 import edu.ar.itba.raytracer.Ray;
+import edu.ar.itba.raytracer.RayCollisionInfo;
 import edu.ar.itba.raytracer.properties.ShapeProperties;
 import edu.ar.itba.raytracer.properties.Transform;
-import edu.ar.itba.raytracer.shape.SceneShape.BB;
-import edu.ar.itba.raytracer.shape.Triangle.PerfectSplits;
 import edu.ar.itba.raytracer.vector.Vector4;
 
-public class Sphere extends SceneShape {
+public class Sphere extends GeometricObject {
 
 	private final Vector4 center;
 	private final double radius;
@@ -29,14 +29,14 @@ public class Sphere extends SceneShape {
 		this(center, radius, new Transform(), properties);
 	}
 
-	public Sphere(final Vector4 center, final double radius,
-			final Transform transform) {
-		this(center, radius, transform, new ShapeProperties());
-	}
-
-	public Sphere(final Vector4 center, final double radius) {
-		this(center, radius, new Transform(), new ShapeProperties());
-	}
+//	public Sphere(final Vector4 center, final double radius,
+//			final Transform transform) {
+//		this(center, radius, transform, new ShapeProperties());
+//	}
+//
+//	public Sphere(final Vector4 center, final double radius) {
+//		this(center, radius, new Transform(), new ShapeProperties());
+//	}
 
 	@Override
 	public boolean intersectionExists(Ray ray) {
@@ -238,7 +238,17 @@ public class Sphere extends SceneShape {
 		return new PerfectSplits(getExtremePoints());
 	}
 
-	public Vector4[] getExtremePoints() {
+    @Override
+    public RayCollisionInfo hit(Ray ray) {
+        return null;
+    }
+
+    @Override
+    public AABB getAABB() {
+        return null;
+    }
+
+    public Vector4[] getExtremePoints() {
 
 		final Vector4 p1 = new Vector4(center);
 		p1.add(new Vector4(radius, 0, 0, 0));

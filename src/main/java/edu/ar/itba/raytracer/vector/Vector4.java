@@ -25,18 +25,20 @@ public class Vector4 {
 		this.w = other.w;
 	}
 
-	public void add(final Vector4 other) {
+	public Vector4 add(final Vector4 other) {
 		x += other.x;
 		y += other.y;
 		z += other.z;
 		w += other.w;
+        return this;
 	}
 
-	public void sub(final Vector4 other) {
+	public Vector4 sub(final Vector4 other) {
 		x -= other.x;
 		y -= other.y;
 		z -= other.z;
 		w -= other.w;
+        return this;
 	}
 
 	public double dot(final Vector4 other) {
@@ -48,14 +50,15 @@ public class Vector4 {
 				z * other.x - x * other.z, x * other.y - y * other.x, w);
 	}
 
-	public void scalarMult(final double scalar) {
+	public Vector4 scalarMult(final double scalar) {
 		x *= scalar;
 		y *= scalar;
 		z *= scalar;
 		w *= scalar;
+        return this;
 	}
 
-	public void normalize() {
+	public Vector4 normalize() {
 		final double norm = (double) Math.sqrt(x * x + y * y + z * z);
 		if (norm == 0) {
 			throw new IllegalStateException(
@@ -68,6 +71,7 @@ public class Vector4 {
 		y *= invNorm;
 		z *= invNorm;
 		w *= invNorm;
+        return this;
 	}
 
 	public double distanceTo(final Vector4 point) {

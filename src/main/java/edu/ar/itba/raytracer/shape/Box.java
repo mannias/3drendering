@@ -5,18 +5,19 @@ import edu.ar.itba.raytracer.properties.Color;
 import edu.ar.itba.raytracer.properties.ShapeProperties;
 import edu.ar.itba.raytracer.properties.Transform;
 import edu.ar.itba.raytracer.vector.Vector3;
+import edu.ar.itba.raytracer.vector.Vector4;
 
 public class Box extends SceneShape {
 
-	private static BoundedPlane calculateFace(final Vector3 cubeCenter,
-			final Vector3 cubeRotation, final Vector3 cubeScale,
+	private static BoundedPlane calculateFace(final Vector4 cubeCenter,
+			final Vector4 cubeRotation, final Vector4 cubeScale,
 			final ShapeProperties cubeProperties,
-			final Vector3 originalFaceCenter,
-			final Vector3 originalFaceRotation, final Vector3 faceRotation) {
+			final Vector4 originalFaceCenter,
+			final Vector4 originalFaceRotation, final Vector4 faceRotation) {
 		Transform faceTransform = new Transform();
 		faceTransform.setScale(cubeScale);
 		faceTransform.setRotation(originalFaceRotation.add(faceRotation));
-		final Vector3 faceCenter = originalFaceCenter.sub(cubeCenter)
+		final Vector4 faceCenter = originalFaceCenter.sub(cubeCenter)
 				.rotate(cubeRotation).add(cubeCenter);
 		faceTransform.setPosition(faceCenter);
 		return new BoundedPlane(faceTransform, cubeProperties);
@@ -27,31 +28,31 @@ public class Box extends SceneShape {
 
 	public Box(final Transform transform, final ShapeProperties properties) {
 		super(transform, properties);
-		final Vector3 scale = transform.getScale();
-		final Vector3 center = transform.getPosition();
-		final Vector3 rotation = transform.getRotation();
-		face1 = calculateFace(center, rotation, scale, new ShapeProperties(
-				new Color(1, 1, 1)), new Vector3(center.x, center.y, center.z
+		final Vector4 scale = transform.getScale();
+		final Vector4 center = transform.getPosition();
+		final Vector4 rotation = transform.getRotation();
+		face1 = calculateFace(center, rotation, scale, properties,
+                new Vector3(center.x, center.y, center.z
 				- scale.z), new Vector3(-90, 0, 0), new Vector3(rotation.x,
 				rotation.y, rotation.z));
-		face2 = calculateFace(center, rotation, scale, new ShapeProperties(
-				new Color(1, 1, 1)), new Vector3(center.x, center.y + scale.y,
+		face2 = calculateFace(center, rotation, scale, properties,
+                new Vector3(center.x, center.y + scale.y,
 				center.z), new Vector3(0, 0, 0), new Vector3(rotation.x,
 				rotation.y, rotation.z));
-		face3 = calculateFace(center, rotation, scale, new ShapeProperties(
-				new Color(1, 1, 1)), new Vector3(center.x - scale.x, center.y,
+		face3 = calculateFace(center, rotation, scale, properties,
+                new Vector3(center.x - scale.x, center.y,
 				center.z), new Vector3(0, 0, 90), new Vector3(rotation.y,
 				rotation.x, rotation.z));
-		face4 = calculateFace(center, rotation, scale, new ShapeProperties(
-				new Color(1, 1, 1)), new Vector3(center.x + scale.x, center.y,
+		face4 = calculateFace(center, rotation, scale, properties,
+                new Vector3(center.x + scale.x, center.y,
 				center.z), new Vector3(90, 90, 0), new Vector3(-rotation.y,
 				-rotation.x, rotation.z));
-		face5 = calculateFace(center, rotation, scale, new ShapeProperties(
-				new Color(1, 1, 1)), new Vector3(center.x, center.y - scale.y,
+		face5 = calculateFace(center, rotation, scale, properties,
+                new Vector3(center.x, center.y - scale.y,
 				center.z), new Vector3(0, 0, 180), new Vector3(-rotation.x,
 				-rotation.y, rotation.z));
-		face6 = calculateFace(center, rotation, scale, new ShapeProperties(
-				new Color(1, 1, 1)), new Vector3(center.x, center.y, center.z
+		face6 = calculateFace(center, rotation, scale, properties,
+                new Vector3(center.x, center.y, center.z
 				+ scale.z), new Vector3(90, 0, 0), new Vector3(rotation.x,
 				rotation.y, rotation.z));
 	}
@@ -109,8 +110,14 @@ public class Box extends SceneShape {
 		return dist;
 	}
 
-	@Override
-	public Vector3 normal(final Vector3 point) {
+    //TODO: todo
+    @Override
+    public boolean intersectionExists(Ray ray) {
+        return false;
+    }
+
+    @Override
+	public Vector4 normal(final Vector4 point) {
 		if (face1.containsPoint(point)) {
 			return face1.normal(point);
 		}
@@ -133,5 +140,11 @@ public class Box extends SceneShape {
 				"You should only call this method for points on the cube's surface. The point "
 						+ point + " is not on it.");
 	}
+
+    //TODO: ok
+    @Override
+    public BB getBB() {
+        return null;
+    }
 
 }

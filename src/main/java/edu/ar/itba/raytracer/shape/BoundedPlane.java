@@ -4,11 +4,12 @@ import edu.ar.itba.raytracer.Ray;
 import edu.ar.itba.raytracer.properties.ShapeProperties;
 import edu.ar.itba.raytracer.properties.Transform;
 import edu.ar.itba.raytracer.vector.Vector3;
+import edu.ar.itba.raytracer.vector.Vector4;
 
 public class BoundedPlane extends Plane {
 
-	private final Vector3 widthVector;
-	private final Vector3 heightVector;
+	private final Vector4 widthVector;
+	private final Vector4 heightVector;
 
 	public BoundedPlane(final Transform transform,
 			final ShapeProperties properties) {
@@ -29,11 +30,11 @@ public class BoundedPlane extends Plane {
 			return -1;
 		}
 
-		final Vector3 raySource = ray.getSource();
-		final Vector3 rayDir = ray.getDir();
-		final Vector3 center = getTransform().getPosition();
+		final Vector4 raySource = ray.getSource();
+		final Vector4 rayDir = ray.getDir();
+		final Vector4 center = getTransform().getPosition();
 
-		final Vector3 intersectionPoint = new Vector3(raySource.x + dist
+		final Vector4 intersectionPoint = new Vector3(raySource.x + dist
 				* rayDir.x, raySource.y + dist * rayDir.y, raySource.z + dist
 				* rayDir.z);
 
@@ -136,4 +137,10 @@ public class BoundedPlane extends Plane {
 
 		return dist;
 	}
+
+    //TODO: Intersection
+    @Override
+    public boolean intersectionExists(Ray ray) {
+        return super.intersectionExists(ray);
+    }
 }

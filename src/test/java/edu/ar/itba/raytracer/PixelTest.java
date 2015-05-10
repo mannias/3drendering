@@ -103,7 +103,7 @@ public class PixelTest {
 				0)));
 
 		final Instance i7 = new Instance(new Mesh(triangles));
-		i7.material = new Material(new Color(0, 0, 1), 1, 1, 1, 50, 0, 1);
+		i7.material = new Material(new Color(0, 0, 1), new Color(0, 0, 1), new Color(0, 0, 1), 50, 0, 1);
 		// i7.translate(4, 1, 0);
 		i7.rotateX(90);
 		scene.add(i7);

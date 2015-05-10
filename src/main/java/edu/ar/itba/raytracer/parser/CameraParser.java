@@ -8,15 +8,35 @@ import java.util.regex.Pattern;
 
 public class CameraParser {
 
-    final static int height = 480;
-    final static int width = 640;
+    private static Integer fov = null;
+    private static Integer width = null;
+    private static Integer height = null;
 
-    public static void Parse(String line, Scene scene){
+    public static void parseFov(String line){
         String pattern = "\"float fov\" \\[([^]]+)\\]";
-        Pattern fov = Pattern.compile(pattern);
-        Matcher m = fov.matcher(line);
-        if(m.find()){
-            scene.addCamera(width, height, Integer.valueOf(m.group(1)));
+        Matcher m;
+        if((m = Pattern.compile(pattern).matcher(line)).find()) {
+            fov = Integer.valueOf(m.group(1));
         }
+    }
+
+    public static void parseDimension(String line){
+        Matcher m;
+        String xpattern = "\"integer xresolution\" \\[([^]]+)\\]";
+        if((m = Pattern.compile(xpattern).matcher(line)).find()) {
+            width = Integer.valueOf(m.group(1));
+        }
+        String ypattern = "\"integer yresolution\" \\[([^]]+)\\]";
+        if((m = Pattern.compile(ypattern).matcher(line)).find()) {
+            height = Integer.valueOf(m.group(1));
+        }
+    }
+
+    public static Camera getCamera(Scene scene){
+        return new Camera(scene,width,height,fov);
+    }
+
+    public static void parseLookAt(String line){
+
     }
 }

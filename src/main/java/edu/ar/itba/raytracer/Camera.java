@@ -113,7 +113,7 @@ public class Camera extends SceneElement {
 	/**
 	 * Creates a picture of what the camera is currently seeing.
 	 * 
-	 * @return a {@link BufferedPicture} with pixels representing what this
+	 * @return a BufferedPixel with pixels representing what this
 	 *         camera is currently seeing.
 	 */
 	private BufferedImage takePicture() {
@@ -294,15 +294,13 @@ public class Camera extends SceneElement {
 		v.scalarMult(-1);
 
 		final Material objectMaterial = collision.getObj().material;
-		final Color objectColor = objectMaterial.color;
-		final double ka = objectMaterial.ka;
-		final double kd = objectMaterial.kd;
-		final double ks = objectMaterial.ks;
+		final Color ka = objectMaterial.ka;
+		final Color kd = objectMaterial.kd;
+		final Color ks = objectMaterial.ks;
 		final double shininess = objectMaterial.shininess;
 
 		Color intensity = new Color(scene.getAmbientLight());
-		intensity.scalarMult(ka);
-		intensity.mult(objectColor);
+		intensity.mult(ka);
 
 		for (final Light light : scene.getLights()) {
 			// Move the from point a little in the direction of the normal
@@ -324,8 +322,7 @@ public class Camera extends SceneElement {
 
 				final Color diffuse = new Color(lightColor);
 				diffuse.scalarMult(ln);
-				diffuse.scalarMult(kd);
-				diffuse.mult(objectColor);
+				diffuse.mult(kd);
 
 				// final Color diffuse = new Color(diffuseRed, diffuseGreen,
 				// diffuseBlue);
@@ -337,7 +334,8 @@ public class Camera extends SceneElement {
 				final double rv = r.dot(v);
 				if (rv > 0) {
 					final Color specular = new Color(lightColor);
-					specular.scalarMult(Math.pow(rv, shininess) * ks);
+                    ks.scalarMult(Math.pow(rv, shininess));
+					specular.mult(ks);
 					intensity = intensity.add(specular);
 				}
 			}

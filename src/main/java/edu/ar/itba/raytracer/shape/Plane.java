@@ -14,25 +14,28 @@ public class Plane extends SceneShape {
 	private final double d;
 	private final Vector4 normal;
 
+    public Plane(final Transform transform, final ShapeProperties properties, final Vector4 normal){
+        super(transform, properties);
+
+        this.normal = normal;
+        d = -normal.dot(transform.getPosition());
+    }
+
 	public Plane(final Transform transform, final ShapeProperties properties) {
-		super(transform, properties);
-
-		final Vector4 defaultNormal = new Vector4(0, 1, 0);
-		this.normal = defaultNormal.rotate(transform.getRotation());
-		d = -normal.dot(transform.getPosition());
+		this(transform,properties,new Vector4(0,1,0,0));
 	}
 
-	public Plane(final Transform transform) {
-		this(transform, new ShapeProperties());
-	}
+//	public Plane(final Transform transform) {
+//		this(transform, new ShapeProperties());
+//	}
 
 	public Plane(final ShapeProperties properties) {
 		this(new Transform(), properties);
 	}
 
-	public Plane() {
-		this(new Transform(), new ShapeProperties());
-	}
+//	public Plane() {
+//		this(new Transform(), new ShapeProperties());
+//	}
 
 	public static final AtomicInteger intersections = new AtomicInteger();
 	public static final AtomicInteger calls = new AtomicInteger();
@@ -57,7 +60,12 @@ public class Plane extends SceneShape {
 		return t;
 	}
 
-	@Override
+    @Override
+    public boolean intersectionExists(Ray ray) {
+        return false;
+    }
+
+    @Override
 	public Vector4 normal(final Vector4 point) {
 		return normal;
 	}
