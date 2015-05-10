@@ -93,7 +93,7 @@ public class Main {
 
 	private static Mesh parseBunny() throws Exception {
 		final Scanner scanner = new Scanner(
-				Paths.get("C:\\Program Files\\Eclipse\\workspace\\cg-2015-05\\bunnylow.txt"));
+				Paths.get("C:\\Program Files\\Eclipse\\workspace\\cg-2015-05\\MaleLow.obj"));
 		final List<Vector4> vertexes = new ArrayList<>();
 		final List<Triangle> triangles = new ArrayList<>();
 		double minX = Double.MAX_VALUE;
@@ -102,6 +102,7 @@ public class Main {
 		double maxX = -Double.MAX_VALUE;
 		double maxY = -Double.MAX_VALUE;
 		double maxZ = -Double.MAX_VALUE;
+		int i = 0;
 		while (scanner.hasNextLine()) {
 			final String line = scanner.nextLine();
 			final String[] tokens = line.split("\\s+");
@@ -127,8 +128,13 @@ public class Main {
 				if (z > maxZ) {
 					maxZ = z;
 				}
+				System.out.println(i + " " + x + " " + y + " " + z);
+				i++;
 				vertexes.add(new Vector4(x, y, z, 1));
 			} else if (tokens[0].equals("f")) {
+				if (tokens.length > 4) {
+					throw new AssertionError();
+				}
 				final int p1 = Integer.parseInt(tokens[1]);
 				final int p2 = Integer.parseInt(tokens[2]);
 				final int p3 = Integer.parseInt(tokens[3]);
@@ -138,9 +144,9 @@ public class Main {
 				e1.sub(vertexes.get(p1 - 1));
 
 				triangles.add(new Triangle(vertexes.get(p1 - 1), vertexes
-						.get(p2 - 1), vertexes.get(p3 - 1), e1.cross(e2)));
+						.get(p2 - 1), vertexes.get(p3 - 1), e2.cross(e1)));
 			} else {
-				throw new Exception();
+//				throw new Exception();
 			}
 		}
 		System.out.println(minX);
@@ -162,10 +168,10 @@ public class Main {
 	}
 
 	private static Camera loadTestScene() throws Exception {
-		final Scene scene = new Scene(new Color(1, 1, 1));
+		final Scene scene = new Scene(new Color(.2, .2, .2));
 		final Transform cameraTransform = new Transform();
-		cameraTransform.setPosition(new Vector4(0, .1, -.1, 1));
-		cameraTransform.setRotation(new Vector4(0, 0, 0, 0));
+		cameraTransform.setPosition(new Vector4(0, 10, 20, 1));
+		cameraTransform.setRotation(new Vector4(0, 180, 0, 0));
 		final Camera camera = scene.addCamera(640, 480, 60, cameraTransform);
 
 		// Instance i = new Instance(new Sphere2());
@@ -275,7 +281,7 @@ public class Main {
 
 		final Instance ii = new Instance(parseBunny());
 		// ii.translate(0, 2, 0);
-		ii.material = new Material(new Color(1, 1, 1), new Color(1, 1, 1), 0,
+		ii.material = new Material(new Color(1, 0, 1), new Color(1, 0, 1), 0,
 				50, 0, 1);
 		scene.add(ii);
 
@@ -285,7 +291,7 @@ public class Main {
 				+ (System.currentTimeMillis() - start));
 
 		final Transform lightTransform = new Transform();
-		lightTransform.setPosition(new Vector4(0, 0, -15, 1));
+		lightTransform.setPosition(new Vector4(0, 0, 15, 1));
 		final LightProperties lightProperties = new LightProperties(new Color(
 				1f, 1f, 1f));
 		scene.addLight(lightTransform, lightProperties);
