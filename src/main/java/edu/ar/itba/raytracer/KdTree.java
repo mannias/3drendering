@@ -1,40 +1,50 @@
 package edu.ar.itba.raytracer;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 import edu.ar.itba.raytracer.GeometricObject.AABB;
+import edu.ar.itba.raytracer.GeometricObject.PerfectSplits;
 import edu.ar.itba.raytracer.shape.CustomStack;
 import edu.ar.itba.raytracer.shape.SceneShape.BB;
+import edu.ar.itba.raytracer.shape.Triangle;
 import edu.ar.itba.raytracer.vector.Vector4;
 
-public class KdTree {
+public class KdTree implements Serializable {
 
-	public abstract static class KdNode {
+	private static final long serialVersionUID = -4875961080744635950L;
+
+	public abstract static class KdNode implements Serializable {
+
+		private static final long serialVersionUID = -2305599400602183527L;
 	}
 
 	private static class KdInternalNode extends KdNode {
+		private static final long serialVersionUID = 9107223497382945170L;
 		private final int splitAxis;
 		private final double splitPosition;
 		private final KdNode left, right;
-		private final BB bb;
 
 		public KdInternalNode(final int splitAxis, final double splitPosition,
-				final KdNode left, final KdNode right, final BB bb) {
+				final KdNode left, final KdNode right) {
 			this.splitAxis = splitAxis;
 			this.splitPosition = splitPosition;
 			this.left = left;
 			this.right = right;
-			this.bb = bb;
 		}
 
 	}
 
 	private static class KdLeafNode extends KdNode {
-		private final Collection<Instance> shapes;
+		private static final long serialVersionUID = 2104639551541046226L;
 
-		public KdLeafNode(final Collection<Instance> shapes) {
+		private final Collection<GeometricObject> shapes;
+
+		public KdLeafNode(final Collection<GeometricObject> shapes) {
 			this.shapes = shapes;
 		}
 
@@ -63,7 +73,10 @@ public class KdTree {
 	private static double EPSILON = 0.00001;
 
 	public static KdTree from(Scene scene) {
-		final Collection<Instance> sceneObjects = scene.getGObjects();
+		return from(scene.getGObjects());
+	}
+
+	public static KdTree from(Collection<GeometricObject> objs) {
 		double minX = Double.POSITIVE_INFINITY;
 		double maxX = Double.NEGATIVE_INFINITY;
 		double minY = Double.POSITIVE_INFINITY;
@@ -71,7 +84,7 @@ public class KdTree {
 		double minZ = Double.POSITIVE_INFINITY;
 		double maxZ = Double.NEGATIVE_INFINITY;
 
-		for (Instance instance : sceneObjects) {
+		for (GeometricObject instance : objs) {
 			AABB bb = instance.getAABB();
 			if (bb.minX < minX) {
 				minX = bb.minX;
@@ -97,10 +110,7 @@ public class KdTree {
 		// tree.rootBb = new BB(minX, maxX, minY, maxY, minZ, maxZ);
 		double size = 30;
 		tree.rootBb = new BB(-size, size, -size, size, -size, size);
-		tree.root = recBuild(0, sceneObjects, tree.rootBb);
-		System.out.println("LEAVES  " + leaves);
-		System.out.println("AMOUNT " + amount / leaves);
-		System.out.println("DEPTH " + depth / leaves);
+		tree.root = recBuild(0, objs, tree.rootBb);
 		return tree;
 	}
 
@@ -111,11 +121,13 @@ public class KdTree {
 	private static double depth;
 
 	private static KdNode recBuild(final int depth,
-			Collection<Instance> shapes, BB bb) {
+			Collection<GeometricObject> shapes, BB bb) {
 		final double cisec = 1;
-		final double ctrav =1;
-		
-		SplitInfo si = naiveSah(shapes, bb, ctrav,cisec);
+		final double ctrav = 1;
+
+//		 SplitInfo si = findPlane(shapes, bb, ctrav, cisec);
+
+		SplitInfo si = naiveSah(shapes, bb, ctrav, cisec);
 
 		if (shapes.isEmpty() || si.minCost >= shapes.size() * cisec) {
 			leaves++;
@@ -126,29 +138,30 @@ public class KdTree {
 
 		return new KdInternalNode(si.axis, si.splitPosition, recBuild(
 				depth + 1, si.tl, si.leftVoxel), recBuild(depth + 1, si.tr,
-				si.rightVoxel), bb);
+				si.rightVoxel));
 
 	}
 
 	private static class TriangleClassification {
-		Collection<Instance> tl, tr, tp;
+		Collection<GeometricObject> tl, tr, tp;
 
-		public TriangleClassification(final Collection<Instance> tl,
-				final Collection<Instance> tr, final Collection<Instance> tp) {
+		public TriangleClassification(final Collection<GeometricObject> tl,
+				final Collection<GeometricObject> tr,
+				final Collection<GeometricObject> tp) {
 			this.tl = tl;
 			this.tr = tr;
 			this.tp = tp;
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	private static TriangleClassification classify(Collection<Instance> shapes,
-			BB leftVoxel, BB rightVoxel, int splitAxis, double splitPosition) {
-		final Collection<Instance> tl = new ArrayList<>();
-		final Collection<Instance> tr = new ArrayList<>();
-		final Collection<Instance> tp = new ArrayList<>();
+	private static TriangleClassification classify(
+			Collection<GeometricObject> shapes, BB leftVoxel, BB rightVoxel,
+			int splitAxis, double splitPosition) {
+		final Collection<GeometricObject> tl = new ArrayList<>();
+		final Collection<GeometricObject> tr = new ArrayList<>();
+		final Collection<GeometricObject> tp = new ArrayList<>();
 
-		for (Instance instance : shapes) {
+		for (GeometricObject instance : shapes) {
 			final Collection<Vector4> vertexes = instance.getAABB()
 					.getCorners();
 			boolean isOnPlane = true;
@@ -186,15 +199,15 @@ public class KdTree {
 	private static class SplitInfo {
 		int axis;
 		double splitPosition;
-		Collection<Instance> tl;
-		Collection<Instance> tr;
+		Collection<GeometricObject> tl;
+		Collection<GeometricObject> tr;
 		BB leftVoxel;
 		BB rightVoxel;
 		double minCost;
 
 		public SplitInfo(int axis, double splitPosition,
-				Collection<Instance> tl, Collection<Instance> tr, BB leftVoxel,
-				BB rightVoxel, double minCost) {
+				Collection<GeometricObject> tl, Collection<GeometricObject> tr,
+				BB leftVoxel, BB rightVoxel, double minCost) {
 			this.axis = axis;
 			this.splitPosition = splitPosition;
 			this.tl = tl;
@@ -205,8 +218,36 @@ public class KdTree {
 		}
 	}
 
-	private static SplitInfo naiveSah(Collection<Instance> shapes, BB voxel,
+	private static class SAH {
+		private boolean left;
+		private double cost;
+
+		public SAH(final boolean left, final double cost) {
+			this.left = left;
+			this.cost = cost;
+		}
+	}
+
+	private static SAH doSAH(final int splitAxis, final double splitPosition,
+			final BB voxel, final double nl, final double nr, final double np,
 			final double ctrav, final double cisec) {
+		final double sav = voxel.getArea();
+		final BB[] voxels = splitVoxel(voxel, splitAxis, splitPosition);
+		final double pvlv = voxels[0].getArea() / sav;
+		final double pvrv = voxels[1].getArea() / sav;
+
+		final double csplitl = ctrav + cisec * (pvlv * (nl + np) + pvrv * nr);
+
+		final double csplitr = ctrav + cisec * (pvlv * nl + pvrv * (nr + np));
+
+		boolean left = csplitl < csplitr;
+
+		return new SAH(left, left ? csplitl : csplitr);
+
+	}
+
+	private static SplitInfo naiveSah(Collection<GeometricObject> shapes,
+			BB voxel, final double ctrav, final double cisec) {
 		Boolean toLeft = null;
 		double costAux = Double.MAX_VALUE;
 		double bestSplitPosition = 0;
@@ -214,7 +255,7 @@ public class KdTree {
 		int bestAxis = 0;
 		BB[] childVoxels = null;
 
-		for (final Instance ss : shapes) {
+		for (final GeometricObject ss : shapes) {
 			// Init vars
 			final Vector4[] splits = ss.getPerfectSplits().clipToVoxel(voxel)
 					.getAllExtremePoints();
@@ -312,8 +353,175 @@ public class KdTree {
 		}
 	}
 
+	private static class Event implements Comparable<Event> {
+		int type;
+		GeometricObject obj;
+		double position;
+
+		public Event(final int type, final GeometricObject obj,
+				final double position) {
+			this.type = type;
+			this.obj = obj;
+			this.position = position;
+		}
+
+		@Override
+		public int compareTo(Event o) {
+			double first = position - o.position;
+			if (first < 0) {
+				return 1;
+			}
+			if (first == 0) {
+				return o.type - type;
+			}
+
+			return -1;
+		}
+	}
+
+	private static class PlaneInfo {
+		double position;
+		int axis;
+
+		PlaneInfo(double position, int axis) {
+			this.position = position;
+			this.axis = axis;
+		}
+	}
+
+	private class SplitInfo2 {
+		double position;
+		int axis;
+		double cost;
+
+		SplitInfo2(double position, int axis, double cost) {
+			this.position = position;
+			this.axis = axis;
+			this.cost = cost;
+		}
+	}
+
+	private static SplitInfo findPlane(Collection<GeometricObject> shapes,
+			BB voxel, final double ctrav, final double cisec) {
+		if (shapes.isEmpty()) {
+			return new SplitInfo(0, 0, Collections.emptyList(),
+					Collections.emptyList(), null, null, 0);
+		}
+		double minCost = Double.MAX_VALUE;
+		double minPos = Double.MAX_VALUE;
+		boolean minSide = false;
+		PlaneInfo minPlane = null;
+
+		for (int axis = 0; axis < 3; axis++) {
+			final List<Event> eventList = new ArrayList<>();
+			for (final GeometricObject obj : shapes) {
+				final PerfectSplits ps = obj.getPerfectSplits().clipToVoxel(
+						voxel);
+				double min = ps.mins[axis].getElemsAsArray()[axis];
+				double max = ps.maxs[axis].getElemsAsArray()[axis];
+
+				// Is planar
+				if (min == max) {
+					eventList.add(new Event(1, obj, min));
+				} else {
+					eventList.add(new Event(2, obj, min));
+					eventList.add(new Event(0, obj, max));
+				}
+			}
+
+			int nl = 0;
+			int np = 0;
+			int nr = shapes.size();
+
+			Event[] orderedEvents = eventList.toArray(new Event[eventList
+					.size()]);
+
+			Arrays.sort(orderedEvents);
+
+			for (int i = 0; i < orderedEvents.length; i++) {
+				final double p = orderedEvents[i].position;
+				int pplus = 0;
+				int pminus = 0;
+				int pplane = 0;
+
+				while (i < orderedEvents.length
+						&& orderedEvents[i].position < p
+						&& orderedEvents[i].type == 0) {
+					pminus++;
+					i++;
+				}
+				while (i < orderedEvents.length
+						&& orderedEvents[i].position == p
+						&& orderedEvents[i].type == 1) {
+					pplane++;
+					i++;
+				}
+				while (i < orderedEvents.length
+						&& orderedEvents[i].position == p
+						&& orderedEvents[i].type == 2) {
+					pplus++;
+					i++;
+				}
+
+				np = pplane;
+				nr -= pplane;
+				nr -= pminus;
+
+				final SAH sah = doSAH(axis, p, voxel, nl, nr, np, ctrav, cisec);
+
+				if (sah.cost < minCost) {
+					minPlane = new PlaneInfo(p, axis);
+					minCost = sah.cost;
+					minSide = sah.left;
+				}
+
+				nl += pplus;
+				nl += pplane;
+				np = 0;
+			}
+		}
+
+		BB[] voxels = splitVoxel(voxel, minPlane.axis, minPlane.position);
+		TriangleClassification tc = classify(shapes, voxels[0], voxels[1],
+				minPlane.axis, minPlane.position);
+
+		if (minSide) {
+			tc.tl.addAll(tc.tp);
+			return new SplitInfo(minPlane.axis, minPlane.position, tc.tl,
+					tc.tr, voxels[0], voxels[1], minCost);
+		} else {
+			tc.tr.addAll(tc.tp);
+			return new SplitInfo(minPlane.axis, minPlane.position, tc.tl,
+					tc.tr, voxels[0], voxels[1], minCost);
+		}
+	}
+
+	private double getMin(final BB bb, final int axis) {
+		switch (axis) {
+		case 0:
+			return bb.minX;
+		case 1:
+			return bb.minY;
+		case 2:
+			return bb.minZ;
+		}
+		return -1;
+	}
+
+	private double getMax(final BB bb, final int axis) {
+		switch (axis) {
+		case 0:
+			return bb.maxX;
+		case 1:
+			return bb.maxY;
+		case 2:
+			return bb.maxZ;
+		}
+		return -1;
+	}
+
 	public boolean intersectionExists(final double tMax, final Ray ray,
-			final CustomStack stack) {
+			final CustomStack stack, final int top) {
 		double tNear = EPSILON;
 		double tFar = tMax;
 
@@ -364,15 +572,17 @@ public class KdTree {
 			}
 
 			final KdLeafNode leaf = (KdLeafNode) node;
-			for (Instance ss : leaf.shapes) {
-				final RayCollisionInfo collision = ss.hit(ray);
+			for (GeometricObject ss : leaf.shapes) {
+				final RayCollisionInfo collision = ss
+						.hit(ray, stack, stack.top);
 				if (collision != null && collision.getDistance() < tFar) {
+					stack.top = top;
 					return true;
 				}
 			}
 
 			// If stack is empty
-			if (stack.top == 0) {
+			if (stack.top == top) {
 				return false;
 			}
 			StackElement e = stack.pop();
@@ -744,7 +954,8 @@ public class KdTree {
 	//
 	// }
 
-	public RayCollisionInfo getCollision(double tMax, Ray ray, CustomStack stack) {
+	public RayCollisionInfo getCollision(double tMax, Ray ray,
+			CustomStack stack, final int top) {
 		double tNear = EPSILON;
 		double tFar = tMax;
 
@@ -783,7 +994,7 @@ public class KdTree {
 					near = internal.right;
 					far = internal.left;
 				}
-				if (d >= tFar || d < EPSILON) {
+				if (d > tFar || d < EPSILON) {
 					node = near;
 				} else if (d <= tNear) {
 					node = far;
@@ -797,24 +1008,29 @@ public class KdTree {
 			final KdLeafNode leaf = (KdLeafNode) node;
 			RayCollisionInfo minCollision = null;
 			double minDistance = Double.MAX_VALUE;
-			for (Instance ss : leaf.shapes) {
-				final RayCollisionInfo collision = ss.hit(ray);
+			for (GeometricObject ss : leaf.shapes) {
+				final RayCollisionInfo collision = ss
+						.hit(ray, stack, stack.top);
 				if (collision != null && collision.getDistance() < minDistance) {
 					minDistance = collision.getDistance();
 					minCollision = collision;
 				}
 			}
+			
+			Triangle t;
 
 			if (minCollision != null) {
-				if (minDistance <= tFar) {
+				if (minDistance <= tFar + EPSILON) {
+					stack.top = top;
 					return minCollision;
 				}
 			}
 
 			// If stack is empty
-			if (stack.top == 0) {
+			if (stack.top == top) {
 				return null;
 			}
+
 			StackElement e = stack.pop();
 			node = e.node;
 			tNear = e.start;

@@ -5,6 +5,7 @@ import static java.lang.Math.sin;
 
 import java.util.List;
 
+import edu.ar.itba.raytracer.shape.CustomStack;
 import edu.ar.itba.raytracer.vector.Matrix44;
 import edu.ar.itba.raytracer.vector.Vector4;
 
@@ -80,13 +81,13 @@ public class Instance extends GeometricObject {
 		invMatrixT = invMatrix.traspose();
 	}
 
-	public RayCollisionInfo hit(final Ray ray) {
+	public RayCollisionInfo hit(final Ray ray, final CustomStack stack, final int top) {
 		final Vector4 invOrigin = invMatrix.multiplyVec(ray.getSource());
 		final Vector4 invDir = invMatrix.multiplyVec(ray.getDir());
 
 		final Ray invRay = new Ray(invOrigin, invDir);
 
-		final RayCollisionInfo collision = obj.hit(invRay);
+		final RayCollisionInfo collision = obj.hit(invRay, stack, top);
 		if (collision == null) {
 			return null;
 		}

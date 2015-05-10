@@ -15,6 +15,8 @@ import edu.ar.itba.raytracer.vector.Vector4;
  */
 public class Triangle extends GeometricObject {
 
+	private static final long serialVersionUID = -1070022975461108053L;
+
 	private final static double EPSILON = 0.00001;
 
 	private final Vector4 vertex0;
@@ -36,12 +38,13 @@ public class Triangle extends GeometricObject {
 		e1.sub(vertex0);
 		e2 = new Vector4(vertex2);
 		e2.sub(vertex0);
-		
+
 		this.normal = normal;
+		normal.normalize();
 	}
 
 	@Override
-	public RayCollisionInfo hit(Ray ray) {
+	public RayCollisionInfo hit(Ray ray, final CustomStack stack, final int top) {
 		final Vector4 d = ray.getDir();
 		final Vector4 p = d.cross(e2);
 		final double div = p.dot(e1);
@@ -110,5 +113,13 @@ public class Triangle extends GeometricObject {
 
 		return new AABB(minX, maxX, minY, maxY, minZ, maxZ);
 	}
+
+	@Override
+	public String toString() {
+		return "Triangle [vertex0=" + vertex0 + ", vertex1=" + vertex1
+				+ ", vertex2=" + vertex2 + ", normal=" + normal + "]";
+	}
+	
+	
 
 }

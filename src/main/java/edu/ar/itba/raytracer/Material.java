@@ -6,16 +6,14 @@ public class Material {
 
 	public static final double MAX_SHININESS = 1000;
 
-	public final Color color;
-
 	/**
 	 * Ambient reflection constant.
 	 */
-	public final double ka;
+	public final Color ka;
 	/**
 	 * Diffuse reflection constant.
 	 */
-	public final double kd;
+	public final Color kd;
 	/**
 	 * Specular reflection constant.
 	 */
@@ -27,10 +25,9 @@ public class Material {
 
 	public final double refractionIndex;
 
-	public Material(final Color color, final double ka, final double kd,
+	public Material(final Color ka, final Color kd,
 			final double ks, final double shininess, final double transparency,
 			final double refractionIndex) {
-		this.color = color;
 		this.ka = ka;
 		this.kd = kd;
 		this.ks = ks;

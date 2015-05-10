@@ -5,6 +5,9 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import edu.ar.itba.raytracer.light.Light;
+import edu.ar.itba.raytracer.light.LightProperties;
+import edu.ar.itba.raytracer.light.PointLight;
 import edu.ar.itba.raytracer.properties.Color;
 import edu.ar.itba.raytracer.properties.Transform;
 import edu.ar.itba.raytracer.shape.CustomStack;
@@ -12,7 +15,7 @@ import edu.ar.itba.raytracer.vector.Vector4;
 
 public class Scene {
 
-	private Collection<Instance> gobjects = new ArrayList<>();
+	private Collection<GeometricObject> gobjects = new ArrayList<>();
 	private final Set<Camera> cameras = new HashSet<>();
 	private final Set<Light> lights = new HashSet<>();
 
@@ -47,12 +50,12 @@ public class Scene {
 
 	public Light addLight(final Transform transform,
 			final LightProperties properties) {
-		final Light light = new Light(transform, properties);
+		final Light light = new PointLight(transform, properties);
 		lights.add(light);
 		return light;
 	}
 
-	public Collection<Instance> getGObjects() {
+	public Collection<GeometricObject> getGObjects() {
 		return gobjects;
 	}
 
@@ -69,19 +72,20 @@ public class Scene {
 
 		final Vector4 p = new Vector4(light.getTransform().getPosition());
 		p.sub(point);
-		
-		final RayCollisionInfo rci = cameras.iterator().next().castRay(new Ray(point, p), stack, false);
-		
+
+		final RayCollisionInfo rci = cameras.iterator().next()
+				.castRay(new Ray(point, p), stack, false);
+
 		return rci == null
 				|| rci.getDistance() > point.distanceTo(light.getTransform()
 						.getPosition());
 
-//		Vector4 aux = new Vector4(light.getTransform().getPosition());
-//		aux.sub(point);
-//		Ray ray = new Ray(point, aux);
-//		return !tree.intersectionExists(
-//				point.distanceTo(light.getTransform().getPosition()), ray,
-//				stack);
+		// Vector4 aux = new Vector4(light.getTransform().getPosition());
+		// aux.sub(point);
+		// Ray ray = new Ray(point, aux);
+		// return !tree.intersectionExists(
+		// point.distanceTo(light.getTransform().getPosition()), ray,
+		// stack);
 	}
 
 	public Color getAmbientLight() {
