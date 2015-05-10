@@ -4,29 +4,39 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import edu.ar.itba.raytracer.GeometricObject;
+import edu.ar.itba.raytracer.KdTree;
 import edu.ar.itba.raytracer.Ray;
 import edu.ar.itba.raytracer.RayCollisionInfo;
 
 public class Mesh extends GeometricObject {
 
+	private static final long serialVersionUID = 2143506060307002492L;
 	private final Collection<Triangle> triangles;
+	private final KdTree tree;
 
 	public Mesh(final Collection<Triangle> triangles) {
 		this.triangles = new ArrayList<>(triangles);
+		final Collection<GeometricObject> instances = new ArrayList<>(
+				triangles.size());
+		for (final Triangle t : triangles) {
+			instances.add(t);
+		}
+		tree = KdTree.from(instances);
 	}
 
 	@Override
-	public RayCollisionInfo hit(Ray ray) {
-		double dist = Double.MAX_VALUE;
-		RayCollisionInfo minCollision = null;
-		for (final Triangle triangle : triangles) {
-			final RayCollisionInfo collision = triangle.hit(ray);
-			if (collision != null && collision.distance < dist) {
-				dist = collision.distance;
-				minCollision = collision;
-			}
-		}
-		return minCollision;
+	public RayCollisionInfo hit(Ray ray, final CustomStack stack, final int top) {
+		// double dist = Double.MAX_VALUE;
+		// RayCollisionInfo minCollision = null;
+		return tree.getCollision(Double.MAX_VALUE, ray, stack, top);
+		// for (final Triangle triangle : triangles) {
+		// final RayCollisionInfo collision = triangle.hit(ray);
+		// if (collision != null && collision.distance < dist) {
+		// dist = collision.distance;
+		// minCollision = collision;
+		// }
+		// }
+		// return minCollision;
 	}
 
 	@Override

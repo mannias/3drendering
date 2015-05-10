@@ -26,7 +26,7 @@ public abstract class SceneShape extends SceneElement implements Intersectable {
 	}
 
 	public abstract Vector4 normal(final Vector4 point);
-	
+
 	public static class BB {
 		public double minX, maxX, minY, maxY, minZ, maxZ;
 
@@ -39,16 +39,15 @@ public abstract class SceneShape extends SceneElement implements Intersectable {
 			this.minZ = minZ;
 			this.maxZ = maxZ;
 		}
-		
+
 		public double getArea() {
 			final double width = maxX - minX;
 			final double height = maxY - minY;
 			final double depth = maxZ - minZ;
-			return width * width + height * height + depth * depth;
+			return 2 * (width * height + height * depth + depth * width);
 		}
 	}
 
-	
 	public abstract BB getBB();
-	
+
 }

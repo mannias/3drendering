@@ -7,6 +7,7 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import edu.ar.itba.raytracer.light.Light;
 import edu.ar.itba.raytracer.properties.Color;
 import edu.ar.itba.raytracer.properties.Transform;
 import edu.ar.itba.raytracer.shape.CustomStack;
@@ -76,6 +77,8 @@ public class Camera extends SceneElement {
 			pixelPoints[i].add(aux1);
 			pixelPoints[i].add(aux2);
 		}
+
+		position = transform.getPosition();
 	}
 
 	public Camera(final Scene scene, final int pictureWidth,
@@ -91,18 +94,25 @@ public class Camera extends SceneElement {
 
 	}
 
+	private final Vector4 position;
+
 	private Ray getPrimaryRay(final double x, final double y) {
-		final Vector4 position = getTransform().getPosition();
-		position.w = 1;
-		final Vector4 dir = new Vector4(forwardVector);
-		final Vector4 aux1 = new Vector4(heightVector);
-		aux1.scalarMult(y);
-		final Vector4 aux2 = new Vector4(widthVector);
-		aux2.scalarMult(x);
-		dir.add(aux1);
-		dir.add(aux2);
-		dir.w = 0;
-		return new Ray(position, dir);
+		// position.w = 1;
+		// final Vector4 dir = new Vector4(forwardVector);
+		// final Vector4 aux1 = new Vector4(heightVector);
+		// aux1.scalarMult(y);
+		// final Vector4 aux2 = new Vector4(widthVector);
+		// aux2.scalarMult(x);
+		// dir.add(aux1);
+		// dir.add(aux2);
+		// dir.w = 0;
+
+		final Vector4 dir2 = new Vector4(forwardVector.x + heightVector.x * y
+				+ widthVector.x * x, forwardVector.y + heightVector.y * y
+				+ widthVector.y * x, forwardVector.z + heightVector.z * y
+				+ widthVector.z * x, 0);
+		dir2.normalize();
+		return new Ray(position, dir2);
 		// return new Ray(position, forwardVector.add(
 		// heightVector.scalarMult(-y + pictureHeight / 2)).add(
 		// widthVector.scalarMult(x - pictureWidth / 2)));
@@ -182,8 +192,9 @@ public class Camera extends SceneElement {
 	}
 
 	public BufferedImage render(final int width, final int height) {
+		System.out.println("STARTING!!!!!");
 		// try {
-		// Thread.sleep(20000);
+		// Thread.sleep(10000);
 		// } catch (InterruptedException e) {
 		// // TODO Auto-generated catch block
 		// e.printStackTrace();
@@ -209,7 +220,7 @@ public class Camera extends SceneElement {
 				@Override
 				public void run() {
 					final CustomStack stack = new CustomStack();
-					final int n = 4;
+					final int n = 2;
 					final long start = System.nanoTime();
 					int currentStart;
 					while ((currentStart = startPixel.getAndAdd(pixelsPerTask)) < pixels) {
@@ -229,6 +240,9 @@ public class Camera extends SceneElement {
 									// + (p + Math.random()) / n;
 											+ (p + .5) / n;
 									stack.reset();
+									if (x == 257 && y == 234) {
+										System.out.println("LL");
+									}
 									Color c = shade(getPrimaryRay(ppx, ppy), 5,
 											stack, x == 500 && y == 250);
 									pixelRed += c.getRed();
@@ -238,6 +252,11 @@ public class Camera extends SceneElement {
 							}
 
 							double n2 = n * n;
+							// if (x == 257 && y == 234) {
+							// picture[y][x] = new Color(1, 1, 1);
+							// continue;
+							// }
+
 							picture[y][x] = new Color(pixelRed / n2, pixelGreen
 									/ n2, pixelBlue / n2);
 						}
@@ -285,6 +304,9 @@ public class Camera extends SceneElement {
 		final Vector4 normal = collision.normal;
 		final Vector4 deltaNormal = new Vector4(normal);
 		deltaNormal.scalarMult(.001f);
+		if (collisionPoint == null) {
+			System.out.println("STOP");
+		}
 		final Vector4 collisionPointPlusDelta = new Vector4(collisionPoint);
 		collisionPointPlusDelta.add(deltaNormal);
 
@@ -296,7 +318,7 @@ public class Camera extends SceneElement {
 		final Material objectMaterial = collision.getObj().material;
 		final Color ka = objectMaterial.ka;
 		final Color kd = objectMaterial.kd;
-		final Color ks = objectMaterial.ks;
+		final double ks = objectMaterial.ks;
 		final double shininess = objectMaterial.shininess;
 
 		Color intensity = new Color(scene.getAmbientLight());
@@ -334,8 +356,7 @@ public class Camera extends SceneElement {
 				final double rv = r.dot(v);
 				if (rv > 0) {
 					final Color specular = new Color(lightColor);
-                    ks.scalarMult(Math.pow(rv, shininess));
-					specular.mult(ks);
+                    specular.scalarMult(Math.pow(rv, shininess) * ks);
 					intensity = intensity.add(specular);
 				}
 			}
@@ -343,18 +364,20 @@ public class Camera extends SceneElement {
 
 		if (rayDepth > 0) {
 			final double nv = normal.dot(v);
-			final Vector4 reflectedDir = new Vector4(normal);
-			reflectedDir.scalarMult(2 * nv);
-			reflectedDir.sub(v);
-			final Ray reflectedRay = new Ray(collisionPointPlusDelta,
-					reflectedDir);
 
-			final Color reflectedColor = shade(reflectedRay, rayDepth - 1,
-					stack, false);
-			reflectedColor.scalarMult(shininess / Material.MAX_SHININESS);
+			if (shininess != 0) {
+				final Vector4 reflectedDir = new Vector4(normal);
+				reflectedDir.scalarMult(2 * nv);
+				reflectedDir.sub(v);
+				final Ray reflectedRay = new Ray(collisionPointPlusDelta,
+						reflectedDir);
 
-			intensity = intensity.add(reflectedColor);
+				final Color reflectedColor = shade(reflectedRay, rayDepth - 1,
+						stack, false);
+				reflectedColor.scalarMult(shininess / Material.MAX_SHININESS);
 
+				intensity = intensity.add(reflectedColor);
+			}
 			Vector4 tNormal = new Vector4(normal);
 			double cosThetaI = nv;
 			double eta = objectMaterial.refractionIndex;
@@ -365,7 +388,7 @@ public class Camera extends SceneElement {
 			}
 
 			final double xx = 1 - (1 - cosThetaI * cosThetaI) / (eta * eta);
-			if (xx >= 0) {
+			if (xx >= 0 && objectMaterial.transparency != 0) {
 				final Vector4 aux = new Vector4(tNormal);
 				aux.scalarMult(Math.sqrt(xx) - cosThetaI / eta);
 				final Vector4 refractedDir = new Vector4(v);
@@ -394,19 +417,19 @@ public class Camera extends SceneElement {
 
 	public RayCollisionInfo castRay(final Ray ray, final CustomStack stack,
 			boolean debug) {
-		// double minDistance = Double.MAX_VALUE;
-		// RayCollisionInfo minCollision = null;
-		// for (final GeometricObject obj : scene.getGObjects()) {
-		// final RayCollisionInfo collision = obj.hit(ray);
-		// if (collision != null && (collision.getDistance() < minDistance)) {
-		// minCollision = collision;
-		// minDistance = collision.getDistance();
-		// }
-		// }
-		//
-		// return minCollision;
+//		double minDistance = Double.MAX_VALUE;
+//		RayCollisionInfo minCollision = null;
+//		for (final GeometricObject obj : scene.getGObjects()) {
+//			final RayCollisionInfo collision = obj.hit(ray, stack, 0);
+//			if (collision != null && (collision.getDistance() < minDistance)) {
+//				minCollision = collision;
+//				minDistance = collision.getDistance();
+//			}
+//		}
+//
+//		return minCollision;
 
-		return scene.getTree().getCollision(Double.MAX_VALUE, ray, stack);
+		 return scene.getTree().getCollision(Double.MAX_VALUE, ray, stack, 0);
 	}
 
 }

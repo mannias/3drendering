@@ -46,8 +46,10 @@ public class Sphere2 extends GeometricObject {
 //
 //	}
 
+	private static final long serialVersionUID = 92320640105733127L;
+
 	@Override
-	public RayCollisionInfo hit(Ray ray) {
+	public RayCollisionInfo hit(Ray ray, final CustomStack stack, final int top) {
 		final Vector4 raySource = ray.getSource();
 		final Vector4 rayDir = ray.getDir();
 

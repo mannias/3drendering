@@ -1,8 +1,11 @@
-package edu.ar.itba.raytracer;
+package edu.ar.itba.raytracer.light;
 
+import edu.ar.itba.raytracer.SceneElement;
+import edu.ar.itba.raytracer.properties.Color;
 import edu.ar.itba.raytracer.properties.Transform;
+import edu.ar.itba.raytracer.vector.Vector4;
 
-public class Light extends SceneElement {
+public abstract class Light extends SceneElement {
 
 	private final LightProperties properties;
 
@@ -18,5 +21,9 @@ public class Light extends SceneElement {
 	public LightProperties getProperties() {
 		return properties;
 	}
+
+	public abstract Vector4 getDirection(final Vector4 hitPoint);
+
+	public abstract Color getIntensity(final Vector4 hitPoint);
 
 }

@@ -16,7 +16,7 @@ public class Material {
 	/**
 	 * Specular reflection constant.
 	 */
-	public final Color ks;
+	public final double ks;
 
 	public final double shininess;
 
@@ -25,7 +25,7 @@ public class Material {
 	public final double refractionIndex;
 
 	public Material(final Color ka, final Color kd,
-			final Color ks, final double shininess, final double transparency,
+			final double ks, final double shininess, final double transparency,
 			final double refractionIndex) {
 		this.ka = ka;
 		this.kd = kd;

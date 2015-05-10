@@ -16,9 +16,9 @@ import com.beust.jcommander.Parameters;
 import edu.ar.itba.raytracer.Camera;
 import edu.ar.itba.raytracer.Instance;
 import edu.ar.itba.raytracer.KdTree;
-import edu.ar.itba.raytracer.LightProperties;
 import edu.ar.itba.raytracer.Material;
 import edu.ar.itba.raytracer.Scene;
+import edu.ar.itba.raytracer.light.LightProperties;
 import edu.ar.itba.raytracer.properties.Color;
 import edu.ar.itba.raytracer.properties.Transform;
 import edu.ar.itba.raytracer.vector.Vector4;
@@ -148,7 +148,7 @@ public class Main {
 				0)));
 
 		final Instance i7 = new Instance(new Mesh(triangles));
-		i7.material = new Material(new Color(0, 0, 1), new Color(0, 0, 1), new Color(0, 0, 1), 50, 0, 1);
+		i7.material = new Material(new Color(0, 0, 1), new Color(0, 0, 1), 1, 50, 0, 1);
 		// i7.translate(4, 1, 0);
 		i7.rotateX(90);
 		scene.add(i7);

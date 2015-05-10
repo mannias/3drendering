@@ -1,15 +1,19 @@
 package edu.ar.itba.raytracer;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import edu.ar.itba.raytracer.shape.CustomStack;
 import edu.ar.itba.raytracer.shape.SceneShape.BB;
 import edu.ar.itba.raytracer.vector.Matrix44;
 import edu.ar.itba.raytracer.vector.Vector4;
 
-public abstract class GeometricObject {
+public abstract class GeometricObject implements Serializable {
+
+	private static final long serialVersionUID = 7574169749789517753L;
 
 	public static Matrix44 translationMatrix(final double x, final double y,
 			final double z) {
@@ -161,7 +165,7 @@ public abstract class GeometricObject {
 
 	public Material material;
 
-	public abstract RayCollisionInfo hit(final Ray ray);
+	public abstract RayCollisionInfo hit(final Ray ray, final CustomStack stack, final int top);
 
 	public abstract AABB getAABB();
 

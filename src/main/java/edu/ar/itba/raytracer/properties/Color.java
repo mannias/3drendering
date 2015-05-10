@@ -77,5 +77,11 @@ public final class Color {
 		}
 		return true;
 	}
+	
+	@Override
+	public String toString() {
+		return "Color [r=" + r + ", g=" + g + ", b=" + b + "]";
+	}
+
 
 }

@@ -10,6 +10,7 @@ import javax.imageio.ImageIO;
 
 import org.junit.Test;
 
+import edu.ar.itba.raytracer.light.LightProperties;
 import edu.ar.itba.raytracer.properties.Color;
 import edu.ar.itba.raytracer.properties.Transform;
 import edu.ar.itba.raytracer.shape.Mesh;

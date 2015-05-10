@@ -1,4 +1,4 @@
-package edu.ar.itba.raytracer;
+package edu.ar.itba.raytracer.light;
 
 import edu.ar.itba.raytracer.properties.Color;
 
