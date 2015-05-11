@@ -10,7 +10,6 @@ import java.util.List;
 import edu.ar.itba.raytracer.GeometricObject.AABB;
 import edu.ar.itba.raytracer.GeometricObject.PerfectSplits;
 import edu.ar.itba.raytracer.shape.CustomStack;
-import edu.ar.itba.raytracer.shape.SceneShape.BB;
 import edu.ar.itba.raytracer.shape.Triangle;
 import edu.ar.itba.raytracer.vector.Vector4;
 
@@ -109,19 +108,19 @@ public class KdTree implements Serializable {
 		KdTree tree = new KdTree();
 		// tree.rootBb = new BB(minX, maxX, minY, maxY, minZ, maxZ);
 		double size = 30;
-		tree.rootBb = new BB(-size, size, -size, size, -size, size);
+		tree.rootBb = new AABB(-size, size, -size, size, -size, size);
 		tree.root = recBuild(0, objs, tree.rootBb);
 		return tree;
 	}
 
-	private BB rootBb;
+	private AABB rootBb;
 
 	private static int leaves;
 	private static double amount;
 	private static double depth;
 
 	private static KdNode recBuild(final int depth,
-			Collection<GeometricObject> shapes, BB bb) {
+			Collection<GeometricObject> shapes, AABB bb) {
 		final double cisec = 1;
 		final double ctrav = 1;
 
@@ -155,7 +154,7 @@ public class KdTree implements Serializable {
 	}
 
 	private static TriangleClassification classify(
-			Collection<GeometricObject> shapes, BB leftVoxel, BB rightVoxel,
+			Collection<GeometricObject> shapes, AABB leftVoxel, AABB rightVoxel,
 			int splitAxis, double splitPosition) {
 		final Collection<GeometricObject> tl = new ArrayList<>();
 		final Collection<GeometricObject> tr = new ArrayList<>();
@@ -201,13 +200,13 @@ public class KdTree implements Serializable {
 		double splitPosition;
 		Collection<GeometricObject> tl;
 		Collection<GeometricObject> tr;
-		BB leftVoxel;
-		BB rightVoxel;
+		AABB leftVoxel;
+		AABB rightVoxel;
 		double minCost;
 
 		public SplitInfo(int axis, double splitPosition,
 				Collection<GeometricObject> tl, Collection<GeometricObject> tr,
-				BB leftVoxel, BB rightVoxel, double minCost) {
+				AABB leftVoxel, AABB rightVoxel, double minCost) {
 			this.axis = axis;
 			this.splitPosition = splitPosition;
 			this.tl = tl;
@@ -229,10 +228,10 @@ public class KdTree implements Serializable {
 	}
 
 	private static SAH doSAH(final int splitAxis, final double splitPosition,
-			final BB voxel, final double nl, final double nr, final double np,
+			final AABB voxel, final double nl, final double nr, final double np,
 			final double ctrav, final double cisec) {
 		final double sav = voxel.getArea();
-		final BB[] voxels = splitVoxel(voxel, splitAxis, splitPosition);
+		final AABB[] voxels = splitVoxel(voxel, splitAxis, splitPosition);
 		final double pvlv = voxels[0].getArea() / sav;
 		final double pvrv = voxels[1].getArea() / sav;
 
@@ -247,13 +246,13 @@ public class KdTree implements Serializable {
 	}
 
 	private static SplitInfo naiveSah(Collection<GeometricObject> shapes,
-			BB voxel, final double ctrav, final double cisec) {
+			AABB voxel, final double ctrav, final double cisec) {
 		Boolean toLeft = null;
 		double costAux = Double.MAX_VALUE;
 		double bestSplitPosition = 0;
 		TriangleClassification triangleCl = null;
 		int bestAxis = 0;
-		BB[] childVoxels = null;
+		AABB[] childVoxels = null;
 
 		for (final GeometricObject ss : shapes) {
 			// Init vars
@@ -264,7 +263,7 @@ public class KdTree implements Serializable {
 				final int axis = i / 2;
 				final double splitPosition = splits[i].getElemsAsArray()[axis];
 
-				final BB[] voxels = splitVoxel(voxel, axis, splitPosition);
+				final AABB[] voxels = splitVoxel(voxel, axis, splitPosition);
 
 				final TriangleClassification cl = classify(shapes, voxels[0],
 						voxels[1], axis, splitPosition);
@@ -324,29 +323,29 @@ public class KdTree implements Serializable {
 
 	}
 
-	private static BB[] splitVoxel(final BB voxel, final int splitAxis,
+	private static AABB[] splitVoxel(final AABB voxel, final int splitAxis,
 			final double splitPosition) {
-		final BB left, right;
+		final AABB left, right;
 
 		switch (splitAxis) {
 		case 0:
-			left = new BB(voxel.minX, splitPosition, voxel.minY, voxel.maxY,
+			left = new AABB(voxel.minX, splitPosition, voxel.minY, voxel.maxY,
 					voxel.minZ, voxel.maxZ);
-			right = new BB(splitPosition, voxel.maxX, voxel.minY, voxel.maxY,
+			right = new AABB(splitPosition, voxel.maxX, voxel.minY, voxel.maxY,
 					voxel.minZ, voxel.maxZ);
-			return new BB[] { left, right };
+			return new AABB[] { left, right };
 		case 1:
-			left = new BB(voxel.minX, voxel.maxX, voxel.minY, splitPosition,
+			left = new AABB(voxel.minX, voxel.maxX, voxel.minY, splitPosition,
 					voxel.minZ, voxel.maxZ);
-			right = new BB(voxel.minX, voxel.maxX, splitPosition, voxel.maxY,
+			right = new AABB(voxel.minX, voxel.maxX, splitPosition, voxel.maxY,
 					voxel.minZ, voxel.maxZ);
-			return new BB[] { left, right };
+			return new AABB[] { left, right };
 		case 2:
-			left = new BB(voxel.minX, voxel.maxX, voxel.minY, voxel.maxY,
+			left = new AABB(voxel.minX, voxel.maxX, voxel.minY, voxel.maxY,
 					voxel.minZ, splitPosition);
-			right = new BB(voxel.minX, voxel.maxX, voxel.minY, voxel.maxY,
+			right = new AABB(voxel.minX, voxel.maxX, voxel.minY, voxel.maxY,
 					splitPosition, voxel.maxZ);
-			return new BB[] { left, right };
+			return new AABB[] { left, right };
 		default:
 			throw new AssertionError();
 
@@ -402,7 +401,7 @@ public class KdTree implements Serializable {
 	}
 
 	private static SplitInfo findPlane(Collection<GeometricObject> shapes,
-			BB voxel, final double ctrav, final double cisec) {
+			AABB voxel, final double ctrav, final double cisec) {
 		if (shapes.isEmpty()) {
 			return new SplitInfo(0, 0, Collections.emptyList(),
 					Collections.emptyList(), null, null, 0);
@@ -481,7 +480,7 @@ public class KdTree implements Serializable {
 			}
 		}
 
-		BB[] voxels = splitVoxel(voxel, minPlane.axis, minPlane.position);
+		AABB[] voxels = splitVoxel(voxel, minPlane.axis, minPlane.position);
 		TriangleClassification tc = classify(shapes, voxels[0], voxels[1],
 				minPlane.axis, minPlane.position);
 
@@ -496,7 +495,7 @@ public class KdTree implements Serializable {
 		}
 	}
 
-	private double getMin(final BB bb, final int axis) {
+	private double getMin(final AABB bb, final int axis) {
 		switch (axis) {
 		case 0:
 			return bb.minX;
@@ -508,7 +507,7 @@ public class KdTree implements Serializable {
 		return -1;
 	}
 
-	private double getMax(final BB bb, final int axis) {
+	private double getMax(final AABB bb, final int axis) {
 		switch (axis) {
 		case 0:
 			return bb.maxX;

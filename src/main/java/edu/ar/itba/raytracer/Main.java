@@ -20,6 +20,9 @@ import edu.ar.itba.raytracer.properties.Transform;
 import edu.ar.itba.raytracer.shape.Mesh;
 import edu.ar.itba.raytracer.shape.Sphere2;
 import edu.ar.itba.raytracer.shape.Triangle;
+import edu.ar.itba.raytracer.texture.ImageTexture;
+import edu.ar.itba.raytracer.texture.SphericalTextureMapping;
+import edu.ar.itba.raytracer.texture.Texture;
 import edu.ar.itba.raytracer.vector.Vector4;
 
 public class Main {
@@ -93,7 +96,7 @@ public class Main {
 
 	private static Mesh parseBunny() throws Exception {
 		final Scanner scanner = new Scanner(
-				Paths.get("C:\\Program Files\\Eclipse\\workspace\\cg-2015-05\\MaleLow.obj"));
+				Paths.get("C:\\Program Files\\Eclipse\\workspace\\cg-2015-05\\AK-47.obj"));
 		final List<Vector4> vertexes = new ArrayList<>();
 		final List<Triangle> triangles = new ArrayList<>();
 		double minX = Double.MAX_VALUE;
@@ -146,7 +149,7 @@ public class Main {
 				triangles.add(new Triangle(vertexes.get(p1 - 1), vertexes
 						.get(p2 - 1), vertexes.get(p3 - 1), e2.cross(e1)));
 			} else {
-//				throw new Exception();
+				// throw new Exception();
 			}
 		}
 		System.out.println(minX);
@@ -158,19 +161,19 @@ public class Main {
 		System.out.println(maxZ);
 
 		System.out.println(triangles.size());
-		
-//		final int size = 2000;
-//		for (int i = 0; i < size; i++) {
-//			System.out.println(triangles.get(i));
-//		}
-		return new Mesh(triangles);//.subList(0, size));
+
+		// final int size = 2000;
+		// for (int i = 0; i < size; i++) {
+		// System.out.println(triangles.get(i));
+		// }
+		return new Mesh(triangles);// .subList(0, size));
 
 	}
 
 	private static Camera loadTestScene() throws Exception {
-		final Scene scene = new Scene(new Color(.2, .2, .2));
+		final Scene scene = new Scene(new Color(1, 1, 1));
 		final Transform cameraTransform = new Transform();
-		cameraTransform.setPosition(new Vector4(0, 10, 20, 1));
+		cameraTransform.setPosition(new Vector4(-.015, .1, 5, 1));
 		cameraTransform.setRotation(new Vector4(0, 180, 0, 0));
 		final Camera camera = scene.addCamera(640, 480, 60, cameraTransform);
 
@@ -279,10 +282,14 @@ public class Main {
 		// scene.add(i7);
 		// }
 
-		final Instance ii = new Instance(parseBunny());
+		final Instance ii = new Instance(new Sphere2());
 		// ii.translate(0, 2, 0);
-		ii.material = new Material(new Color(1, 0, 1), new Color(1, 0, 1), 0,
-				50, 0, 1);
+
+		BufferedImage image = ImageIO
+				.read(new File(
+						"C:\\Program Files\\Eclipse\\workspace\\cg-2015-05\\earth.jpg"));
+		Texture t = new ImageTexture(image, new SphericalTextureMapping());
+		ii.material = new Material(t, t, 0, 50, 0, 1);
 		scene.add(ii);
 
 		final long start = System.currentTimeMillis();
@@ -291,7 +298,7 @@ public class Main {
 				+ (System.currentTimeMillis() - start));
 
 		final Transform lightTransform = new Transform();
-		lightTransform.setPosition(new Vector4(0, 0, 15, 1));
+		lightTransform.setPosition(new Vector4(0, 0, -1, 1));
 		final LightProperties lightProperties = new LightProperties(new Color(
 				1f, 1f, 1f));
 		scene.addLight(lightTransform, lightProperties);

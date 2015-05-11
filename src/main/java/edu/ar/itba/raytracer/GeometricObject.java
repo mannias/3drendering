@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.List;
 
 import edu.ar.itba.raytracer.shape.CustomStack;
-import edu.ar.itba.raytracer.shape.SceneShape.BB;
 import edu.ar.itba.raytracer.vector.Matrix44;
 import edu.ar.itba.raytracer.vector.Vector4;
 
@@ -115,7 +114,7 @@ public abstract class GeometricObject implements Serializable {
 			maxs[axis] = maxPoint;
 		}
 
-		public PerfectSplits clipToVoxel(final BB voxel) {
+		public PerfectSplits clipToVoxel(final AABB voxel) {
 			Vector4 minX = mins[0];
 			Vector4 maxX = maxs[0];
 			Vector4 minY = mins[1];
@@ -165,7 +164,8 @@ public abstract class GeometricObject implements Serializable {
 
 	public Material material;
 
-	public abstract RayCollisionInfo hit(final Ray ray, final CustomStack stack, final int top);
+	public abstract RayCollisionInfo hit(final Ray ray,
+			final CustomStack stack, final int top);
 
 	public abstract AABB getAABB();
 
