@@ -79,7 +79,7 @@ public class ShapeParser {
         return new Box(transform,properties);
     }
 
-    private static Sphere parseSphere(String line){
+    private static Sphere2 parseSphere(String line){
         double radius = 1.0;
         String name;
         String radiusPattern = "\"float radius\" \\[(\\d+\\.\\d+)\\]";
@@ -92,7 +92,7 @@ public class ShapeParser {
             name = m.group(1);
         }
         //TODO: check center
-        return new Sphere(new Vector4(0,0,0,0),radius,transform,properties);
+        return new Sphere2(radius);
     }
 
     private static Mesh parseMesh(String line){

@@ -14,7 +14,7 @@ public class BoundedPlaneTest {
 
 	@Test
 	public void testBoundedIntersection() {
-        ShapeProperties properties = new ShapeProperties(new Material(new Color(0, 0, 1), new Color(0, 0, 1), new Color(0, 0, 1), 50, 0, 1));
+        ShapeProperties properties = new ShapeProperties(new Material(new Color(0, 0, 1), new Color(0, 0, 1), 1, 50, 0, 1));
 		final BoundedPlane boundedPlane = new BoundedPlane(new Transform(),
                 properties);
 		final Ray ray = new Ray(new Vector3(0, 0, -1),
@@ -24,7 +24,7 @@ public class BoundedPlaneTest {
 
 	@Test
 	public void testBoundedIntersection1() {
-        ShapeProperties properties = new ShapeProperties(new Material(new Color(0, 0, 1), new Color(0, 0, 1), new Color(0, 0, 1), 50, 0, 1));
+        ShapeProperties properties = new ShapeProperties(new Material(new Color(0, 0, 1), new Color(0, 0, 1), 1, 50, 0, 1));
         final Transform boundedPlaneTransform = new Transform();
 		boundedPlaneTransform.setPosition(new Vector3(0, 0, 0));
 		boundedPlaneTransform.setRotation(new Vector3(90, 0, 0));

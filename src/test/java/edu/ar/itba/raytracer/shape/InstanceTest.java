@@ -3,6 +3,7 @@ package edu.ar.itba.raytracer.shape;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
 
+import edu.ar.itba.raytracer.vector.Vector4;
 import org.junit.Test;
 
 import edu.ar.itba.raytracer.Instance;
@@ -15,7 +16,7 @@ public class InstanceTest {
 
 	@Test
 	public void testAABBWithNoTransform() {
-		instance = new Instance(new Sphere2());
+		instance = new Instance(new Sphere2(1));
 
 		assertThat(instance.getAABB().minX).isCloseTo(-1, within(EPSILON));
 		assertThat(instance.getAABB().maxX).isCloseTo(1, within(EPSILON));
@@ -27,7 +28,7 @@ public class InstanceTest {
 
 	@Test
 	public void testAABBWithTranslation() {
-		instance = new Instance(new Sphere2());
+		instance = new Instance(new Sphere2(1));
 		instance.translate(2, 3, 4);
 
 		assertThat(instance.getAABB().minX).isCloseTo(1, within(EPSILON));
@@ -40,7 +41,7 @@ public class InstanceTest {
 
 	@Test
 	public void testAABBWithScale() {
-		instance = new Instance(new Sphere2());
+		instance = new Instance(new Sphere2(1));
 		instance.scale(2, 3, 4);
 
 		assertThat(instance.getAABB().minX).isCloseTo(-2, within(EPSILON));
@@ -53,7 +54,7 @@ public class InstanceTest {
 
 	@Test
 	public void testAABBWithRotationX() {
-		instance = new Instance(new Sphere2());
+		instance = new Instance(new Sphere2(1));
 		instance.rotateX(45);
 
 		assertThat(instance.getAABB().minX).isCloseTo(-1, within(EPSILON));

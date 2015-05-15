@@ -243,7 +243,7 @@ public class Camera extends SceneElement {
 									if (x == 257 && y == 234) {
 										System.out.println("LL");
 									}
-									Color c = shade(getPrimaryRay(ppx, ppy), 5,
+									Color c = shade(getPrimaryRay(ppx, ppy), 20,
 											stack, x == 500 && y == 250);
 									pixelRed += c.getRed();
 									pixelGreen += c.getGreen();
@@ -356,7 +356,7 @@ public class Camera extends SceneElement {
 				final double rv = r.dot(v);
 				if (rv > 0) {
 					final Color specular = new Color(lightColor);
-                    specular.scalarMult(Math.pow(rv, shininess) * ks);
+					specular.scalarMult(ks * Math.pow(rv, shininess));
 					intensity = intensity.add(specular);
 				}
 			}

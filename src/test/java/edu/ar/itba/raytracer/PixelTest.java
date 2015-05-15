@@ -8,14 +8,13 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
+import edu.ar.itba.raytracer.shape.*;
+import edu.ar.itba.raytracer.vector.Vector3;
 import org.junit.Test;
 
 import edu.ar.itba.raytracer.light.LightProperties;
 import edu.ar.itba.raytracer.properties.Color;
 import edu.ar.itba.raytracer.properties.Transform;
-import edu.ar.itba.raytracer.shape.Mesh;
-import edu.ar.itba.raytracer.shape.Sphere2;
-import edu.ar.itba.raytracer.shape.Triangle;
 import edu.ar.itba.raytracer.vector.Vector4;
 
 public class PixelTest {
@@ -33,7 +32,7 @@ public class PixelTest {
 	private Camera createScene(final int width, final int height) {
 		final Scene scene = new Scene(new Color(1, 1, 1));
 		final Transform cameraTransform = new Transform();
-		cameraTransform.setPosition(new Vector4(0, 0, -9, 1));
+		cameraTransform.setPosition(new Vector4(0, 0, -7, 1));
 		cameraTransform.setRotation(new Vector4(0, 0, 0, 0));
 		final Camera camera = scene.addCamera(width, height, 60,
 				cameraTransform);
@@ -65,51 +64,70 @@ public class PixelTest {
 		// i5.scale(2, 1, 1);
 		// scene.add(i5);
 
-		final List<Triangle> triangles = new ArrayList<>();
-		triangles.add(new Triangle(new Vector4(-.5, -.5, -.5, 1), new Vector4(
-				.5, -.5, -.5, 1), new Vector4(-.5, .5, -.5, 1), new Vector4(0,
-				0, -1, 0)));
-		triangles.add(new Triangle(new Vector4(.5, -.5, -.5, 1), new Vector4(
-				-.5, .5, -.5, 1), new Vector4(.5, .5, -.5, 1), new Vector4(0,
-				0, -1, 0)));
-		triangles.add(new Triangle(new Vector4(.5, .5, -.5, 1), new Vector4(.5,
-				.5, .5, 1), new Vector4(.5, -.5, .5, 1),
-				new Vector4(1, 0, 0, 0)));
-		triangles.add(new Triangle(new Vector4(.5, -.5, -.5, 1), new Vector4(
-				.5, .5, -.5, 1), new Vector4(.5, -.5, .5, 1), new Vector4(1, 0,
-				0, 0)));
-		triangles.add(new Triangle(new Vector4(-.5, .5, -.5, 1), new Vector4(
-				-.5, -.5, -.5, 1), new Vector4(-.5, -.5, .5, 1), new Vector4(
-				-1, 0, 0, 0)));
-		triangles.add(new Triangle(new Vector4(-.5, .5, -.5, 1), new Vector4(
-				-.5, .5, .5, 1), new Vector4(-.5, -.5, .5, 1), new Vector4(-1,
-				0, 0, 0)));
-		triangles.add(new Triangle(new Vector4(-.5, -.5, .5, 1), new Vector4(
-				.5, -.5, .5, 1), new Vector4(-.5, .5, .5, 1), new Vector4(0, 0,
-				1, 0)));
-		triangles.add(new Triangle(new Vector4(.5, -.5, .5, 1), new Vector4(
-				-.5, .5, .5, 1), new Vector4(.5, .5, .5, 1), new Vector4(0, 0,
-				1, 0)));
-		triangles.add(new Triangle(new Vector4(-.5, -.5, -.5, 1), new Vector4(
-				.5, -.5, -.5, 1), new Vector4(-.5, -.5, .5, 1), new Vector4(0,
-				-1, 0, 0)));
-		triangles.add(new Triangle(new Vector4(.5, -.5, -.5, 1), new Vector4(
-				.5, -.5, .5, 1), new Vector4(-.5, -.5, .5, 1), new Vector4(0,
-				-1, 0, 0)));
-		triangles.add(new Triangle(new Vector4(-.5, .5, -.5, 1), new Vector4(
-				.5, .5, -.5, 1), new Vector4(-.5, .5, .5, 1), new Vector4(0,
-				-1, 0, 0)));
-		triangles.add(new Triangle(new Vector4(.5, .5, -.5, 1), new Vector4(.5,
-				.5, .5, 1), new Vector4(-.5, .5, .5, 1), new Vector4(0, -1, 0,
-				0)));
+//		final List<Triangle> triangles = new ArrayList<>();
+//		triangles.add(new Triangle(new Vector4(-.5, -.5, -.5, 1), new Vector4(
+//				.5, -.5, -.5, 1), new Vector4(-.5, .5, -.5, 1), new Vector4(0,
+//				0, -1, 0)));
+//		triangles.add(new Triangle(new Vector4(.5, -.5, -.5, 1), new Vector4(
+//				-.5, .5, -.5, 1), new Vector4(.5, .5, -.5, 1), new Vector4(0,
+//				0, -1, 0)));
+//		triangles.add(new Triangle(new Vector4(.5, .5, -.5, 1), new Vector4(.5,
+//				.5, .5, 1), new Vector4(.5, -.5, .5, 1),
+//				new Vector4(1, 0, 0, 0)));
+//		triangles.add(new Triangle(new Vector4(.5, -.5, -.5, 1), new Vector4(
+//				.5, .5, -.5, 1), new Vector4(.5, -.5, .5, 1), new Vector4(1, 0,
+//				0, 0)));
+//		triangles.add(new Triangle(new Vector4(-.5, .5, -.5, 1), new Vector4(
+//				-.5, -.5, -.5, 1), new Vector4(-.5, -.5, .5, 1), new Vector4(
+//				-1, 0, 0, 0)));
+//		triangles.add(new Triangle(new Vector4(-.5, .5, -.5, 1), new Vector4(
+//				-.5, .5, .5, 1), new Vector4(-.5, -.5, .5, 1), new Vector4(-1,
+//				0, 0, 0)));
+//		triangles.add(new Triangle(new Vector4(-.5, -.5, .5, 1), new Vector4(
+//				.5, -.5, .5, 1), new Vector4(-.5, .5, .5, 1), new Vector4(0, 0,
+//				1, 0)));
+//		triangles.add(new Triangle(new Vector4(.5, -.5, .5, 1), new Vector4(
+//				-.5, .5, .5, 1), new Vector4(.5, .5, .5, 1), new Vector4(0, 0,
+//				1, 0)));
+//		triangles.add(new Triangle(new Vector4(-.5, -.5, -.5, 1), new Vector4(
+//				.5, -.5, -.5, 1), new Vector4(-.5, -.5, .5, 1), new Vector4(0,
+//				-1, 0, 0)));
+//		triangles.add(new Triangle(new Vector4(.5, -.5, -.5, 1), new Vector4(
+//				.5, -.5, .5, 1), new Vector4(-.5, -.5, .5, 1), new Vector4(0,
+//				-1, 0, 0)));
+//		triangles.add(new Triangle(new Vector4(-.5, .5, -.5, 1), new Vector4(
+//				.5, .5, -.5, 1), new Vector4(-.5, .5, .5, 1), new Vector4(0,
+//				-1, 0, 0)));
+//		triangles.add(new Triangle(new Vector4(.5, .5, -.5, 1), new Vector4(.5,
+//				.5, .5, 1), new Vector4(-.5, .5, .5, 1), new Vector4(0, -1, 0,
+//				0)));
+//
+//		final Instance i7 = new Instance(new Mesh(triangles));
+//		i7.material = new Material(new Color(0, 0, 1), new Color(0, 0, 1), 1d, 50, 0, 1);
+//		// i7.translate(4, 1, 0);
+//		i7.rotateX(90);
+//		scene.add(i7);
 
-		final Instance i7 = new Instance(new Mesh(triangles));
-		i7.material = new Material(new Color(0, 0, 1), new Color(0, 0, 1), new Color(0, 0, 1), 50, 0, 1);
-		// i7.translate(4, 1, 0);
-		i7.rotateX(90);
-		scene.add(i7);
+        final Instance i10 = new Instance(new Triangle(new Vector4(0,0,0,0), new Vector4(1,1,0,0), new Vector4(2,0,0,0), new Vector4(0,0,-1,0)));
+        i10.translate(0,0,0);
+        i10.material = new Material(new Color(0,0,0), new Color(0.2775, 0.2775, 0.2775), 0.774597, 560, 0, 0);
+        scene.add(i10);
 
-		final long start = System.currentTimeMillis();
+//        final Instance i9 = new Instance(new Sphere2(1));
+//        i9.translate(1,1,-3);
+//        i9.material = new Material(new Color(0,0,0), new Color(0.2775, 0.2775, 0.2775), 0.774597, 560, 0, 0);
+//        scene.add(i9);
+
+        final Instance i8 = new Instance(new Sphere2(1));
+        i8.translate(-1,-1,-2);
+        i8.material = new Material(new Color(0, 0, 0), new Color(0.9, 0.9, 0.9), 1, 750, 1, 1.62);
+        scene.add(i8);
+//
+//        final Instance i10 = new Instance(new Plane2(new Vector4(0,0,-1,0)));
+//        i10.material = new Material(new Color(0, 0, 0.0), new Color(.1,.6,.1), .5,50 , 0, 0);
+//        scene.add(i10);
+
+        final long start = System.currentTimeMillis();
 		KdTree tree = KdTree.from(scene);
 		System.out.println("Finished building tree in "
 				+ (System.currentTimeMillis() - start));
@@ -122,10 +140,13 @@ public class PixelTest {
 		// scene.addLight(lightTransform, lightProperties);
 
 		final Transform lightTransform2 = new Transform();
-		lightTransform2.setPosition(new Vector4(0, 0, -6, 1));
+		lightTransform2.setPosition(new Vector4(0, 0, -7, 1));
 		final LightProperties lightProperties2 = new LightProperties(new Color(
-				1, 1, 1));
+                1, 1, 1));
 		scene.addLight(lightTransform2, lightProperties2);
+//        final Transform lightTransform3 = new Transform();
+//        lightTransform2.setPosition(new Vector4(7, 8, 0, 1));
+//        scene.addLight(lightTransform3, new LightProperties(new Color(1, 1, 1)));
 
 		scene.setTree(tree);
 

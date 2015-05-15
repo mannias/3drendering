@@ -1,7 +1,8 @@
 package edu.ar.itba.raytracer.texture;
 
-public class Texture {
+import edu.ar.itba.raytracer.RayCollisionInfo;
+import edu.ar.itba.raytracer.properties.Color;
 
-	Color getColor(final RayCollisionInfo collisionInfo);
-	
+public interface Texture {
+        Color getColor(final RayCollisionInfo collisionInfo);
 }

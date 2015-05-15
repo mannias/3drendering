@@ -1,11 +1,12 @@
 package edu.ar.itba.raytracer.light;
 
+import edu.ar.itba.raytracer.properties.Color;
 import edu.ar.itba.raytracer.vector.Vector4;
 
 public class SpotLight extends Light {
 
 	private final Vector4 dir;
-	private final double angle
+	private final double angle;
 	
 	public SpotLight(final Vector4 dir, final double angle) {
 		this.dir = dir;
@@ -16,7 +17,7 @@ public class SpotLight extends Light {
 		final Vector4 L = new Vector4(x);
 		L.sub(getTransform().getPosition());
 		
-		Math.max(0, L.dot(dir)/Math.acos(angle)) * dirac(w - L);
+		final double res = Math.max(0, L.dot(dir)/Math.acos(angle)) * dirac(w.sub(L));
 	}
 	
 	public double dirac(final Vector4 arg) {
@@ -25,4 +26,14 @@ public class SpotLight extends Light {
 		}
 		return 0;
 	}
+
+    @Override
+    public Vector4 getDirection(Vector4 hitPoint) {
+        return null;
+    }
+
+    @Override
+    public Color getIntensity(Vector4 hitPoint) {
+        return null;
+    }
 }

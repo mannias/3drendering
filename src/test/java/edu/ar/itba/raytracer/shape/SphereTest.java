@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.tuple;
 
 import java.util.*;
 
+import edu.ar.itba.raytracer.vector.Vector3;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -16,7 +17,7 @@ public class SphereTest {
 
 	@Before
 	public void setup() {
-		sphere = new Sphere2();
+		sphere = new Sphere2(1);
 	}
 
 	@Test

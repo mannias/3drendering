@@ -5,7 +5,7 @@ import edu.ar.itba.raytracer.properties.Color;
 
 public class Glass extends Material{
 
-    public Glass(Color reflectivity, Color transmited, double refractionIndex){
-        super(new Color(1.0,1.0,1.0),new Color(1.0,1.0,1.0),new Color(1.0,1.0,1.0),0d,0d,refractionIndex);
+    public Glass(Color reflected, Color transmited, double refractionIndex){
+        super(reflected , transmited,0,0d,1,refractionIndex);
     }
 }
