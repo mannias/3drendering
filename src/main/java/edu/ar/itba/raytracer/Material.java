@@ -4,7 +4,7 @@ import edu.ar.itba.raytracer.texture.Texture;
 
 public class Material {
 
-	public static final double MAX_SHININESS = 1000;
+	public static final double MAX_SHININESS = 128;
 
 	/**
 	 * Ambient reflection constant.
@@ -17,7 +17,7 @@ public class Material {
 	/**
 	 * Specular reflection constant.
 	 */
-	public final double ks;
+	public final Texture ks;
 
 	public final double shininess;
 
@@ -26,7 +26,7 @@ public class Material {
 	public final double refractionIndex;
 
 	public Material(final Texture ka, final Texture kd,
-			final double ks, final double shininess, final double transparency,
+			final Texture ks, final double shininess, final double transparency,
 			final double refractionIndex) {
 		this.ka = ka;
 		this.kd = kd;

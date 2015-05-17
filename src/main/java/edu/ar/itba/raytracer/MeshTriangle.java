@@ -1,24 +1,9 @@
-package edu.ar.itba.raytracer.shape;
+package edu.ar.itba.raytracer;
 
-import java.util.Arrays;
-import java.util.Collection;
-
-import edu.ar.itba.raytracer.GeometricObject;
-import edu.ar.itba.raytracer.Ray;
-import edu.ar.itba.raytracer.RayCollisionInfo;
+import edu.ar.itba.raytracer.shape.CustomStack;
 import edu.ar.itba.raytracer.vector.Vector4;
 
-/**
- * Shape that represents a triangle.
- * 
- * <p>
- * The intersection algorithm used is the one described by <a
- * href="http://www.graphics.cornell.edu/pubs/1997/MT97.pdf"
- * >http://www.graphics.cornell.edu/pubs/1997/MT97.pdf</a>
- */
-public class Triangle extends GeometricObject {
-
-	private static final long serialVersionUID = -1070022975461108053L;
+public class MeshTriangle extends GeometricObject {
 
 	private final static double EPSILON = 0.00001;
 
@@ -26,43 +11,35 @@ public class Triangle extends GeometricObject {
 	private final Vector4 vertex1;
 	private final Vector4 vertex2;
 
+	private final Vector4 n0;
+	private final Vector4 n1;
+	private final Vector4 n2;
+
 	private final Vector4 e1;
 	private final Vector4 e2;
 
-	private final Vector4 normal;
-
-	public Triangle(final Vector4 vertex0, final Vector4 vertex1,
-			final Vector4 vertex2, final Vector4 normal) {
+	public MeshTriangle(final Vector4 vertex0, final Vector4 vertex1,
+			final Vector4 vertex2, final Vector4 n0, final Vector4 n1,
+			final Vector4 n2) {
 		this.vertex0 = vertex0;
 		this.vertex1 = vertex1;
 		this.vertex2 = vertex2;
+
+		this.n0 = n0;
+		this.n0.normalize();
+		this.n1 = n1;
+		this.n1.normalize();
+		this.n2 = n2;
+		this.n2.normalize();
 
 		e1 = new Vector4(vertex1);
 		e1.sub(vertex0);
 		e2 = new Vector4(vertex2);
 		e2.sub(vertex0);
-
-		this.normal = normal;
-		normal.normalize();
-	}
-	
-	public Triangle(final Vector4 vertex0, final Vector4 vertex1,
-			final Vector4 vertex2) {
-		this.vertex0 = vertex0;
-		this.vertex1 = vertex1;
-		this.vertex2 = vertex2;
-
-		e1 = new Vector4(vertex1);
-		e1.sub(vertex0);
-		e2 = new Vector4(vertex2);
-		e2.sub(vertex0);
-
-		this.normal = e1.cross(e2);
-		normal.normalize();
 	}
 
 	@Override
-	public RayCollisionInfo hit(Ray ray, final CustomStack stack, final int top) {
+	public RayCollisionInfo hit(Ray ray, CustomStack stack, int top) {
 		final Vector4 d = ray.getDir();
 		final Vector4 p = d.cross(e2);
 		final double div = p.dot(e1);
@@ -94,10 +71,26 @@ public class Triangle extends GeometricObject {
 		}
 
 		final RayCollisionInfo rci = new RayCollisionInfo(this, ray, dist);
-		rci.normal = normal;
+		final Vector4 normal = new Vector4(n0);
+		normal.scalarMult(1 - u - v);
+
+		final Vector4 normal1 = new Vector4(n1);
+		normal1.scalarMult(v);
+
+		final Vector4 normal2 = new Vector4(n2);
+		normal2.scalarMult(u);
+
+		normal.add(normal1);
+		normal.add(normal2);
+		
+		
+//		rci.normal = normal;
+	
+		rci.normal = e1.cross(e2);
+		
 		return rci;
 	}
-	
+
 	@Override
 	public AABB getAABB() {
 		final Vector4[] vertexes = new Vector4[] { vertex0, vertex1, vertex2 };
@@ -131,13 +124,4 @@ public class Triangle extends GeometricObject {
 
 		return new AABB(minX, maxX, minY, maxY, minZ, maxZ);
 	}
-
-	@Override
-	public String toString() {
-		return "Triangle [vertex0=" + vertex0 + ", vertex1=" + vertex1
-				+ ", vertex2=" + vertex2 + ", normal=" + normal + "]";
-	}
-	
-	
-
 }

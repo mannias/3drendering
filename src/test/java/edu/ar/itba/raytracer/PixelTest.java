@@ -14,7 +14,7 @@ import edu.ar.itba.raytracer.light.LightProperties;
 import edu.ar.itba.raytracer.properties.Color;
 import edu.ar.itba.raytracer.properties.Transform;
 import edu.ar.itba.raytracer.shape.Mesh;
-import edu.ar.itba.raytracer.shape.Sphere2;
+import edu.ar.itba.raytracer.shape.Sphere;
 import edu.ar.itba.raytracer.shape.Triangle;
 import edu.ar.itba.raytracer.vector.Vector4;
 

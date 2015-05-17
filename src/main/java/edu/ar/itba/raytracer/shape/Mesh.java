@@ -5,20 +5,21 @@ import java.util.Collection;
 
 import edu.ar.itba.raytracer.GeometricObject;
 import edu.ar.itba.raytracer.KdTree;
+import edu.ar.itba.raytracer.MeshTriangle;
 import edu.ar.itba.raytracer.Ray;
 import edu.ar.itba.raytracer.RayCollisionInfo;
 
 public class Mesh extends GeometricObject {
 
 	private static final long serialVersionUID = 2143506060307002492L;
-	private final Collection<Triangle> triangles;
+	private final Collection<MeshTriangle> triangles;
 	private final KdTree tree;
 
-	public Mesh(final Collection<Triangle> triangles) {
+	public Mesh(final Collection<MeshTriangle> triangles) {
 		this.triangles = new ArrayList<>(triangles);
 		final Collection<GeometricObject> instances = new ArrayList<>(
 				triangles.size());
-		for (final Triangle t : triangles) {
+		for (final MeshTriangle t : triangles) {
 			instances.add(t);
 		}
 		tree = KdTree.from(instances);
@@ -48,7 +49,7 @@ public class Mesh extends GeometricObject {
 		double maxY = -Double.MAX_VALUE;
 		double maxZ = -Double.MAX_VALUE;
 
-		for (final Triangle triangle : triangles) {
+		for (final MeshTriangle triangle : triangles) {
 			final AABB aabb = triangle.getAABB();
 			if (aabb.minX < minX) {
 				minX = aabb.minX;

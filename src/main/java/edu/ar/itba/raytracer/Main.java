@@ -4,6 +4,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Scanner;
 
@@ -18,10 +20,9 @@ import edu.ar.itba.raytracer.light.LightProperties;
 import edu.ar.itba.raytracer.properties.Color;
 import edu.ar.itba.raytracer.properties.Transform;
 import edu.ar.itba.raytracer.shape.Mesh;
-import edu.ar.itba.raytracer.shape.Sphere2;
+import edu.ar.itba.raytracer.shape.Sphere;
 import edu.ar.itba.raytracer.shape.Triangle;
-import edu.ar.itba.raytracer.texture.ImageTexture;
-import edu.ar.itba.raytracer.texture.SphericalTextureMapping;
+import edu.ar.itba.raytracer.texture.ConstantColorTexture;
 import edu.ar.itba.raytracer.texture.Texture;
 import edu.ar.itba.raytracer.vector.Vector4;
 
@@ -86,7 +87,7 @@ public class Main {
 		// } catch (Exception e) {
 		//
 		// }
-		ImageIO.write(image, "png", new File("pic2.png"));
+		ImageIO.write(image, "png", new File("pic.png"));
 		// }
 
 	}
@@ -96,9 +97,11 @@ public class Main {
 
 	private static Mesh parseBunny() throws Exception {
 		final Scanner scanner = new Scanner(
-				Paths.get("C:\\Program Files\\Eclipse\\workspace\\cg-2015-05\\AK-47.obj"));
+				Paths.get("C:\\Program Files\\Eclipse\\workspace\\cg-2015-05\\Jade_buddha.obj"));
 		final List<Vector4> vertexes = new ArrayList<>();
-		final List<Triangle> triangles = new ArrayList<>();
+		final List<Vector4> vertexNormals = new ArrayList<>();
+		final Collection<List<Integer>> normalMap = new ArrayList<>();
+		final List<MeshTriangle> triangles = new ArrayList<>();
 		double minX = Double.MAX_VALUE;
 		double minY = Double.MAX_VALUE;
 		double minZ = Double.MAX_VALUE;
@@ -136,21 +139,34 @@ public class Main {
 				vertexes.add(new Vector4(x, y, z, 1));
 			} else if (tokens[0].equals("f")) {
 				if (tokens.length > 4) {
+					System.out.println(Arrays.toString(tokens));
 					throw new AssertionError();
 				}
-				final int p1 = Integer.parseInt(tokens[1]);
-				final int p2 = Integer.parseInt(tokens[2]);
-				final int p3 = Integer.parseInt(tokens[3]);
-				final Vector4 e1 = new Vector4(vertexes.get(p2 - 1));
-				e1.sub(vertexes.get(p1 - 1));
-				final Vector4 e2 = new Vector4(vertexes.get(p3 - 1));
-				e1.sub(vertexes.get(p1 - 1));
+				final String[] p1s = tokens[1].split("//");
+				final String[] p2s = tokens[2].split("//");
+				final String[] p3s = tokens[3].split("//");
 
-				triangles.add(new Triangle(vertexes.get(p1 - 1), vertexes
-						.get(p2 - 1), vertexes.get(p3 - 1), e2.cross(e1)));
-			} else {
-				// throw new Exception();
+				final int p1 = Integer.parseInt(p1s[0]);
+				final int p2 = Integer.parseInt(p2s[0]);
+				final int p3 = Integer.parseInt(p3s[0]);
+
+				normalMap.add(Arrays.asList(p1, p2, p3,
+						Integer.parseInt(p1s[1]), Integer.parseInt(p2s[1]),
+						Integer.parseInt(p3s[1])));
+			} else if (tokens[0].equals("vn")) {
+				final double p1 = Double.parseDouble(tokens[1]);
+				final double p2 = Double.parseDouble(tokens[2]);
+				final double p3 = Double.parseDouble(tokens[3]);
+				vertexNormals.add(new Vector4(p1, p2, p3, 0));
 			}
+		}
+
+		for (final List<Integer> c : normalMap) {
+			triangles.add(new MeshTriangle(vertexes.get(c.get(0) - 1), vertexes
+					.get(c.get(1) - 1), vertexes.get(c.get(2) - 1),
+					vertexNormals.get(c.get(0) - 1),
+					vertexNormals.get(c.get(1) - 1),
+					vertexNormals.get(c.get(2) - 1)));
 		}
 		System.out.println(minX);
 		System.out.println(minY);
@@ -162,19 +178,14 @@ public class Main {
 
 		System.out.println(triangles.size());
 
-		// final int size = 2000;
-		// for (int i = 0; i < size; i++) {
-		// System.out.println(triangles.get(i));
-		// }
-		return new Mesh(triangles);// .subList(0, size));
-
+		return new Mesh(triangles);
 	}
 
 	private static Camera loadTestScene() throws Exception {
-		final Scene scene = new Scene(new Color(1, 1, 1));
+		final Scene scene = new Scene(new Color(.2, .2, .2));
 		final Transform cameraTransform = new Transform();
-		cameraTransform.setPosition(new Vector4(-.015, .1, 5, 1));
-		cameraTransform.setRotation(new Vector4(0, 180, 0, 0));
+		cameraTransform.setPosition(new Vector4(0, 7000, 0, 1));
+		cameraTransform.setRotation(new Vector4(90, 0, 0, 0));
 		final Camera camera = scene.addCamera(640, 480, 60, cameraTransform);
 
 		// Instance i = new Instance(new Sphere2());
@@ -205,9 +216,9 @@ public class Main {
 		// scene.add(i5);
 
 		// final List<Triangle> triangles = new ArrayList<>();
-		// for (int i = -4; i < 4; i++) {
-		// for (int j = -4; j < 4; j++) {
-		// for (int k = -4; k < 4; k++) {
+		// for (int i = 0; i < 1; i++) {
+		// for (int j = 0; j < 1; j++) {
+		// for (int k = 0; k < 1; k++) {
 		// triangles.add(new Triangle(new Vector4(-.5 + i, -.5 + j,
 		// -.5 + k, 1), new Vector4(.5 + i, -.5 + j, -.5 + k,
 		// 1), new Vector4(-.5 + i, .5 + j, -.5 + k, 1),
@@ -266,42 +277,69 @@ public class Main {
 		// -1, .5, -.5, 1), new Vector4(-.5, -.5, -.5, 1), new Vector4(0,
 		// 0, -1, 0)));
 
-		// for (int i = 0; i < 1000; i++) {
-		// final Instance i7 = new Instance(new Mesh(triangles));
+		// for (int i = 0; i < 9; i++) {
+		// final Instance i7 = new Instance(new Sphere());
 		// final Color c = new Color(Math.random(), Math.random(),
 		// Math.random());
 		// // System.out.println(c);
-		// i7.material = new Material(c, c, 0, 50, 0, 1);
+		// BufferedImage image = ImageIO
+		// .read(new File(
+		// "C:\\Program Files\\Eclipse\\workspace\\cg-2015-05\\earth.jpg"));
+		// Texture t = new ImageTexture(image, new SphericalTextureMapping());
+		// i7.material = new Material(t, t, 0, 50, 0, 1);
 		// final double x = Math.random() * 20 - 10;
 		// final double y = Math.random() * 20 - 10;
 		// final double z = Math.random() * 20 - 5;
-		// i7.translate(x, y, z);
+		// i7.translate(i - 5, 0, 0);
 		// // System.out.println("Translation x = " + x + ", y = " + y +
 		// // ", z = " + z);
 		// // i7.translate(0, 0, 0);
 		// scene.add(i7);
 		// }
 
-		final Instance ii = new Instance(new Sphere2());
-		// ii.translate(0, 2, 0);
+		// for (int i = 0; i < 10; i += 2) {
 
-		BufferedImage image = ImageIO
-				.read(new File(
-						"C:\\Program Files\\Eclipse\\workspace\\cg-2015-05\\earth.jpg"));
-		Texture t = new ImageTexture(image, new SphericalTextureMapping());
-		ii.material = new Material(t, t, 0, 50, 0, 1);
+		final Instance ii = new Instance(parseBunny());
+
+		// ii.rotateX(-138);
+		// ii.rotateY(30);
+		// ii.translate(0, -1, 0);
+		// BufferedImage image = ImageIO
+		// .read(new File(
+		// "C:\\Program Files\\Eclipse\\workspace\\cg-2015-05\\earth.jpg"));
+		// Texture t = new ImageTexture(image, new
+		// SphericalTextureMapping());
+		// Texture t = new ConstantColorTexture(new Color(.5, .5, .5));
+		// ii.material = new Material(t, t, new ConstantColorTexture(new
+		// Color(0,0,0)), 50, 0, 1);
+		Texture t1 = new ConstantColorTexture(
+				new Color(0.24725, 0.2245, 0.0645));
+		Texture t2 = new ConstantColorTexture(
+				new Color(0.34615, 0.3143, 0.0903));
+		Texture t3 = new ConstantColorTexture(new Color(0.797357, 0.723991,
+				0.208006));
+		ii.material = new Material(t1, t2, t3, 51.2, 0, 1);
+
+		// ii.translate(1, 1, 1);
 		scene.add(ii);
+		// }
 
 		final long start = System.currentTimeMillis();
 		KdTree tree = KdTree.from(scene);
 		System.out.println("Finished building tree in "
 				+ (System.currentTimeMillis() - start));
 
-		final Transform lightTransform = new Transform();
-		lightTransform.setPosition(new Vector4(0, 0, -1, 1));
-		final LightProperties lightProperties = new LightProperties(new Color(
+//		final Transform lightTransform = new Transform();
+//		lightTransform.setPosition(new Vector4(0, 5, 0, 1));
+//		final LightProperties lightProperties = new LightProperties(new Color(
+//				1f, 1f, 1f));
+//		scene.addLight(lightTransform, lightProperties);
+
+		final Transform light2Transform = new Transform();
+		light2Transform.setPosition(new Vector4(0, 0, -500, 1));
+		final LightProperties light2Properties = new LightProperties(new Color(
 				1f, 1f, 1f));
-		scene.addLight(lightTransform, lightProperties);
+		scene.addLight(light2Transform, light2Properties);
 
 		// final Transform lightTransform2 = new Transform();
 		// lightTransform2.setPosition(new Vector4(-3, 10, 6, 1));

@@ -42,11 +42,11 @@ public abstract class GeometricObject implements Serializable {
 			this.exZ = exZ;
 		}
 
-		public double getArea() {
+		public double getSurfaceArea() {
 			final double width = maxX - minX;
 			final double height = maxY - minY;
 			final double depth = maxZ - minZ;
-			return width * width + height * height + depth * depth;
+			return 2 * (width * height + height * depth + depth * width);
 		}
 
 		public List<Vector4> getCorners() {
@@ -93,11 +93,25 @@ public abstract class GeometricObject implements Serializable {
 		}
 
 		private void loadSplitsForAxis(final int axis) {
+			final int axis2;
+			switch (axis) {
+			case 0:
+				axis2 = 2;
+				break;
+			case 1:
+				axis2 = 1;
+				break;
+			case 2:
+				axis2 = 0;
+				break;
+			default:
+				throw new RuntimeException();
+			}
 			double min = Double.MAX_VALUE;
 			Vector4 minPoint = null;
 			for (final Vector4 point : points) {
-				if (point.getElemsAsArray()[axis] < min) {
-					min = point.getElemsAsArray()[axis];
+				if (point.getElemsAsArray()[axis2] < min) {
+					min = point.getElemsAsArray()[axis2];
 					minPoint = point;
 				}
 			}
@@ -106,8 +120,8 @@ public abstract class GeometricObject implements Serializable {
 			double max = -Double.MAX_VALUE;
 			Vector4 maxPoint = null;
 			for (final Vector4 point : points) {
-				if (point.getElemsAsArray()[axis] > max) {
-					max = point.getElemsAsArray()[axis];
+				if (point.getElemsAsArray()[axis2] > max) {
+					max = point.getElemsAsArray()[axis2];
 					maxPoint = point;
 				}
 			}

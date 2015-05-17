@@ -218,7 +218,7 @@ public class Camera extends SceneElement {
 				@Override
 				public void run() {
 					final CustomStack stack = new CustomStack();
-					final int n = 2;
+					final int n = 1;
 					final long start = System.nanoTime();
 					int currentStart;
 					while ((currentStart = startPixel.getAndAdd(pixelsPerTask)) < pixels) {
@@ -238,7 +238,7 @@ public class Camera extends SceneElement {
 									// + (p + Math.random()) / n;
 											+ (p + .5) / n;
 									stack.reset();
-									if (x == 257 && y == 234) {
+									 if (x == 270 && y == 234) {
 										System.out.println("LL");
 									}
 									Color c = shade(getPrimaryRay(ppx, ppy), 5,
@@ -250,10 +250,10 @@ public class Camera extends SceneElement {
 							}
 
 							double n2 = n * n;
-							// if (x == 257 && y == 234) {
-							// picture[y][x] = new Color(1, 1, 1);
-							// continue;
-							// }
+							 if (x == 270 && y == 234) {
+							 picture[y][x] = new Color(1, 1, 1);
+							 continue;
+							 }
 
 							picture[y][x] = new Color(pixelRed / n2, pixelGreen
 									/ n2, pixelBlue / n2);
@@ -316,7 +316,7 @@ public class Camera extends SceneElement {
 		final Material objectMaterial = collision.getObj().material;
 		final Color ka = objectMaterial.ka.getColor(collision);
 		final Color kd = objectMaterial.kd.getColor(collision);
-		final double ks = objectMaterial.ks;
+		final Color ks = objectMaterial.ks.getColor(collision);
 		final double shininess = objectMaterial.shininess;
 
 		Color intensity = new Color(scene.getAmbientLight());
@@ -354,7 +354,11 @@ public class Camera extends SceneElement {
 				final double rv = r.dot(v);
 				if (rv > 0) {
 					final Color specular = new Color(lightColor);
-					specular.scalarMult(Math.pow(rv, shininess) * ks);
+					
+					final Color ksAux = new Color(ks);
+					ksAux.scalarMult(Math.pow(rv, shininess));
+					
+					specular.mult(ksAux);
 					intensity = intensity.add(specular);
 				}
 			}
