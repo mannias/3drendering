@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import edu.ar.itba.raytracer.light.DirectionalLight;
 import edu.ar.itba.raytracer.light.Light;
 import edu.ar.itba.raytracer.light.LightProperties;
 import edu.ar.itba.raytracer.light.PointLight;
@@ -48,11 +49,8 @@ public class Scene {
 		return camera;
 	}
 
-	public Light addLight(final Transform transform,
-			final LightProperties properties) {
-		final Light light = new PointLight(transform, properties);
+	public void addLight(final Light light) {
 		lights.add(light);
-		return light;
 	}
 
 	public Collection<GeometricObject> getGObjects() {
@@ -69,23 +67,15 @@ public class Scene {
 
 	public boolean isIlluminati(final Vector4 point, Light light,
 			CustomStack stack) {
-
-		final Vector4 p = new Vector4(light.getTransform().getPosition());
-		p.sub(point);
-
-		final RayCollisionInfo rci = cameras.iterator().next()
-				.castRay(new Ray(point, p), stack, false);
-
-		return rci == null
-				|| rci.getDistance() > point.distanceTo(light.getTransform()
-						.getPosition());
-
-		// Vector4 aux = new Vector4(light.getTransform().getPosition());
-		// aux.sub(point);
-		// Ray ray = new Ray(point, aux);
-		// return !tree.intersectionExists(
-		// point.distanceTo(light.getTransform().getPosition()), ray,
-		// stack);
+		if (light instanceof DirectionalLight) {
+			return true;
+		}
+		Vector4 aux = new Vector4(light.getTransform().getPosition());
+		aux.sub(point);
+		Ray ray = new Ray(point, aux);
+		return !tree.intersectionExists(
+				point.distanceTo(light.getTransform().getPosition()), ray,
+				stack, 0);
 	}
 
 	public Color getAmbientLight() {

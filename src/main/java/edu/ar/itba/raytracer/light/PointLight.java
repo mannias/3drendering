@@ -11,8 +11,9 @@ public class PointLight extends Light {
 	}
 
 	public Vector4 getDirection(final Vector4 hitPoint) {
-		final Vector4 ret = new Vector4(hitPoint);
-		ret.sub(getTransform().getPosition());
+		final Vector4 ret = new Vector4(getTransform().getPosition());
+		ret.sub(hitPoint);
+		ret.normalize();
 		return ret;
 	}
 

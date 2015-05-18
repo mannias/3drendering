@@ -329,11 +329,14 @@ public class Camera extends SceneElement {
 			if (!scene.isIlluminati(collisionPointPlusDelta, light, stack)) {
 				continue;
 			}
+			
+			final Vector4 lightVersor = light.getDirection(collisionPoint);
+			
 
-			final Vector4 lightVersor = new Vector4(light.getTransform()
-					.getPosition());
-			lightVersor.sub(collisionPoint);
-			lightVersor.normalize();
+//			final Vector4 lightVersor = new Vector4(light.getTransform()
+//					.getPosition());
+//			lightVersor.sub(collisionPoint);
+//			lightVersor.normalize();
 
 			final double ln = lightVersor.dot(normal);
 
@@ -412,25 +415,8 @@ public class Camera extends SceneElement {
 		return intensity;
 	}
 
-	// private RayCollisionInfo castRay(final Vector33 from, final Vector33
-	// through) {
-	// return castRay(new Ray(from, through.sub(from)));
-	// }
-
 	public RayCollisionInfo castRay(final Ray ray, final CustomStack stack,
 			boolean debug) {
-//		double minDistance = Double.MAX_VALUE;
-//		RayCollisionInfo minCollision = null;
-//		for (final GeometricObject obj : scene.getGObjects()) {
-//			final RayCollisionInfo collision = obj.hit(ray, stack, 0);
-//			if (collision != null && (collision.getDistance() < minDistance)) {
-//				minCollision = collision;
-//				minDistance = collision.getDistance();
-//			}
-//		}
-//
-//		return minCollision;
-
 		 return scene.getTree().getCollision(Double.MAX_VALUE, ray, stack, 0);
 	}
 

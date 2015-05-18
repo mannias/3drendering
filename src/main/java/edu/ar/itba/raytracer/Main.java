@@ -16,6 +16,7 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.Parameters;
 
+import edu.ar.itba.raytracer.light.DirectionalLight;
 import edu.ar.itba.raytracer.light.LightProperties;
 import edu.ar.itba.raytracer.properties.Color;
 import edu.ar.itba.raytracer.properties.Transform;
@@ -97,7 +98,7 @@ public class Main {
 
 	private static Mesh parseBunny() throws Exception {
 		final Scanner scanner = new Scanner(
-				Paths.get("C:\\Program Files\\Eclipse\\workspace\\cg-2015-05\\Jade_buddha.obj"));
+				Paths.get("C:\\Program Files\\Eclipse\\workspace\\cg-2015-05\\bunny.obj"));
 		final List<Vector4> vertexes = new ArrayList<>();
 		final List<Vector4> vertexNormals = new ArrayList<>();
 		final Collection<List<Integer>> normalMap = new ArrayList<>();
@@ -182,10 +183,10 @@ public class Main {
 	}
 
 	private static Camera loadTestScene() throws Exception {
-		final Scene scene = new Scene(new Color(.2, .2, .2));
+		final Scene scene = new Scene(new Color(1,1,1));
 		final Transform cameraTransform = new Transform();
-		cameraTransform.setPosition(new Vector4(0, 7000, 0, 1));
-		cameraTransform.setRotation(new Vector4(90, 0, 0, 0));
+		cameraTransform.setPosition(new Vector4(-1.5, 0, 0, 1));
+		cameraTransform.setRotation(new Vector4(0, 90, 0, 0));
 		final Camera camera = scene.addCamera(640, 480, 60, cameraTransform);
 
 		// Instance i = new Instance(new Sphere2());
@@ -312,15 +313,10 @@ public class Main {
 		// Texture t = new ConstantColorTexture(new Color(.5, .5, .5));
 		// ii.material = new Material(t, t, new ConstantColorTexture(new
 		// Color(0,0,0)), 50, 0, 1);
-		Texture t1 = new ConstantColorTexture(
-				new Color(0.24725, 0.2245, 0.0645));
-		Texture t2 = new ConstantColorTexture(
-				new Color(0.34615, 0.3143, 0.0903));
-		Texture t3 = new ConstantColorTexture(new Color(0.797357, 0.723991,
-				0.208006));
-		ii.material = new Material(t1, t2, t3, 51.2, 0, 1);
+		Texture t = new ConstantColorTexture(1,1,1);
+		ii.material = Material.GOLD;// new Material(t, t, t, 0, 0, 1);
 
-		// ii.translate(1, 1, 1);
+		 ii.rotateX(-140);
 		scene.add(ii);
 		// }
 
@@ -330,16 +326,16 @@ public class Main {
 				+ (System.currentTimeMillis() - start));
 
 //		final Transform lightTransform = new Transform();
-//		lightTransform.setPosition(new Vector4(0, 5, 0, 1));
+//		lightTransform.setPosition(new Vector4(-2, 5, -5, 1));
 //		final LightProperties lightProperties = new LightProperties(new Color(
 //				1f, 1f, 1f));
 //		scene.addLight(lightTransform, lightProperties);
 
 		final Transform light2Transform = new Transform();
-		light2Transform.setPosition(new Vector4(0, 0, -500, 1));
+		light2Transform.setPosition(new Vector4(-2, 5, 5, 1));
 		final LightProperties light2Properties = new LightProperties(new Color(
 				1f, 1f, 1f));
-		scene.addLight(light2Transform, light2Properties);
+		scene.addLight(new DirectionalLight(new Vector4(0,-1,1,0), light2Properties));
 
 		// final Transform lightTransform2 = new Transform();
 		// lightTransform2.setPosition(new Vector4(-3, 10, 6, 1));

@@ -668,16 +668,6 @@ public class KdTree implements Serializable {
 			}
 
 			return 1;
-
-			// if (position < o.position
-			// || (position == o.position && type < o.type)) {
-			// // if (position == o.position) {
-			// // return axis - o.axis;
-			// // }
-			// return -1;
-			// }
-			//
-			// return 1;
 		}
 	}
 
@@ -775,7 +765,6 @@ public class KdTree implements Serializable {
 		int[] other = new int[] { 2, 1, 0 };
 
 		while (true) {
-			// while (!node.isLeaf)
 			while (node instanceof KdInternalNode) {
 				final KdInternalNode internal = (KdInternalNode) node;
 				final int axis = internal.splitAxis;
