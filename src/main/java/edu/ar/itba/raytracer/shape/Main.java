@@ -146,11 +146,11 @@ public class Main {
 				.5, .5, 1), new Vector4(-.5, .5, .5, 1), new Vector4(0, -1, 0,
 				0)));
 
-		final Instance i7 = new Instance(new Mesh(triangles));
-		i7.material = new Material(new Color(0, 0, 1), new Color(0, 0, 1), 0, 50, 0, 1);
-		// i7.translate(4, 1, 0);
-		i7.rotateX(90);
-		scene.add(i7);
+//		final Instance i7 = new Instance(new Mesh(triangles));
+//		i7.material = new Material(new Color(0, 0, 1), new Color(0, 0, 1), 0, 50, 0, 1);
+//		// i7.translate(4, 1, 0);
+//		i7.rotateX(90);
+//		scene.add(i7);
 
 		final long start = System.currentTimeMillis();
 		KdTree tree = KdTree.from(scene);

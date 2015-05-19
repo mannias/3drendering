@@ -3,7 +3,6 @@ package edu.ar.itba.raytracer.parser;
 import edu.ar.itba.raytracer.Material;
 import edu.ar.itba.raytracer.Scene;
 import edu.ar.itba.raytracer.Texture;
-import edu.ar.itba.raytracer.shape.SceneShape;
 
 import java.io.*;
 import java.util.Collections;
@@ -53,9 +52,9 @@ public class FileInput {
         Material material = null;
         while((line = file.readLine()).compareTo("AttributeEnd") != 0){
             if(line.contains("Material")){
-                material = MaterialParser.Parse(line, Collections.<Texture>emptyList());
+//                material = MaterialParser.Parse(line, Collections.<Texture>emptyList());
             }else if(line.contains("Shape")){
-                SceneShape shape = ShapeParser.Parse(line,material);
+//                SceneShape shape = ShapeParser.Parse(line,material);
             }else if(line.contains("Texture")){
 
             }else if(line.contains("LightSource")){

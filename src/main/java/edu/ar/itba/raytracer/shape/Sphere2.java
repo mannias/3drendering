@@ -46,88 +46,72 @@ public class Sphere2 extends GeometricObject {
 //
 //	}
 
-	private static final long serialVersionUID = 92320640105733127L;
+    private final double radius;
 
-	@Override
-	public RayCollisionInfo hit(Ray ray, final CustomStack stack, final int top) {
-		final Vector4 raySource = ray.getSource();
-		final Vector4 rayDir = ray.getDir();
+    public Sphere2(final double radius) {
+        this.radius = radius;
+    }
 
-		final double lx = -raySource.x;
-		final double ly = -raySource.y;
-		final double lz = -raySource.z;
+    private static final long serialVersionUID = 92320640105733127L;
 
-		final double l2 = lx * lx + ly * ly + lz * lz;
+    @Override
+    public RayCollisionInfo hit(Ray ray, final CustomStack stack, final int top) {
+        final Vector4 raySource = ray.getSource();
+        final Vector4 rayDir = ray.getDir();
 
-		final double radius2 = 1;
+        final double lx = -raySource.x;
+        final double ly = -raySource.y;
+        final double lz = -raySource.z;
 
-		final boolean originIsInsideSphere = l2 < radius2;
+        final double l2 = lx * lx + ly * ly + lz * lz;
 
-		final double s = lx * rayDir.x + ly * rayDir.y + lz * rayDir.z;
+        final boolean originIsInsideSphere = l2 < radius;
 
-		if (s < 0 && !originIsInsideSphere) {
-			return null;// RayCollisionInfo.noCollision(ray);
-		}
+        final double s = lx * rayDir.x + ly * rayDir.y + lz * rayDir.z;
 
-		final double m2 = l2 - s * s;
+        if (s < 0 && !originIsInsideSphere) {
+            return null;// RayCollisionInfo.noCollision(ray);
+        }
 
-		if (m2 > radius2) {
-			return null;// RayCollisionInfo.noCollision(ray);
-		}
+        final double m2 = l2 - s * s;
 
-		final double q2 = radius2 - m2;
+        if (m2 > radius) {
+            return null;// RayCollisionInfo.noCollision(ray);
+        }
 
-		final double q = Math.sqrt(q2);
+        final double q2 = radius - m2;
 
-		if (originIsInsideSphere) {
-			final RayCollisionInfo collision = new RayCollisionInfo(this, ray,
-					s + q);
-			final Vector4 normal = new Vector4(
-					collision.getLocalCollisionPoint());
-			normal.w = 0;
-			// Center is (0,0,0), so nothing else is needed;
-			normal.normalize();
-			collision.normal = normal;
-			return collision;
-		}
-		final RayCollisionInfo collision = new RayCollisionInfo(this, ray, s
-				- q);
-		final Vector4 normal = new Vector4(collision.getLocalCollisionPoint());
-		normal.w = 0;
-		// Center is (0,0,0), so nothing else is needed;
-		normal.normalize();
-		collision.normal = normal;
-		return collision;
-	}
+        final double q = Math.sqrt(q2);
 
-	@Override
-	public AABB getAABB() {
-		return new AABB(-1, 1, -1, 1, -1, 1);
-	}
+        if (originIsInsideSphere) {
+            final RayCollisionInfo collision = new RayCollisionInfo(this, ray,
+                    s + q);
+            final Vector4 normal = new Vector4(
+                    collision.getLocalCollisionPoint());
+            normal.w = 0;
+            // Center is (0,0,0), so nothing else is needed;
+            normal.normalize();
+            collision.normal = normal;
+            return collision;
+        }
+        final RayCollisionInfo collision = new RayCollisionInfo(this, ray, s
+                - q);
+        final Vector4 normal = new Vector4(collision.getLocalCollisionPoint());
+        normal.w = 0;
+        // Center is (0,0,0), so nothing else is needed;
+        normal.normalize();
+        collision.normal = normal;
+        return collision;
+    }
 
-//	@Override
-//	public List<Vector4> getExtremePoints() {
-//		final List<Vector4> extremePoints = new ArrayList<>(6);
-//
-//		final Vector4 p1 = new Vector4(0, 0, 0, 1);
-//		p1.add(new Vector4(1, 0, 0, 0));
-//		extremePoints.add(p1);
-//		final Vector4 p2 = new Vector4(0, 0, 0, 1);
-//		p2.sub(new Vector4(1, 0, 0, 0));
-//		extremePoints.add(p2);
-//		final Vector4 p3 = new Vector4(0, 0, 0, 1);
-//		p3.add(new Vector4(0, 1, 0, 0));
-//		extremePoints.add(p3);
-//		final Vector4 p4 = new Vector4(0, 0, 0, 1);
-//		p4.sub(new Vector4(0, 1, 0, 0));
-//		extremePoints.add(p4);
-//		final Vector4 p5 = new Vector4(0, 0, 0, 1);
-//		p5.add(new Vector4(0, 0, 1, 0));
-//		extremePoints.add(p5);
-//		final Vector4 p6 = new Vector4(0, 0, 0, 1);
-//		p6.sub(new Vector4(0, 0, 1, 0));
-//		extremePoints.add(p6);
-//
-//		return extremePoints;
-//	}
+    @Override
+    public AABB getAABB() {
+        double minX = -radius;
+        double maxX = radius;
+        double minY = -radius;
+        double maxY = radius;
+        double minZ = -radius;
+        double maxZ = radius;
+        return new AABB(minX, maxX, minY, maxY, minZ, maxZ);
+    }
 }

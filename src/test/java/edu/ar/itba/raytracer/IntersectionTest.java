@@ -10,8 +10,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import edu.ar.itba.raytracer.shape.Plane;
-import edu.ar.itba.raytracer.shape.Sphere;
 import edu.ar.itba.raytracer.vector.Vector3;
 
 @RunWith(Parameterized.class)

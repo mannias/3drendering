@@ -1,6 +1,6 @@
 package edu.ar.itba.raytracer;
 
-import edu.ar.itba.raytracer.properties.Color;
+import edu.ar.itba.raytracer.texture.Texture;
 
 public class Material {
 
@@ -8,11 +8,11 @@ public class Material {
 	/**
 	 * Ambient reflection constant.
 	 */
-	public final Color ka;
+	public final Texture ka;
 	/**
 	 * Diffuse reflection constant.
 	 */
-	public final Color kd;
+	public final Texture kd;
 	/**
 	 * Specular reflection constant.
 	 */
@@ -24,7 +24,7 @@ public class Material {
 
 	public final double refractionIndex;
 
-	public Material(final Color ka, final Color kd,
+	public Material(final Texture ka, final Texture kd,
 			final double ks, final double shininess, final double transparency,
 			final double refractionIndex) {
 		this.ka = ka;

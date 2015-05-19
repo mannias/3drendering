@@ -28,15 +28,15 @@ public class Mesh extends GeometricObject {
 	public RayCollisionInfo hit(Ray ray, final CustomStack stack, final int top) {
 		// double dist = Double.MAX_VALUE;
 		// RayCollisionInfo minCollision = null;
-		return tree.getCollision(Double.MAX_VALUE, ray, stack, top);
 		// for (final Triangle triangle : triangles) {
-		// final RayCollisionInfo collision = triangle.hit(ray);
+		// final RayCollisionInfo collision = triangle.hit(ray, stack, top);
 		// if (collision != null && collision.distance < dist) {
 		// dist = collision.distance;
 		// minCollision = collision;
 		// }
 		// }
 		// return minCollision;
+		return tree.getCollision(Double.MAX_VALUE, ray, stack, top);
 	}
 
 	@Override

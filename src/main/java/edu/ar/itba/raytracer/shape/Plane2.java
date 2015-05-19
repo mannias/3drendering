@@ -8,7 +8,7 @@ import edu.ar.itba.raytracer.vector.Vector4;
 public class Plane2 extends GeometricObject {
 
     protected static final double EPSILON = 0.000001f;
-    private final Vector4 normal;
+    protected final Vector4 normal;
 
     public Plane2(Vector4 normal){
         this.normal = normal;

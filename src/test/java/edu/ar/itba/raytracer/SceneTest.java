@@ -9,7 +9,6 @@ import edu.ar.itba.raytracer.shape.Mesh;
 import org.junit.Before;
 import org.junit.Test;
 
-import edu.ar.itba.raytracer.shape.Plane;
 import edu.ar.itba.raytracer.vector.Vector3;
 
 public class SceneTest {

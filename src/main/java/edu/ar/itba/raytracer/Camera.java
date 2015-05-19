@@ -11,8 +11,6 @@ import edu.ar.itba.raytracer.light.Light;
 import edu.ar.itba.raytracer.properties.Color;
 import edu.ar.itba.raytracer.properties.Transform;
 import edu.ar.itba.raytracer.shape.CustomStack;
-import edu.ar.itba.raytracer.shape.Plane;
-import edu.ar.itba.raytracer.shape.Sphere;
 import edu.ar.itba.raytracer.vector.Vector4;
 
 public class Camera extends SceneElement {
@@ -80,6 +78,10 @@ public class Camera extends SceneElement {
 
 		position = transform.getPosition();
 	}
+
+    public void lookAt(Vector4 position, Vector4 target, Vector4 up){
+
+    }
 
 	public Camera(final Scene scene, final int pictureWidth,
 			final int pictureHeight, final double fov) {
@@ -316,8 +318,8 @@ public class Camera extends SceneElement {
 		v.scalarMult(-1);
 
 		final Material objectMaterial = collision.getObj().material;
-		final Color ka = objectMaterial.ka;
-		final Color kd = objectMaterial.kd;
+		final Color ka = objectMaterial.ka.getColor(collision);
+		final Color kd = objectMaterial.kd.getColor(collision);
 		final double ks = objectMaterial.ks;
 		final double shininess = objectMaterial.shininess;
 
