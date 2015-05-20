@@ -16,7 +16,7 @@ public class InstanceTest {
 
 	@Test
 	public void testAABBWithNoTransform() {
-		instance = new Instance(new Sphere2(1));
+		instance = new Instance(new Sphere());
 
 		assertThat(instance.getAABB().minX).isCloseTo(-1, within(EPSILON));
 		assertThat(instance.getAABB().maxX).isCloseTo(1, within(EPSILON));
@@ -28,7 +28,7 @@ public class InstanceTest {
 
 	@Test
 	public void testAABBWithTranslation() {
-		instance = new Instance(new Sphere2(1));
+		instance = new Instance(new Sphere());
 		instance.translate(2, 3, 4);
 
 		assertThat(instance.getAABB().minX).isCloseTo(1, within(EPSILON));
@@ -41,7 +41,7 @@ public class InstanceTest {
 
 	@Test
 	public void testAABBWithScale() {
-		instance = new Instance(new Sphere2(1));
+		instance = new Instance(new Sphere());
 		instance.scale(2, 3, 4);
 
 		assertThat(instance.getAABB().minX).isCloseTo(-2, within(EPSILON));
@@ -54,7 +54,8 @@ public class InstanceTest {
 
 	@Test
 	public void testAABBWithRotationX() {
-		instance = new Instance(new Sphere2(1));
+		instance = new Instance(new Sphere());
+
 		instance.rotateX(45);
 
 		assertThat(instance.getAABB().minX).isCloseTo(-1, within(EPSILON));

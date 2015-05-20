@@ -11,6 +11,10 @@ public class ConstantColorTexture implements Texture {
 		this.color = color;
 	}
 
+	public ConstantColorTexture(final double r, final double g, final double b) {
+		this(new Color(r, g, b));
+	}
+
 	@Override
 	public Color getColor(RayCollisionInfo collisionInfo) {
 		return color;

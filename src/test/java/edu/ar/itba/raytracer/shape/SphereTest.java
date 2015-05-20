@@ -13,11 +13,12 @@ import edu.ar.itba.raytracer.vector.Vector4;
 
 public class SphereTest {
 
-	private Sphere2 sphere;
+	private Sphere sphere;
 
 	@Before
 	public void setup() {
-		sphere = new Sphere2(1);
+		sphere = new Sphere();
+
 	}
 
 	@Test

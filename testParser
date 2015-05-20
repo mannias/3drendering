@@ -1,0 +1,13 @@
+LookAt 0 10 100 0 -1 0 0 1 0
+Camera "perspective" "float fov" [30]
+
+Film "fleximage" "integer xresolution" [300] "integer yresolution" [300]
+
+WorldBegin
+
+AttributeBegin
+	Material "matte" "color Kd" [0.6 0.6 0.6]
+	Shape "sphere" "float radius" [1.0]
+AttributeEnd
+
+WorldEnd

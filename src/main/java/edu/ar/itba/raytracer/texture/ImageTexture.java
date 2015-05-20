@@ -10,7 +10,7 @@ public class ImageTexture implements Texture {
 	private final int hres;
 	private final int vres;
 	private final BufferedImage image;
-	private final TextureMapping mapping;
+	private TextureMapping mapping;
 
 	public ImageTexture(final BufferedImage image, final TextureMapping mapping) {
 		this.image = image;
@@ -18,6 +18,14 @@ public class ImageTexture implements Texture {
 		vres = image.getHeight();
 		this.mapping = mapping;
 	}
+
+    public ImageTexture(final BufferedImage image){
+        this(image, null);
+    }
+
+    public void setMapping(TextureMapping mapping){
+        this.mapping = mapping;
+    }
 
 	@Override
 	public Color getColor(RayCollisionInfo collisionInfo) {

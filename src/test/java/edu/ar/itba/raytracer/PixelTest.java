@@ -8,6 +8,7 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
+import edu.ar.itba.raytracer.light.DirectionalLight;
 import edu.ar.itba.raytracer.shape.*;
 import edu.ar.itba.raytracer.texture.CheckedTexture;
 import edu.ar.itba.raytracer.texture.ConstantColorTexture;
@@ -56,15 +57,17 @@ public class PixelTest {
 //        i9.material = new Material(new Color(0,0,0), new Color(0.2775, 0.2775, 0.2775), 0.774597, 560, 0, 0);
 //        scene.add(i9);
 
-        final Instance i8 = new Instance(new Sphere2(1));
+        final Instance i8 = new Instance(new Sphere());
         i8.translate(0,0,-1);
         i8.material = new Material(new ConstantColorTexture(new Color(0, 0, 0)),
-                new ConstantColorTexture(new Color(0.588235, 0.670588, 0.729412)), .9, 750, 1, 1.52);
+                new ConstantColorTexture(new Color(0.588235, 0.670588, 0.729412)),
+                new ConstantColorTexture(new Color(0.9, 0.9, 0.9)), 750, 1, 1.52);
         scene.add(i8);
 
         final Instance i11 = new Instance(new Plane2(new Vector4(0,0,-1,0)));
         i11.material = new Material(new ConstantColorTexture(new Color(0, 0, 0.0)),
-                new ConstantColorTexture(new Color(.1,.6,.1)), 0 ,0 , 0, 0);
+                new ConstantColorTexture(new Color(.1,.6,.1)),
+                new ConstantColorTexture(new Color(0, 0, 0)) ,0 , 0, 0);
         scene.add(i11);
 
         final long start = System.currentTimeMillis();
@@ -79,11 +82,11 @@ public class PixelTest {
 		// 1f, 1f, 1f));
 		// scene.addLight(lightTransform, lightProperties);
 
-		final Transform lightTransform2 = new Transform();
-		lightTransform2.setPosition(new Vector4(0, 0, -7, 1));
-		final LightProperties lightProperties2 = new LightProperties(new Color(
-                1, 1, 1));
-		scene.addLight(lightTransform2, lightProperties2);
+        final Transform light2Transform = new Transform();
+        light2Transform.setPosition(new Vector4(-2, 5, 5, 1));
+        final LightProperties light2Properties = new LightProperties(new Color(
+                1f, 1f, 1f));
+        scene.addLight(new DirectionalLight(new Vector4(0,-1,1,0), light2Properties));
 //        final Transform lightTransform3 = new Transform();
 //        lightTransform2.setPosition(new Vector4(7, 8, 0, 1));
 //        scene.addLight(lightTransform3, new LightProperties(new Color(1, 1, 1)));
