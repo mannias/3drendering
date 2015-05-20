@@ -3,11 +3,18 @@ package edu.ar.itba.raytracer.parser;
 import edu.ar.itba.raytracer.GeometricObject;
 import edu.ar.itba.raytracer.Instance;
 import edu.ar.itba.raytracer.Material;
+import edu.ar.itba.raytracer.MeshTriangle;
 import edu.ar.itba.raytracer.properties.ShapeProperties;
 import edu.ar.itba.raytracer.properties.Transform;
 import edu.ar.itba.raytracer.shape.*;
+import edu.ar.itba.raytracer.vector.Vector3;
 import edu.ar.itba.raytracer.vector.Vector4;
+import javafx.scene.shape.TriangleMesh;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -95,7 +102,41 @@ public class ShapeParser {
     }
 
     private static Instance parseMesh(String line){
-        //TODO: I have no idea how this works
-        return null;
+        String normalsrx = "\"normal\\[([^\"]+)\\] N\" \\[([^]]+)\\]";
+        String pointsrx = "\"point\\[([^\"]+)\\] P\" \\[([^]]+)\\]";
+        String triindices = "\"integer\\[([^\"]+)\\] triindices\" \\[([^]]+)\\]";
+        ArrayList<Vector3> vertex = new ArrayList<>();
+        ArrayList<Vector3> vertexNormal = new ArrayList<>();
+        List<MeshTriangle> result = new LinkedList<>();
+        int length = 0;
+        Matcher m;
+        if((m = Pattern.compile(pointsrx).matcher(line)).find()){
+            length = Integer.valueOf(m.group(1));
+            String[] splitted = m.group(2).split("\\s+");
+            for(int i = 0; i<= length*3; i+=3){
+                vertex.add(new Vector3(Double.valueOf(splitted[i]),Double.valueOf(splitted[i+1]),
+                        Double.valueOf(splitted[i+2])));
+            }
+        }
+        if((m = Pattern.compile(normalsrx).matcher(line)).find()){
+            length = Integer.valueOf(m.group(1));
+            String[] splitted = m.group(2).split("\\s+");
+            for(int i = 0; i<= length*3; i+=3){
+                vertexNormal.add(new Vector3(Double.valueOf(splitted[i]), Double.valueOf(splitted[i + 1]),
+                        Double.valueOf(splitted[i + 2])));
+            }
+        }
+        if((m = Pattern.compile(triindices).matcher(line)).find()){
+            length = Integer.valueOf(m.group(1));
+            String[] splitted = m.group(2).split("\\s+");
+            for(int i = 0; i<= length*3; i+=3){
+                result.add(new MeshTriangle(vertex.get(Integer.valueOf(splitted[i])),
+                        vertex.get(Integer.valueOf(splitted[i+1])),vertex.get(Integer.valueOf(splitted[i+2])),
+                        vertexNormal.get(Integer.valueOf(splitted[i])),
+                        vertexNormal.get(Integer.valueOf(splitted[i+1])),vertexNormal.get(Integer.valueOf(splitted[i+2]))));
+            }
+        }
+
+        return new Instance(new Mesh(result));
     }
 }
