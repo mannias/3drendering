@@ -49,7 +49,7 @@ public class MaterialParser {
         Color reflectivity = new Color(1.0,1.0,1.0), transmited =  new Color(1.0,1.0,1.0);
         double refractionIndex = 1.5;
         String kr = "\"color Kr\" \\[(\\d?\\.\\d+) (\\d?\\.\\d+) (\\d?\\.\\d+)\\]";
-        String kt = "\"color Kr\" \\[(\\d?\\.\\d+) (\\d?\\.\\d+) (\\d?\\.\\d+)\\]";
+        String kt = "\"color Kt\" \\[(\\d?\\.\\d+) (\\d?\\.\\d+) (\\d?\\.\\d+)\\]";
         String index = "\"float index\" (\\d?\\.\\d+)";
         Matcher m;
         if((m = Pattern.compile(kr).matcher(line)).find()) {

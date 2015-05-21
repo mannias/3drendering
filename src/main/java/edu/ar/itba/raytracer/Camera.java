@@ -88,6 +88,8 @@ public class Camera extends SceneElement {
 		this(scene, pictureWidth, pictureHeight, fov, new Transform());
 	}
 
+
+
 	public void lookAt(final Vector4 lookAt) {
 
 		final Vector4 forwardVector = new Vector4(lookAt);
@@ -192,6 +194,10 @@ public class Camera extends SceneElement {
 
 		return halfDim / (double) Math.tan(fov / 2 * Math.PI / 180);
 	}
+
+    public BufferedImage render(){
+        return this.render(pictureWidth,pictureHeight);
+    }
 
 	public BufferedImage render(final int width, final int height) {
 		System.out.println("STARTING!!!!!");

@@ -5,7 +5,6 @@ import edu.ar.itba.raytracer.light.LightProperties;
 import edu.ar.itba.raytracer.light.PointLight;
 import edu.ar.itba.raytracer.properties.Color;
 import edu.ar.itba.raytracer.properties.Transform;
-import edu.ar.itba.raytracer.texture.ConstantColorTexture;
 import edu.ar.itba.raytracer.vector.Vector3;
 
 import java.util.regex.Matcher;
