@@ -1,14 +1,12 @@
 package edu.ar.itba.raytracer.parser;
 
 
-import edu.ar.itba.raytracer.GeometricObject;
 import edu.ar.itba.raytracer.Instance;
 import edu.ar.itba.raytracer.Material;
 import edu.ar.itba.raytracer.Scene;
 import edu.ar.itba.raytracer.texture.Texture;
 
 import java.io.*;
-import java.util.Collections;
 import java.util.HashMap;
 
 public class FileInput {
@@ -60,14 +58,33 @@ public class FileInput {
         while((line = file.readLine()).compareTo("AttributeEnd") != 0){
             if(line.contains("Material")){
                 material = MaterialParser.Parse(line, textureMap);
+            }else if(line.contains("Shape") && line.contains("mesh")){
+
             }else if(line.contains("Shape")){
-                instance = ShapeParser.Parse(line,material);
+                scene.add(instance = ShapeParser.Parse(line, material));
             }else if(line.contains("Texture")){
                 TextureParser.parseTexture(line,textureMap);
             }else if(line.contains("LightSource")){
-
+                scene.addLight(LightParser.parseLight(line));
+            }else if(line.contains("TransformBegin")){
+                if(instance == null){
+                    throw new IllegalArgumentException("Incorrect parameter order");
+                }
+                parseTransformation(instance);
             }
         }
-        scene.add(instance);
+    }
+
+    private void parseTransformation(Instance instance) throws IOException {
+        String line;
+        while((line = file.readLine()).contains("TransformEnd")){
+            if(line.contains("Translate")){
+                TransformationParser.parseTranslate(line,instance);
+            }else if(line.contains("Rotate")){
+                TransformationParser.parseRotate(line, instance);
+            }else if(line.contains("Scale")){
+                TransformationParser.parseScale(line,instance);
+            }
+        }
     }
 }

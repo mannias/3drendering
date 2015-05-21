@@ -1,17 +1,14 @@
 package edu.ar.itba.raytracer.parser;
 
-import edu.ar.itba.raytracer.GeometricObject;
 import edu.ar.itba.raytracer.Instance;
 import edu.ar.itba.raytracer.Material;
 import edu.ar.itba.raytracer.MeshTriangle;
-import edu.ar.itba.raytracer.properties.ShapeProperties;
-import edu.ar.itba.raytracer.properties.Transform;
 import edu.ar.itba.raytracer.shape.*;
 import edu.ar.itba.raytracer.vector.Vector3;
 import edu.ar.itba.raytracer.vector.Vector4;
-import javafx.scene.shape.TriangleMesh;
 
-import java.lang.reflect.Array;
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,28 +19,70 @@ public class ShapeParser {
 
     public static Instance Parse(String line, Material material){
         Instance instance = null;
-        if(line.contains("Rotate")) {
-            setRotate(line);
-        }else if(line.contains("box")){
+        if(line.contains("box")){
             instance = parseBox(line);
         }else if(line.contains("plane")){
             instance = parsePlane(line);
         }else if(line.contains("sphere")){
             instance = parseSphere(line);
-        }else if(line.contains("mesh")){
-            instance = parseMesh(line);
         }
-
         return instance;
     }
 
-    private static void setRotate(String line){
-        Vector4 n = null;
-        String normal = "Rotate (\\d+) (\\d+) (\\d+)";
+    public static Instance ParseMesh(String line, Material Material, BufferedReader file) throws IOException {
+        List<Vector4> normals = null, vertex = null;
+        String normalsrx = "\"normal\\[([^\"]+)\\] N\" \\[";
+        String vertexrx = "\"point\\[([^\"]+)\\] P\" \\[";
+        String triindices = "\"integer\\[([^\"]+)\\] triindices\" \\[";
+        Instance instance = null;
         Matcher m;
-        if((m = Pattern.compile(normal).matcher(line)).find()){
-            //TODO: implement
+        if((m = Pattern.compile(normalsrx).matcher(line)).find()){
+            int length = Integer.valueOf(m.group(1));
+            normals = parseVectors(length, file);
         }
+        if((m = Pattern.compile(vertexrx).matcher(line)).find()){
+            int length = Integer.valueOf(m.group(1));
+            vertex = parseVectors(length, file);
+        }
+        if((m = Pattern.compile(triindices).matcher(line)).find()){
+            int length = Integer.valueOf(m.group(1));
+            instance = new Instance(new Mesh(calculateTriangles(normals,vertex,length,file)));
+        }
+        return instance;
+    }
+
+    private static List<Vector4> parseVectors(int num, BufferedReader file) throws IOException {
+        String line;
+        List<Vector4> list = new LinkedList<>();
+        String vector =  "(\\d?\\.\\d+) (\\d?\\.\\d+) (\\d?\\.\\d+)";
+        Pattern pat = Pattern.compile(vector);
+        Matcher m;
+        while((line = file.readLine()) != null && !line.contains("]")){
+            if((m = pat.matcher(line)).find()){
+                list.add(new Vector3(Double.valueOf(m.group(1)),Double.valueOf(m.group(2)),Double.valueOf(m.group(3))));
+            }
+        }
+        return list;
+    }
+
+    private static List<MeshTriangle> calculateTriangles(List<Vector4> normals, List<Vector4> vertex, int num,
+                                                         BufferedReader file) throws IOException {
+        String line;
+        List<MeshTriangle> list = new LinkedList<>();
+        String vector =  "(\\d?\\.\\d+) (\\d?\\.\\d+) (\\d?\\.\\d+)";
+        int loc1 = -1, loc2 = -1, loc3 = -1;
+        Pattern pat = Pattern.compile(vector);
+        Matcher m;
+        while((line = file.readLine()) != null && !line.contains("]")){
+            if((m = pat.matcher(line)).find()){
+                loc1 = Integer.valueOf(m.group(1));
+                loc2 = Integer.valueOf(m.group(2));
+                loc3 = Integer.valueOf(m.group(3));
+                list.add(new MeshTriangle(vertex.get(loc1),vertex.get(loc2),vertex.get(loc3),
+                        normals.get(loc1),normals.get(loc2),normals.get(loc3)));
+            }
+        }
+        return list;
     }
 
     private static Instance parsePlane(String line){

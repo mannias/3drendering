@@ -10,8 +10,6 @@ import edu.ar.itba.raytracer.properties.Color;
 import edu.ar.itba.raytracer.texture.ConstantColorTexture;
 import edu.ar.itba.raytracer.texture.Texture;
 
-import javax.xml.soap.Text;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
