@@ -3,6 +3,7 @@ package edu.ar.itba.raytracer.parser;
 import edu.ar.itba.raytracer.Camera;
 import edu.ar.itba.raytracer.Scene;
 import edu.ar.itba.raytracer.properties.Transform;
+import edu.ar.itba.raytracer.vector.Matrix44;
 import edu.ar.itba.raytracer.vector.Vector3;
 import edu.ar.itba.raytracer.vector.Vector4;
 
@@ -52,6 +53,6 @@ public class CameraParser {
         Transform cameraTransform = new Transform();
         cameraTransform.setPosition(new Vector4(-1.5,0,0,1));
         cameraTransform.setRotation(new Vector4(0, 90, 0,0));
-        return scene.addCamera(width, height, fov, position, target, up);
+        return scene.addCamera(width, height, fov, position, target, up, Matrix44.ID);
     }
 }

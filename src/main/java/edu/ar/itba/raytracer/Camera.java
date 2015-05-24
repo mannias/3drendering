@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import edu.ar.itba.raytracer.light.Light;
 import edu.ar.itba.raytracer.properties.Color;
 import edu.ar.itba.raytracer.shape.CustomStack;
+import edu.ar.itba.raytracer.vector.Matrix44;
 import edu.ar.itba.raytracer.vector.Vector4;
 
 public class Camera extends SceneElement {
@@ -38,7 +39,6 @@ public class Camera extends SceneElement {
 
 	private Vector4 forwardVector;
 
-	private Vector4 w;
 	private Vector4 u;
 	private Vector4 v;
 
@@ -48,7 +48,7 @@ public class Camera extends SceneElement {
 
 	public Camera(final Scene scene, final int pictureWidth,
 			final int pictureHeight, final double fov, final Vector4 position,
-			final Vector4 lookAt, final Vector4 up) {
+			final Vector4 lookAt, final Vector4 up, final Matrix44 transform) {
 		this.scene = scene;
 		this.pictureWidth = pictureWidth;
 		this.pictureHeight = pictureHeight;
@@ -56,18 +56,25 @@ public class Camera extends SceneElement {
 		picture = new Color[pictureHeight][pictureWidth];
 		initPicture();
 
-		w = new Vector4(position);
+		final Vector4 w = new Vector4(position);
 		w.sub(lookAt);
 		w.normalize();
+		
+		final Vector4 transformedW = transform.multiplyVec(w);
+		transformedW.normalize();
+		
+		final Vector4 transformedUp = transform.multiplyVec(up); 
+		transformedUp.normalize();
 
-		u = up.cross(w);
+		u = transformedUp.cross(transformedW);
 		u.normalize();
 
-		v = w.cross(u);
+		v = transformedW.cross(u);
 
-		forwardVector = new Vector4(w);
+		forwardVector = new Vector4(transformedW);
 		forwardVector.scalarMult(-distToPixels);
-		// forwardVector.scalarMult(-1);
+		
+		
 
 		pixelPoints = new Vector4[pictureHeight * pictureWidth];
 		for (int i = 0; i < pictureHeight * pictureWidth; i++) {
@@ -338,7 +345,7 @@ public class Camera extends SceneElement {
 			final double ln = lightVersor.dot(normal);
 
 			if (ln > 0) {
-				final Color lightColor = light.getProperties().getColor();
+				final Color lightColor = light.color;
 
 				final Color diffuse = new Color(lightColor);
 				diffuse.scalarMult(ln);

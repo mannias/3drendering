@@ -1,14 +1,14 @@
 package edu.ar.itba.raytracer.parser;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import edu.ar.itba.raytracer.light.Light;
-import edu.ar.itba.raytracer.light.LightProperties;
 import edu.ar.itba.raytracer.light.PointLight;
 import edu.ar.itba.raytracer.properties.Color;
 import edu.ar.itba.raytracer.properties.Transform;
+import edu.ar.itba.raytracer.vector.Matrix44;
 import edu.ar.itba.raytracer.vector.Vector3;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class LightParser {
 
@@ -38,7 +38,6 @@ public class LightParser {
         }
         Transform transform = new Transform();
         transform.setPosition(locationPoint);
-        return new PointLight(transform, new LightProperties(lightColor));
-
+        return new PointLight(locationPoint, Matrix44.ID, lightColor);
     }
 }

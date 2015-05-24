@@ -2,6 +2,9 @@ package edu.ar.itba.raytracer.vector;
 
 public class Matrix44 {
 
+	public static final Matrix44 ID = new Matrix44(1, 0, 0, 0, 0, 1, 0, 0, 0,
+			0, 1, 0, 0, 0, 0, 1);
+
 	private double[][] m = new double[4][4];
 
 	public Matrix44(double m00, double m01, double m02, double m03, double m10,

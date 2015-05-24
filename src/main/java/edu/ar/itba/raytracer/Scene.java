@@ -7,9 +7,11 @@ import java.util.Set;
 
 import edu.ar.itba.raytracer.light.DirectionalLight;
 import edu.ar.itba.raytracer.light.Light;
+import edu.ar.itba.raytracer.light.PointLight;
 import edu.ar.itba.raytracer.properties.Color;
 import edu.ar.itba.raytracer.shape.CustomStack;
 import edu.ar.itba.raytracer.shape.GeometricObject;
+import edu.ar.itba.raytracer.vector.Matrix44;
 import edu.ar.itba.raytracer.vector.Vector4;
 
 public class Scene {
@@ -36,9 +38,9 @@ public class Scene {
 
 	public Camera addCamera(final int width, final int height,
 			final double fov, final Vector4 position, final Vector4 lookAt,
-			final Vector4 up) {
+			final Vector4 up, final Matrix44 transform) {
 		final Camera camera = new Camera(this, width, height, fov, position,
-				lookAt, up);
+				lookAt, up, transform);
 		cameras.add(camera);
 		return camera;
 	}
@@ -64,11 +66,12 @@ public class Scene {
 		if (light instanceof DirectionalLight) {
 			return true;
 		}
-		Vector4 aux = new Vector4(light.getTransform().getPosition());
+		final PointLight pointLight = (PointLight) light;
+		Vector4 aux = new Vector4(pointLight.position);
 		aux.sub(point);
 		Ray ray = new Ray(point, aux);
 		return !tree.intersectionExists(
-				point.distanceTo(light.getTransform().getPosition()), ray,
+				point.distanceTo(pointLight.position), ray,
 				stack, 0);
 	}
 

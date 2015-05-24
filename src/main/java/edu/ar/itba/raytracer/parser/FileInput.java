@@ -1,18 +1,23 @@
 package edu.ar.itba.raytracer.parser;
 
 
-import edu.ar.itba.raytracer.*;
-import edu.ar.itba.raytracer.light.DirectionalLight;
-import edu.ar.itba.raytracer.light.LightProperties;
-import edu.ar.itba.raytracer.properties.Color;
-import edu.ar.itba.raytracer.properties.Transform;
-import edu.ar.itba.raytracer.texture.Texture;
-import edu.ar.itba.raytracer.vector.Vector4;
+import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.HashMap;
 
 import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.*;
-import java.util.HashMap;
+
+import edu.ar.itba.raytracer.Camera;
+import edu.ar.itba.raytracer.Instance;
+import edu.ar.itba.raytracer.KdTree;
+import edu.ar.itba.raytracer.Material;
+import edu.ar.itba.raytracer.Scene;
+import edu.ar.itba.raytracer.properties.Color;
+import edu.ar.itba.raytracer.texture.Texture;
 
 public class FileInput {
 
@@ -41,11 +46,6 @@ public class FileInput {
                 }
             }
 
-            final Transform light2Transform = new Transform();
-            light2Transform.setPosition(new Vector4(-2, 5, 5, 1));
-            final LightProperties light2Properties = new LightProperties(new Color(
-                    1f, 1f, 1f));
-            scene.addLight(new DirectionalLight(new Vector4(0,-1,1,0), light2Properties));
             final long start = System.currentTimeMillis();
             KdTree tree = KdTree.from(scene);
             System.out.println("Finished building tree in "
