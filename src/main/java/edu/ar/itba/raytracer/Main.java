@@ -23,6 +23,7 @@ import com.beust.jcommander.Parameters;
 import edu.ar.itba.raytracer.light.AmbientLight;
 import edu.ar.itba.raytracer.light.DirectionalLight;
 import edu.ar.itba.raytracer.properties.Color;
+import edu.ar.itba.raytracer.shape.Box;
 import edu.ar.itba.raytracer.shape.GeometricObject;
 import edu.ar.itba.raytracer.shape.Mesh;
 import edu.ar.itba.raytracer.shape.MeshTriangle;
@@ -203,23 +204,23 @@ public class Main {
 	private static Camera loadTestScene(final int w, final int h)
 			throws Exception {
 		final Scene scene = new Scene();
-		scene.addLight(new AmbientLight(new Color(1,1,1)));
+		scene.addLight(new AmbientLight(new Color(1, 1, 1)));
 		final double rot = 0 * PI / 180;
 		final Camera camera = scene.addCamera(w, h, 50,
-				new Vector4(0, 0, 4, 1), new Vector4(0, 0, 0, 1), new Vector4(
+				new Vector4(0, 0, 2, 1), new Vector4(0, 0, 0, 1), new Vector4(
 						0, 1, 0, 0), new Matrix44(cos(rot), -sin(rot), 0, 0,
 						sin(rot), cos(rot), 0, 0, 0, 0, 1, 0, 0, 0, 0, 1));
 
-		Instance i = new Instance(new Sphere(1));
-		BufferedImage image = ImageIO
-				.read(new File(
-						"C:\\Program Files\\Eclipse\\workspace\\cg-2015-05\\earth.jpg"));
-		Texture t = new ImageTexture(image, new SphericalTextureMapping());
-		i.material = new Material(t, t, new ConstantColorTexture(new Color(0,
-				0, 0)), 50, 0, 1);
-		i.transform(GeometricObject.translationMatrix(0, 0, 0).multiply(
-				GeometricObject.scaleMatrix(2, 1, 1)));
-		scene.add(i);
+//		Instance i = new Instance(new Box(1, 1, 1));
+//		BufferedImage image = ImageIO
+//				.read(new File(
+//						"C:\\Program Files\\Eclipse\\workspace\\cg-2015-05\\earth.jpg"));
+//		Texture t = new ImageTexture(image);
+//		i.material = new Material(t, t, new ConstantColorTexture(new Color(0,
+//				0, 0)), 50, 0, 1);
+//		// i.transform(GeometricObject.translationMatrix(0, 0, 0).multiply(
+//		// GeometricObject.scaleMatrix(2, 1, 1)));
+//		scene.add(i);
 
 		// Instance i1 = new Instance(new Sphere2());
 		// i1.material = new Material(new Color(1, .5, 0), 1, 1, 1, 1, 0, 1);
@@ -327,14 +328,14 @@ public class Main {
 
 		// for (int i = 0; i < 10; i += 2) {
 
-		// final Instance ii = new Instance(parseBunny());
-		// // ii.rotateZ(20);
-		// // ii.translate(0, 0, 1);
-		// ii.material = new Material(new ConstantColorTexture(.9, .9, .9),
-		// new ConstantColorTexture(.5, .5, .5), new ConstantColorTexture(
-		// 0, 0, 0), 0, 0, 1);
-		// // ii.material = Material.GOLD;
-		// scene.add(ii);
+		final Instance ii = new Instance(parseBunny());
+		// ii.rotateZ(20);
+		// ii.translate(0, 0, 1);
+		ii.material = new Material(new ConstantColorTexture(.9, .9, .9),
+				new ConstantColorTexture(.5, .5, .5), new ConstantColorTexture(
+						0, 0, 0), 0, 0, 1);
+		// ii.material = Material.GOLD;
+		scene.add(ii);
 
 		// final Instance ii = new Instance(new Sphere());
 		// BufferedImage image = ImageIO
@@ -412,14 +413,14 @@ public class Main {
 		// scene.addLight(new DirectionalLight(new Vector4(0, -1, 1, 0),
 		// light2Properties));
 
-		scene.addLight(new DirectionalLight(new Vector4(0, 0, 0, 1),
-				new Vector4(1, 0, 0, 1), Matrix44.ID,/*
-													 * new Matrix44(1, 0, 0, 3,
-													 * 0, 1, 0, 3, 0, 0, 1, 3,
-													 * 0, 0, 0, 1),
-													 */
-				new Color(1, 1, 1)));
-
+		// scene.addLight(new DirectionalLight(new Vector4(0, 0, 0, 1),
+		// new Vector4(1, 0, 0, 1), Matrix44.ID,/*
+		// * new Matrix44(1, 0, 0, 3,
+		// * 0, 1, 0, 3, 0, 0, 1, 3,
+		// * 0, 0, 0, 1),
+		// */
+		// new Color(1, 1, 1)));
+		//
 		scene.setTree(tree);
 
 		return camera;
