@@ -3,6 +3,7 @@ package edu.ar.itba.raytracer.parser;
 import edu.ar.itba.raytracer.Instance;
 import edu.ar.itba.raytracer.Material;
 import edu.ar.itba.raytracer.shape.*;
+import edu.ar.itba.raytracer.vector.Vector2;
 import edu.ar.itba.raytracer.vector.Vector3;
 import edu.ar.itba.raytracer.vector.Vector4;
 
@@ -27,62 +28,63 @@ public class ShapeParser {
         return instance;
     }
 
-    public static Instance ParseMesh(String line, Material Material, BufferedReader file) throws IOException {
+    public static Instance ParseMesh(String line, BufferedReader file) throws IOException {
         List<Vector4> normals = null, vertex = null;
-        String normalsrx = "\"normal\\[([^\"]+)\\] N\" \\[";
-        String vertexrx = "\"vertex\\[([^\"]+)\\] P\" \\[";
-        String triindices = "\"integer\\[([^\"]+)\\] triindices\" \\[";
+        List<Vector2> uv = null;
+        final String normalsrx = "\"normal N\" \\[([^]]+)\\]";
+        final String vertexrx = "\"vertex P\" \\[([^]]+)\\]";
+        final String triindicesrx = "\"integer triindices\" \\[([^]]+)\\]";
+        final String uvrx = "\"float uv\" \\[([^]]+)\\]";
         Instance instance = null;
         Matcher m;
         if((m = Pattern.compile(vertexrx).matcher(line)).find()){
-            int length = Integer.valueOf(m.group(1));
-            vertex = parseVectors(length, file);
+            vertex = parseVectors(m.group(1));
         }
         if((m = Pattern.compile(normalsrx).matcher(file.readLine())).find()){
-            int length = Integer.valueOf(m.group(1));
-            normals = parseVectors(length, file);
+            normals = parseVectors(m.group(1));
         }
-        if((m = Pattern.compile(triindices).matcher(file.readLine())).find()){
-            int length = Integer.valueOf(m.group(1));
-            instance = new Instance(new Mesh(calculateTriangles(normals,vertex,length,file)));
+        if((m = Pattern.compile(uvrx).matcher(file.readLine())).find()){
+            uv = parseUv(m.group(1));
+        }
+        if((m = Pattern.compile(triindicesrx).matcher(file.readLine())).find()){
+            instance = new Instance(new Mesh(calculateTriangles(m.group(1), normals,vertex, uv)));
         }
         return instance;
     }
 
-    private static List<Vector4> parseVectors(int num, BufferedReader file) throws IOException {
-        String line;
+    private static List<Vector4> parseVectors(String line){
         List<Vector4> list = new LinkedList<>();
-        String vector =  "(-?\\d?\\.\\d+) (-?\\d?\\.\\d+) (-?\\d?\\.\\d+)";
-        Pattern pat = Pattern.compile(vector);
-        Matcher m;
-        while((line = file.readLine()) != null && !line.contains("]")){
-            if((m = pat.matcher(line)).find()){
-                list.add(new Vector3(Double.valueOf(m.group(1)),Double.valueOf(m.group(2)),Double.valueOf(m.group(3))));
-            }else{
-                System.out.println("not detected");
-            }
+        String[] elems = line.split("\\s");
+        for(int i = 0; i+2 < elems.length; i+=3){
+            list.add(new Vector3(Double.valueOf(elems[i]), Double.valueOf(elems[i+1]), Double.valueOf(elems[i+2])));
         }
         return list;
     }
 
-    private static List<MeshTriangle> calculateTriangles(List<Vector4> normals, List<Vector4> vertex, int num,
-                                                         BufferedReader file) throws IOException {
-        String line;
-        List<MeshTriangle> list = new LinkedList<>();
-        String vector =  "(\\d+) (\\d+) (\\d+)";
-        int loc1 = -1, loc2 = -1, loc3 = -1;
-        Pattern pat = Pattern.compile(vector);
-        Matcher m;
-        while((line = file.readLine()) != null && !line.contains("]")){
-            if((m = pat.matcher(line)).find()){
-                loc1 = Integer.valueOf(m.group(1)) - 1;
-                loc2 = Integer.valueOf(m.group(2)) - 1;
-                loc3 = Integer.valueOf(m.group(3)) - 1;
-                list.add(new MeshTriangle(vertex.get(loc1),vertex.get(loc2),vertex.get(loc3),
-                        normals.get(loc1),normals.get(loc2),normals.get(loc3)));
-            }
+    private static List<Vector2> parseUv(String line){
+        List<Vector2> list = new LinkedList<>();
+        String[] elems = line.split("\\s");
+        for(int i = 0; i+1 < elems.length; i+=2){
+            list.add(new Vector2(Double.valueOf(elems[i]), Double.valueOf(elems[i+1])));
         }
         return list;
+    }
+
+
+
+
+    private static List<MeshTriangle> calculateTriangles(String line, List<Vector4> normals,
+                                                         List<Vector4> vertex, List<Vector2> uv){
+        List<MeshTriangle> list = new LinkedList<>();
+        String[] elems = line.split("\\s");
+        for(int i = 0; i+2 < elems.length; i+=3){
+            int loc1 = Integer.valueOf(elems[i]);
+            int loc2 = Integer.valueOf(elems[i+1]);
+            int loc3 = Integer.valueOf(elems[i+2]);
+            list.add(new MeshTriangle(vertex.get(loc1),vertex.get(loc2),vertex.get(loc3),
+                    uv.get(loc1),uv.get(loc2), uv.get(loc3),
+                    normals.get(loc1),normals.get(loc2),normals.get(loc3)));
+        }
     }
 
     private static Instance parsePlane(String line){

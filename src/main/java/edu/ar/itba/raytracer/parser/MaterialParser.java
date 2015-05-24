@@ -30,6 +30,29 @@ public class MaterialParser {
         return mat;
     }
 
+    public static void parseNamedMaterial(String line, Map<String,Material> materialMap, Map<String,Texture> textureMap){
+        String materialNamerx = "MakeNamedMaterial \"([^\"]+)\"";
+        String materialName;
+        Matcher m;
+        if((m = Pattern.compile(materialNamerx).matcher(line)).find()) {
+            materialName = m.group(1);
+            materialMap.put(materialName, Parse(line,textureMap));
+        }
+    }
+
+    public static Material getNamedMaterial(String line, Map<String,Material> materialMap){
+        String materialNamerx = "NamedMaterial \"([^\"]+)\"";
+        String materialName = null;
+        Matcher m;
+        if((m = Pattern.compile(materialNamerx).matcher(line)).find()) {
+            materialName = m.group(1);
+        }
+        if(materialName != null){
+            return materialMap.get(materialName);
+        }
+        return null;
+    }
+
     private static Material parseMatte(String line, Map<String,Texture> textureMap){
         Texture diffuseColor = new ConstantColorTexture(new Color(1,1,1));
         String kdcolor = "\"color Kd\" \\[(\\d?\\.\\d+) (\\d?\\.\\d+) (\\d?\\.\\d+)\\]";

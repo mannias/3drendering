@@ -2,22 +2,22 @@ package edu.ar.itba.raytracer.parser;
 
 
 import edu.ar.itba.raytracer.*;
-import edu.ar.itba.raytracer.light.DirectionalLight;
-import edu.ar.itba.raytracer.light.LightProperties;
 import edu.ar.itba.raytracer.properties.Color;
-import edu.ar.itba.raytracer.properties.Transform;
 import edu.ar.itba.raytracer.texture.Texture;
-import edu.ar.itba.raytracer.vector.Vector4;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class FileInput {
 
     private final BufferedReader file;
     private final Scene scene;
+    private final HashMap<String, Texture> textureMap = new HashMap<>();
+    private final HashMap<String, Material> materialMap = new HashMap<>();
 
     public FileInput(File file) throws FileNotFoundException {
         this.file = new BufferedReader(new FileReader(file));
@@ -42,11 +42,6 @@ public class FileInput {
                 }
             }
 
-            final Transform light2Transform = new Transform();
-            light2Transform.setPosition(new Vector4(-2, 5, 5, 1));
-            final LightProperties light2Properties = new LightProperties(new Color(
-                    1f, 1f, 1f));
-            scene.addLight(new DirectionalLight(new Vector4(0,-1,1,0), light2Properties));
             final long start = System.currentTimeMillis();
             KdTree tree = KdTree.from(scene);
             System.out.println("Finished building tree in "
@@ -63,28 +58,72 @@ public class FileInput {
     }
 
     private void parseWorld() throws IOException {
-        String line;
+        String line, filename;
+        final String filerx = "Include \"([^\"]+)\"";
+        Matcher m;
         while(!(line = file.readLine()).contains("WorldEnd")){
             if(line.contains("AttributeBegin")){
-                parseAttribute();
+                parseAttribute(file);
+            }else if(line.contains("Include")){
+                if((m = Pattern.compile(filerx).matcher(line)).find()) {
+                    filename = m.group(1);
+                    if(filename.contains("lxm")){
+                        parseLxm(filename);
+                    }else if(filename.contains("lxo")){
+                        parseLxo(filename);
+                    }
+                }
             }
         }
     }
 
-    private void parseAttribute() throws IOException {
+    private void parseLxm(String filename){
+        String line;
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(filename));
+            while((line = reader.readLine()) != null) {
+                if(line.contains("Texture")) {
+                    TextureParser.parseTexture(line, textureMap);
+                }else if(line.contains("MakeNamedMaterial")){
+                    MaterialParser.parseNamedMaterial(line,materialMap,textureMap);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void parseLxo(String filename){
+        String line;
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(filename));
+            while((line = reader.readLine()) != null) {
+                if(line.contains("AttributeBegin")) {
+                    parseAttribute(reader);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
+    private void parseAttribute(BufferedReader reader) throws IOException {
         String line;
         Material material = null;
         Instance instance = null;
-        HashMap<String, Texture> textureMap = new HashMap<>();
-        while(!(line = file.readLine()).contains("AttributeEnd")){
-            if(line.contains("Material")){
+        while(!(line = reader.readLine()).contains("AttributeEnd")){
+            if(line.contains("NamedMaterial")){
+                material = MaterialParser.getNamedMaterial(line,materialMap);
+            }else if(line.contains("Material")){
                 material = MaterialParser.Parse(line, textureMap);
             }else if(line.contains("Shape") && line.contains("mesh")){
-                instance = ShapeParser.ParseMesh(line,material,file);
+                instance = ShapeParser.ParseMesh(line, reader);
             }else if(line.contains("Shape")){
                 instance = ShapeParser.Parse(line, material);
             }else if(line.contains("Texture")){
-                TextureParser.parseTexture(line,textureMap);
+                TextureParser.parseTexture(line, textureMap);
             }else if(line.contains("LightSource")){
                 scene.addLight(LightParser.parseLight(line));
             }else if(line.contains("TransformBegin")){

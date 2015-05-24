@@ -1,5 +1,6 @@
 package edu.ar.itba.raytracer.parser;
 
+import edu.ar.itba.raytracer.light.DirectionalLight;
 import edu.ar.itba.raytracer.light.Light;
 import edu.ar.itba.raytracer.light.LightProperties;
 import edu.ar.itba.raytracer.light.PointLight;
@@ -17,7 +18,7 @@ public class LightParser {
         if(line.contains("point")){
             light = parsePointLight(line);
         }else if(line.contains("distant")){
-
+            light = parseDistantLight(line);
         }else if(line.contains("infinite")){
 
         }
@@ -40,5 +41,29 @@ public class LightParser {
         transform.setPosition(locationPoint);
         return new PointLight(transform, new LightProperties(lightColor));
 
+    }
+
+    private static Light parseDistantLight(String line){
+        final String colorrx = "\"color l\" \\[(\\d?\\.\\d+) (\\d?\\.\\d+) (\\d?\\.\\d+)\\]";
+        final String fromrx = "\"point from\" \\[(\\d?\\.\\d+) (\\d?\\.\\d+) (\\d?\\.\\d+)\\]";
+        final String torx = "\"point from\" \\[(\\d?\\.\\d+) (\\d?\\.\\d+) (\\d?\\.\\d+)\\]";
+        Matcher m;
+        Vector3 fromPoint = new Vector3(0,0,0);
+        Vector3 toPoint = new Vector3(1,1,1);
+        Color lightColor = new Color(1,1,1);
+        if((m = Pattern.compile(colorrx).matcher(line)).find()) {
+            lightColor = new Color(Double.valueOf(m.group(1)), Double.valueOf(m.group(2)), Double.valueOf(m.group(3)));
+        }
+        if((m = Pattern.compile(fromrx).matcher(line)).find()) {
+            fromPoint = new Vector3(Double.valueOf(m.group(1)), Double.valueOf(m.group(2)), Double.valueOf(m.group(3)));
+        }
+        if((m = Pattern.compile(torx).matcher(line)).find()) {
+            toPoint = new Vector3(Double.valueOf(m.group(1)), Double.valueOf(m.group(2)), Double.valueOf(m.group(3)));
+        }
+        return new DirectionalLight(toPoint.sub(fromPoint), new LightProperties(lightColor));
+    }
+
+    private static Light parseInfiniteLight(String line){
+        return null;
     }
 }
