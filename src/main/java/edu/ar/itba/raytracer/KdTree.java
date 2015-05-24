@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -14,10 +13,10 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 
-import edu.ar.itba.raytracer.GeometricObject.AABB;
-import edu.ar.itba.raytracer.GeometricObject.PerfectSplits;
 import edu.ar.itba.raytracer.shape.CustomStack;
-import edu.ar.itba.raytracer.shape.Triangle;
+import edu.ar.itba.raytracer.shape.GeometricObject;
+import edu.ar.itba.raytracer.shape.GeometricObject.AABB;
+import edu.ar.itba.raytracer.shape.GeometricObject.PerfectSplits;
 import edu.ar.itba.raytracer.vector.Vector4;
 
 public class KdTree implements Serializable {
@@ -403,10 +402,6 @@ public class KdTree implements Serializable {
 
 	private AABB rootBb;
 
-	private static int leaves;
-	private static double amount;
-	private static double depth;
-
 	private static final int MAX_DEPTH = 50;
 
 	private static KdNode recBuild(final int depth,
@@ -420,9 +415,6 @@ public class KdTree implements Serializable {
 
 		if (shapes.isEmpty() || depth > MAX_DEPTH || p == null
 				|| p.minCost >= shapes.size() * cisec || prevSplits.contains(p)) {
-			leaves++;
-			amount += shapes.size();
-			KdTree.depth += depth;
 			return new KdLeafNode(shapes);
 		}
 
@@ -520,16 +512,14 @@ public class KdTree implements Serializable {
 	}
 
 	private static class TriangleClassification {
-		final Collection<GeometricObject> tl, tr, tp;
+		final Collection<GeometricObject> tl, tr;
 		final Map<GeometricObject, Integer> sides;
 
 		public TriangleClassification(final Collection<GeometricObject> tl,
 				final Collection<GeometricObject> tr,
-				final Collection<GeometricObject> tp,
 				final Map<GeometricObject, Integer> sides) {
 			this.tl = tl;
 			this.tr = tr;
-			this.tp = tp;
 			this.sides = sides;
 		}
 	}
@@ -567,7 +557,6 @@ public class KdTree implements Serializable {
 
 		final Collection<GeometricObject> tl = new ArrayList<>();
 		final Collection<GeometricObject> tr = new ArrayList<>();
-		final Collection<GeometricObject> tp = new ArrayList<>();
 
 		for (final Entry<GeometricObject, Integer> e : sides.entrySet()) {
 			switch (e.getValue()) {
@@ -585,7 +574,7 @@ public class KdTree implements Serializable {
 			}
 		}
 
-		return new TriangleClassification(tl, tr, tp, sides);
+		return new TriangleClassification(tl, tr, sides);
 	}
 
 	private static class EventClassification {
@@ -809,8 +798,6 @@ public class KdTree implements Serializable {
 					minCollision = collision;
 				}
 			}
-
-			Triangle t;
 
 			if (minCollision != null) {
 				if (minDistance <= tFar + EPSILON) {

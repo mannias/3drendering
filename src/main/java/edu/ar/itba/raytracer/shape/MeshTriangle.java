@@ -1,6 +1,8 @@
-package edu.ar.itba.raytracer;
+package edu.ar.itba.raytracer.shape;
 
-import edu.ar.itba.raytracer.shape.CustomStack;
+import edu.ar.itba.raytracer.Ray;
+import edu.ar.itba.raytracer.RayCollisionInfo;
+import edu.ar.itba.raytracer.vector.Vector2;
 import edu.ar.itba.raytracer.vector.Vector4;
 
 public class MeshTriangle extends GeometricObject {
@@ -14,6 +16,10 @@ public class MeshTriangle extends GeometricObject {
 	private final Vector4 n0;
 	private final Vector4 n1;
 	private final Vector4 n2;
+
+//	private final Vector2 uv0;
+//	private final Vector2 uv1;
+//	private final Vector2 uv2;
 
 	private final Vector4 e1;
 	private final Vector4 e2;
@@ -31,6 +37,10 @@ public class MeshTriangle extends GeometricObject {
 		this.n1.normalize();
 		this.n2 = n2;
 		this.n2.normalize();
+
+//		this.uv0 = uv0;
+//		this.uv1 = uv1;
+//		this.uv2 = uv2;
 
 		e1 = new Vector4(vertex1);
 		e1.sub(vertex0);
@@ -54,14 +64,14 @@ public class MeshTriangle extends GeometricObject {
 
 		final double u = invDiv * t.dot(p);
 
-		if (u < 0 || u > 1) {
+		if (u < EPSILON || u > 1 + EPSILON) {
 			return null;
 		}
 
 		final Vector4 q = t.cross(e1);
 
 		final double v = invDiv * d.dot(q);
-		if (v < 0 || u + v > 1) {
+		if (v < EPSILON || u + v > 1 + EPSILON) {
 			return null;
 		}
 
@@ -71,23 +81,29 @@ public class MeshTriangle extends GeometricObject {
 		}
 
 		final RayCollisionInfo rci = new RayCollisionInfo(this, ray, dist);
+
+//		final double interpolatedU = uv0.x * (1 - u - v) + uv1.x * u + uv2.x
+//				* v;
+//		final double interpolatedV = uv0.y * (1 - u - v) + uv1.y * u + uv2.y
+//				* v;
+
+//		rci.u = interpolatedU;
+//		rci.v = interpolatedV;
+
 		final Vector4 normal = new Vector4(n0);
 		normal.scalarMult(1 - u - v);
 
 		final Vector4 normal1 = new Vector4(n1);
-		normal1.scalarMult(v);
+		normal1.scalarMult(u);
 
 		final Vector4 normal2 = new Vector4(n2);
-		normal2.scalarMult(u);
+		normal2.scalarMult(v);
 
 		normal.add(normal1);
 		normal.add(normal2);
-		
-		
-//		rci.normal = normal;
-	
-		rci.normal = e1.cross(e2);
-		
+
+		rci.normal = normal;
+
 		return rci;
 	}
 

@@ -2,7 +2,6 @@ package edu.ar.itba.raytracer.parser;
 
 import edu.ar.itba.raytracer.Instance;
 import edu.ar.itba.raytracer.Material;
-import edu.ar.itba.raytracer.MeshTriangle;
 import edu.ar.itba.raytracer.shape.*;
 import edu.ar.itba.raytracer.vector.Vector3;
 import edu.ar.itba.raytracer.vector.Vector4;

@@ -45,17 +45,13 @@ public class CameraParser {
             position = new Vector3(Integer.valueOf(m.group(1)),Integer.valueOf(m.group(2)),Integer.valueOf(m.group(3)));
             target = new Vector3(Integer.valueOf(m.group(4)),Integer.valueOf(m.group(5)),Integer.valueOf(m.group(6)));
             up = new Vector3(Integer.valueOf(m.group(7)),Integer.valueOf(m.group(8)),Integer.valueOf(m.group(9)));
-
         }
-
-
-
     }
 
     public static Camera getCamera(Scene scene){
         Transform cameraTransform = new Transform();
         cameraTransform.setPosition(new Vector4(-1.5,0,0,1));
         cameraTransform.setRotation(new Vector4(0, 90, 0,0));
-        return scene.addCamera(width, height, fov, cameraTransform);
+        return scene.addCamera(width, height, fov, position, target, up);
     }
 }

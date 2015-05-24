@@ -9,7 +9,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import edu.ar.itba.raytracer.light.Light;
 import edu.ar.itba.raytracer.properties.Color;
-import edu.ar.itba.raytracer.properties.Transform;
 import edu.ar.itba.raytracer.shape.CustomStack;
 import edu.ar.itba.raytracer.vector.Vector4;
 
@@ -38,16 +37,18 @@ public class Camera extends SceneElement {
 	private final Color[][] picture;
 
 	private Vector4 forwardVector;
-	private Vector4 heightVector;
-	private Vector4 widthVector;
+
+	private Vector4 w;
+	private Vector4 u;
+	private Vector4 v;
 
 	private final Vector4[] pixelPoints;
 
 	private final Scene scene;
 
 	public Camera(final Scene scene, final int pictureWidth,
-			final int pictureHeight, final double fov, final Transform transform) {
-		super(transform);
+			final int pictureHeight, final double fov, final Vector4 position,
+			final Vector4 lookAt, final Vector4 up) {
 		this.scene = scene;
 		this.pictureWidth = pictureWidth;
 		this.pictureHeight = pictureHeight;
@@ -55,47 +56,33 @@ public class Camera extends SceneElement {
 		picture = new Color[pictureHeight][pictureWidth];
 		initPicture();
 
-		forwardVector = new Vector4(0, 0, 1, 0).rotate(getTransform()
-				.getRotation());
-		forwardVector.scalarMult((double) distToPixels);
-		heightVector = new Vector4(0, 1, 0, 0).rotate(getTransform()
-				.getRotation());
-		widthVector = new Vector4(1, 0, 0, 0).rotate(getTransform()
-				.getRotation());
+		w = new Vector4(lookAt);
+		w.sub(position);
+		w.normalize();
+
+		u = up.cross(w);
+		u.normalize();
+
+		v = w.cross(u);
+
+		forwardVector = new Vector4(w);
+		forwardVector.scalarMult(distToPixels);
+		// forwardVector.scalarMult(-1);
 
 		pixelPoints = new Vector4[pictureHeight * pictureWidth];
 		for (int i = 0; i < pictureHeight * pictureWidth; i++) {
 			final int x = i % pictureWidth;
 			final int y = i / pictureWidth;
 			pixelPoints[i] = new Vector4(forwardVector);
-			final Vector4 aux1 = new Vector4(heightVector);
+			final Vector4 aux1 = new Vector4(v);
 			aux1.scalarMult(-y + pictureHeight / 2);
-			final Vector4 aux2 = new Vector4(widthVector);
+			final Vector4 aux2 = new Vector4(w);
 			aux2.scalarMult(x - pictureWidth / 2);
 			pixelPoints[i].add(aux1);
 			pixelPoints[i].add(aux2);
 		}
 
-		position = transform.getPosition();
-	}
-
-    public void lookAt(Vector4 position, Vector4 target, Vector4 up){
-
-    }
-
-	public Camera(final Scene scene, final int pictureWidth,
-			final int pictureHeight, final double fov) {
-		this(scene, pictureWidth, pictureHeight, fov, new Transform());
-	}
-
-
-
-	public void lookAt(final Vector4 lookAt) {
-
-		final Vector4 forwardVector = new Vector4(lookAt);
-		forwardVector.sub(getTransform().getPosition());
-		forwardVector.normalize();
-
+		this.position = position;
 	}
 
 	private final Vector4 position;
@@ -111,10 +98,9 @@ public class Camera extends SceneElement {
 		// dir.add(aux2);
 		// dir.w = 0;
 
-		final Vector4 dir2 = new Vector4(forwardVector.x + heightVector.x * y
-				+ widthVector.x * x, forwardVector.y + heightVector.y * y
-				+ widthVector.y * x, forwardVector.z + heightVector.z * y
-				+ widthVector.z * x, 0);
+		final Vector4 dir2 = new Vector4(forwardVector.x + v.x * y + u.x * x,
+				forwardVector.y + v.y * y + u.y * x, forwardVector.z + v.z * y
+						+ u.z * x, 0);
 		dir2.normalize();
 		return new Ray(position, dir2);
 		// return new Ray(position, forwardVector.add(
@@ -127,8 +113,8 @@ public class Camera extends SceneElement {
 	/**
 	 * Creates a picture of what the camera is currently seeing.
 	 * 
-	 * @return a BufferedPixel with pixels representing what this
-	 *         camera is currently seeing.
+	 * @return a BufferedPixel with pixels representing what this camera is
+	 *         currently seeing.
 	 */
 	private BufferedImage takePicture() {
 		BufferedImage image = new BufferedImage(pictureWidth, pictureHeight,
@@ -195,9 +181,9 @@ public class Camera extends SceneElement {
 		return halfDim / (double) Math.tan(fov / 2 * Math.PI / 180);
 	}
 
-    public BufferedImage render(){
-        return this.render(pictureWidth,pictureHeight);
-    }
+	public BufferedImage render() {
+		return this.render(pictureWidth, pictureHeight);
+	}
 
 	public BufferedImage render(final int width, final int height) {
 		System.out.println("STARTING!!!!!");
@@ -210,7 +196,7 @@ public class Camera extends SceneElement {
 		final int pixels = width * height;
 		final int cores = Runtime.getRuntime().availableProcessors();
 
-		final int pixelsPerTask = 32 * 32;
+		final int pixelsPerTask = 1;
 		// final int pixelsPerTask = pixels;
 
 		final ForkJoinTask<?>[] threads = new ForkJoinTask[cores];
@@ -248,10 +234,10 @@ public class Camera extends SceneElement {
 									// + (p + Math.random()) / n;
 											+ (p + .5) / n;
 									stack.reset();
-									 if (x == 270 && y == 234) {
+									if (x == 332 && y == 303) {
 										System.out.println("LL");
 									}
-									Color c = shade(getPrimaryRay(ppx, ppy), 20,
+									Color c = shade(getPrimaryRay(ppx, ppy), 2,
 											stack, x == 500 && y == 250);
 									pixelRed += c.getRed();
 									pixelGreen += c.getGreen();
@@ -260,13 +246,14 @@ public class Camera extends SceneElement {
 							}
 
 							double n2 = n * n;
-							 if (x == 270 && y == 234) {
-							 picture[y][x] = new Color(1, 1, 1);
-							 continue;
-							 }
+							// if (x == 332 && y == 303) {
+							// picture[y][x] = new Color(1, 1, 1);
+							// continue;
+							// }
 
-							picture[y][x] = new Color(pixelRed / n2, pixelGreen
-									/ n2, pixelBlue / n2);
+							picture[y][width - 1 - x] = new Color(
+									pixelRed / n2, pixelGreen / n2, pixelBlue
+											/ n2);
 						}
 					}
 					System.out.println("TIME THREAD "
@@ -339,14 +326,13 @@ public class Camera extends SceneElement {
 			if (!scene.isIlluminati(collisionPointPlusDelta, light, stack)) {
 				continue;
 			}
-			
-			final Vector4 lightVersor = light.getDirection(collisionPoint);
-			
 
-//			final Vector4 lightVersor = new Vector4(light.getTransform()
-//					.getPosition());
-//			lightVersor.sub(collisionPoint);
-//			lightVersor.normalize();
+			final Vector4 lightVersor = light.getDirection(collisionPoint);
+
+			// final Vector4 lightVersor = new Vector4(light.getTransform()
+			// .getPosition());
+			// lightVersor.sub(collisionPoint);
+			// lightVersor.normalize();
 
 			final double ln = lightVersor.dot(normal);
 
@@ -368,10 +354,9 @@ public class Camera extends SceneElement {
 				if (rv > 0) {
 					final Color specular = new Color(lightColor);
 
-					
 					final Color ksAux = new Color(ks);
 					ksAux.scalarMult(Math.pow(rv, shininess));
-					
+
 					specular.mult(ksAux);
 					intensity = intensity.add(specular);
 				}
@@ -428,7 +413,7 @@ public class Camera extends SceneElement {
 
 	public RayCollisionInfo castRay(final Ray ray, final CustomStack stack,
 			boolean debug) {
-		 return scene.getTree().getCollision(Double.MAX_VALUE, ray, stack, 0);
+		return scene.getTree().getCollision(Double.MAX_VALUE, ray, stack, 0);
 	}
 
 }

@@ -16,15 +16,14 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.Parameters;
 
-import edu.ar.itba.raytracer.light.DirectionalLight;
 import edu.ar.itba.raytracer.light.LightProperties;
+import edu.ar.itba.raytracer.light.PointLight;
 import edu.ar.itba.raytracer.properties.Color;
 import edu.ar.itba.raytracer.properties.Transform;
+import edu.ar.itba.raytracer.shape.BoundedPlane;
 import edu.ar.itba.raytracer.shape.Mesh;
-import edu.ar.itba.raytracer.shape.Sphere;
-import edu.ar.itba.raytracer.shape.Triangle;
-import edu.ar.itba.raytracer.texture.ConstantColorTexture;
-import edu.ar.itba.raytracer.texture.Texture;
+import edu.ar.itba.raytracer.shape.MeshTriangle;
+import edu.ar.itba.raytracer.vector.Vector2;
 import edu.ar.itba.raytracer.vector.Vector4;
 
 public class Main {
@@ -70,27 +69,15 @@ public class Main {
 
 		System.out.println(parameters.output);
 
-		Scanner s = new Scanner(System.in);
 		final int height = 480;
 		final int width = 640;
 		BufferedImage image = null;
-		// Thread.sleep(10000);
 		Camera c = loadTestScene();
-		// while (true) {
 		for (int i = 0; i < parameters.benchmark; i++) {
 			image = c.render(width, height);
 		}
-		// try {
-		// String l = s.nextLine();
-		// x = Integer.parseInt(l);
-		// l = s.nextLine();
-		// y = Integer.parseInt(l);
-		// } catch (Exception e) {
-		//
-		// }
-		ImageIO.write(image, "png", new File("pic.png"));
-		// }
 
+		ImageIO.write(image, "png", new File("pic.png"));
 	}
 
 	public static int x;
@@ -101,6 +88,7 @@ public class Main {
 				Paths.get("C:\\Program Files\\Eclipse\\workspace\\cg-2015-05\\bunny.obj"));
 		final List<Vector4> vertexes = new ArrayList<>();
 		final List<Vector4> vertexNormals = new ArrayList<>();
+		final List<Vector2> vertexTextures = new ArrayList<>();
 		final Collection<List<Integer>> normalMap = new ArrayList<>();
 		final List<MeshTriangle> triangles = new ArrayList<>();
 		double minX = Double.MAX_VALUE;
@@ -143,31 +131,43 @@ public class Main {
 					System.out.println(Arrays.toString(tokens));
 					throw new AssertionError();
 				}
-				final String[] p1s = tokens[1].split("//");
-				final String[] p2s = tokens[2].split("//");
-				final String[] p3s = tokens[3].split("//");
+				final String[] p1s = tokens[1].split("/");
+				final String[] p2s = tokens[2].split("/");
+				final String[] p3s = tokens[3].split("/");
 
 				final int p1 = Integer.parseInt(p1s[0]);
 				final int p2 = Integer.parseInt(p2s[0]);
 				final int p3 = Integer.parseInt(p3s[0]);
 
-				normalMap.add(Arrays.asList(p1, p2, p3,
-						Integer.parseInt(p1s[1]), Integer.parseInt(p2s[1]),
-						Integer.parseInt(p3s[1])));
+				// final int pt1 = Integer.parseInt(p1s[1]);
+				// final int pt2 = Integer.parseInt(p2s[1]);
+				// final int pt3 = Integer.parseInt(p3s[1]);
+
+				final int pn1 = Integer.parseInt(p1s[2]);
+				final int pn2 = Integer.parseInt(p2s[2]);
+				final int pn3 = Integer.parseInt(p3s[2]);
+
+				normalMap.add(Arrays.asList(p1, p2, p3, pn1, pn2, pn3));
 			} else if (tokens[0].equals("vn")) {
 				final double p1 = Double.parseDouble(tokens[1]);
 				final double p2 = Double.parseDouble(tokens[2]);
 				final double p3 = Double.parseDouble(tokens[3]);
 				vertexNormals.add(new Vector4(p1, p2, p3, 0));
+			} else if (tokens[0].equals("vt")) {
+				final double p1 = Double.parseDouble(tokens[1]);
+				final double p2 = Double.parseDouble(tokens[2]);
+				vertexTextures.add(new Vector2(p1, p2));
 			}
 		}
+
+		scanner.close();
 
 		for (final List<Integer> c : normalMap) {
 			triangles.add(new MeshTriangle(vertexes.get(c.get(0) - 1), vertexes
 					.get(c.get(1) - 1), vertexes.get(c.get(2) - 1),
-					vertexNormals.get(c.get(0) - 1),
-					vertexNormals.get(c.get(1) - 1),
-					vertexNormals.get(c.get(2) - 1)));
+					vertexNormals.get(c.get(3) - 1),
+					vertexNormals.get(c.get(4) - 1),
+					vertexNormals.get(c.get(5) - 1)));
 		}
 		System.out.println(minX);
 		System.out.println(minY);
@@ -183,17 +183,15 @@ public class Main {
 	}
 
 	private static Camera loadTestScene() throws Exception {
-		final Scene scene = new Scene(new Color(1,1,1));
-		final Transform cameraTransform = new Transform();
-		cameraTransform.setPosition(new Vector4(-1.5, 0, 0, 1));
-		cameraTransform.setRotation(new Vector4(0, 90, 0, 0));
-		final Camera camera = scene.addCamera(640, 480, 60, cameraTransform);
+		final Scene scene = new Scene(new Color(1, 1, 1));
+		final Camera camera = scene.addCamera(640, 480, 60, new Vector4(2, 0,
+				0, 1), new Vector4(0, 0, 0, 1), new Vector4(0, 1, 0, 0));
 
-		// Instance i = new Instance(new Sphere2());
-		// i.material = new Material(new Color(1, 0, 0), 1, 1, 1, 1, 0, 1);
-		// i.translate(-2.5, 0, 0);
+		// Instance i = new Instance(new Sphere());
+		// i.material = Material.GOLD;
+		// i.translate(0, 0, 5);
 		// scene.add(i);
-		//
+
 		// Instance i1 = new Instance(new Sphere2());
 		// i1.material = new Material(new Color(1, .5, 0), 1, 1, 1, 1, 0, 1);
 		// scene.add(i1);
@@ -300,52 +298,61 @@ public class Main {
 
 		// for (int i = 0; i < 10; i += 2) {
 
-		final Instance ii = new Instance(parseBunny());
+		// final Instance ii = new Instance(parseBunny());
+		// ii.rotateX(-140);
+		// // ii.translate(0, 0, 5);
+		// // ii.material = new Material(new ConstantColorTexture(0, 0, 0),
+		// // new ConstantColorTexture(0.588235, 0.670588, 0.729412),
+		// // new ConstantColorTexture(.9, .9, .9), 96, 1, 1.52);
+		// ii.material = Material.GOLD;
+		// scene.add(ii);
 
-		// ii.rotateX(-138);
-		// ii.rotateY(30);
-		// ii.translate(0, -1, 0);
+		// final Instance ii = new Instance(new Sphere());
 		// BufferedImage image = ImageIO
 		// .read(new File(
 		// "C:\\Program Files\\Eclipse\\workspace\\cg-2015-05\\earth.jpg"));
-		// Texture t = new ImageTexture(image, new
-		// SphericalTextureMapping());
-		// Texture t = new ConstantColorTexture(new Color(.5, .5, .5));
+		// Texture t = new ImageTexture(image, new SphericalTextureMapping());
 		// ii.material = new Material(t, t, new ConstantColorTexture(new
-		// Color(0,0,0)), 50, 0, 1);
-		Texture t = new ConstantColorTexture(1,1,1);
-		ii.material = Material.GOLD;// new Material(t, t, t, 0, 0, 1);
-		 ii.rotateX(-140);
+		// Color(0,
+		// 0, 0)), 50, 0, 1);
+		// ii.rotateZ(90);
+		// scene.add(ii);
+
+		final Instance ii = new Instance(new BoundedPlane(new Vector4(1, 1, 0,
+				0)));
+		ii.scale(1, 2, 1);
+		ii.material = Material.GOLD;
+
 		scene.add(ii);
-		// }
 
 		final long start = System.currentTimeMillis();
 		KdTree tree = KdTree.from(scene);
 		System.out.println("Finished building tree in "
 				+ (System.currentTimeMillis() - start));
 
-//		final Transform lightTransform = new Transform();
-//		lightTransform.setPosition(new Vector4(-2, 5, -5, 1));
-//		final LightProperties lightProperties = new LightProperties(new Color(
-//				1f, 1f, 1f));
-//		scene.addLight(lightTransform, lightProperties);
-
-		final Transform light2Transform = new Transform();
-		light2Transform.setPosition(new Vector4(-2, 5, 5, 1));
-		final LightProperties light2Properties = new LightProperties(new Color(
-				1f, 1f, 1f));
-		scene.addLight(new DirectionalLight(new Vector4(0,-1,1,0), light2Properties));
-
-		// final Transform lightTransform2 = new Transform();
-		// lightTransform2.setPosition(new Vector4(-3, 10, 6, 1));
-		// final LightProperties lightProperties2 = new LightProperties(new
+		// final Transform lightTransform = new Transform();
+		// lightTransform.setPosition(new Vector4(-2, 5, -5, 1));
+		// final LightProperties lightProperties = new LightProperties(new
 		// Color(
-		// 1, 1, 1));
-		// scene.addLight(lightTransform2, lightProperties2);
+		// 1f, 1f, 1f));
+		// scene.addLight(lightTransform, lightProperties);
+
+		// final Transform light2Transform = new Transform();
+		// light2Transform.setPosition(new Vector4(-2, 5, 5, 1));
+		// final LightProperties light2Properties = new LightProperties(new
+		// Color(
+		// 1f, 1f, 1f));
+		// scene.addLight(new DirectionalLight(new Vector4(0, -1, 1, 0),
+		// light2Properties));
+
+		final Transform lightTransform2 = new Transform();
+		lightTransform2.setPosition(new Vector4(1, 0, 0, 1));
+		final LightProperties lightProperties2 = new LightProperties(new Color(
+				1, 1, 1));
+		scene.addLight(new PointLight(lightTransform2, lightProperties2));
 
 		scene.setTree(tree);
 
 		return camera;
 	}
-
 }

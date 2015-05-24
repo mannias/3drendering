@@ -19,18 +19,25 @@ public class ImageTexture implements Texture {
 		this.mapping = mapping;
 	}
 
-    public ImageTexture(final BufferedImage image){
-        this(image, null);
-    }
+	public ImageTexture(final BufferedImage image) {
+		this(image, null);
+	}
 
-    public void setMapping(TextureMapping mapping){
-        this.mapping = mapping;
-    }
+	public void setMapping(TextureMapping mapping) {
+		this.mapping = mapping;
+	}
 
 	@Override
 	public Color getColor(RayCollisionInfo collisionInfo) {
-		int[] point = mapping.getPixelCoordinates(
-				collisionInfo.getLocalCollisionPoint(), hres, vres);
+		int[] point;
+
+		if (mapping != null) {
+			point = mapping.getPixelCoordinates(
+					collisionInfo.getLocalCollisionPoint(), hres, vres);
+		} else {
+			point = new int[] { (int) (collisionInfo.v * (vres - 1)),
+					(int) (collisionInfo.u * (hres - 1)) };
+		}
 
 		int rgb = image.getRGB(point[0], point[1]);
 

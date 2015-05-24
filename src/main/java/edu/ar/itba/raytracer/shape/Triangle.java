@@ -1,9 +1,5 @@
 package edu.ar.itba.raytracer.shape;
 
-import java.util.Arrays;
-import java.util.Collection;
-
-import edu.ar.itba.raytracer.GeometricObject;
 import edu.ar.itba.raytracer.Ray;
 import edu.ar.itba.raytracer.RayCollisionInfo;
 import edu.ar.itba.raytracer.vector.Vector4;
@@ -17,8 +13,6 @@ import edu.ar.itba.raytracer.vector.Vector4;
  * >http://www.graphics.cornell.edu/pubs/1997/MT97.pdf</a>
  */
 public class Triangle extends GeometricObject {
-
-	private static final long serialVersionUID = -1070022975461108053L;
 
 	private final static double EPSILON = 0.00001;
 
@@ -45,7 +39,7 @@ public class Triangle extends GeometricObject {
 		this.normal = normal;
 		normal.normalize();
 	}
-	
+
 	public Triangle(final Vector4 vertex0, final Vector4 vertex1,
 			final Vector4 vertex2) {
 		this.vertex0 = vertex0;
@@ -97,7 +91,7 @@ public class Triangle extends GeometricObject {
 		rci.normal = normal;
 		return rci;
 	}
-	
+
 	@Override
 	public AABB getAABB() {
 		final Vector4[] vertexes = new Vector4[] { vertex0, vertex1, vertex2 };
@@ -137,7 +131,5 @@ public class Triangle extends GeometricObject {
 		return "Triangle [vertex0=" + vertex0 + ", vertex1=" + vertex1
 				+ ", vertex2=" + vertex2 + ", normal=" + normal + "]";
 	}
-	
-	
 
 }

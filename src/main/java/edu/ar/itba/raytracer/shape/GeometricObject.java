@@ -1,18 +1,17 @@
-package edu.ar.itba.raytracer;
+package edu.ar.itba.raytracer.shape;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import edu.ar.itba.raytracer.shape.CustomStack;
+import edu.ar.itba.raytracer.Material;
+import edu.ar.itba.raytracer.Ray;
+import edu.ar.itba.raytracer.RayCollisionInfo;
 import edu.ar.itba.raytracer.vector.Matrix44;
 import edu.ar.itba.raytracer.vector.Vector4;
 
-public abstract class GeometricObject implements Serializable {
-
-	private static final long serialVersionUID = 7574169749789517753L;
+public abstract class GeometricObject {
 
 	public static Matrix44 translationMatrix(final double x, final double y,
 			final double z) {
@@ -80,8 +79,8 @@ public abstract class GeometricObject implements Serializable {
 	public static class PerfectSplits {
 		Collection<Vector4> points;
 
-		Vector4[] mins = new Vector4[3];
-		Vector4[] maxs = new Vector4[3];
+		public Vector4[] mins = new Vector4[3];
+		public Vector4[] maxs = new Vector4[3];
 
 		public PerfectSplits(final Collection<Vector4> newPoints) {
 			this.points = newPoints;

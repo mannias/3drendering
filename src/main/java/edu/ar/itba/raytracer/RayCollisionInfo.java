@@ -1,5 +1,6 @@
 package edu.ar.itba.raytracer;
 
+import edu.ar.itba.raytracer.shape.GeometricObject;
 import edu.ar.itba.raytracer.vector.Vector4;
 
 public class RayCollisionInfo {
@@ -10,6 +11,7 @@ public class RayCollisionInfo {
 	private final Vector4 localCollisionPoint;
 	public Vector4 worldCollisionPoint;
 	public Vector4 normal;
+	public double u,v;
 
 	public RayCollisionInfo(GeometricObject obj, Ray ray, double distance) {
 		this.obj = obj;

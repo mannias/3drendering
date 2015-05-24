@@ -6,6 +6,7 @@ import static java.lang.Math.sin;
 import java.util.List;
 
 import edu.ar.itba.raytracer.shape.CustomStack;
+import edu.ar.itba.raytracer.shape.GeometricObject;
 import edu.ar.itba.raytracer.vector.Matrix44;
 import edu.ar.itba.raytracer.vector.Vector4;
 

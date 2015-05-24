@@ -3,15 +3,12 @@ package edu.ar.itba.raytracer.shape;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import edu.ar.itba.raytracer.GeometricObject;
 import edu.ar.itba.raytracer.KdTree;
-import edu.ar.itba.raytracer.MeshTriangle;
 import edu.ar.itba.raytracer.Ray;
 import edu.ar.itba.raytracer.RayCollisionInfo;
 
 public class Mesh extends GeometricObject {
 
-	private static final long serialVersionUID = 2143506060307002492L;
 	private final Collection<MeshTriangle> triangles;
 	private final KdTree tree;
 

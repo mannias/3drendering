@@ -1,13 +1,10 @@
 package edu.ar.itba.raytracer.shape;
 
-import edu.ar.itba.raytracer.GeometricObject;
 import edu.ar.itba.raytracer.Ray;
 import edu.ar.itba.raytracer.RayCollisionInfo;
 import edu.ar.itba.raytracer.vector.Vector4;
 
 public class Sphere extends GeometricObject {
-
-	private static final long serialVersionUID = 92320640105733127L;
 
     @Override
 	public RayCollisionInfo hit(Ray ray, final CustomStack stack, final int top) {

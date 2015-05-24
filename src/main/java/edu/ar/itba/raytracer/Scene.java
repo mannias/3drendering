@@ -7,11 +7,9 @@ import java.util.Set;
 
 import edu.ar.itba.raytracer.light.DirectionalLight;
 import edu.ar.itba.raytracer.light.Light;
-import edu.ar.itba.raytracer.light.LightProperties;
-import edu.ar.itba.raytracer.light.PointLight;
 import edu.ar.itba.raytracer.properties.Color;
-import edu.ar.itba.raytracer.properties.Transform;
 import edu.ar.itba.raytracer.shape.CustomStack;
+import edu.ar.itba.raytracer.shape.GeometricObject;
 import edu.ar.itba.raytracer.vector.Vector4;
 
 public class Scene {
@@ -36,15 +34,11 @@ public class Scene {
 		this(Color.DEFAULT_COLOR);
 	}
 
-	public Camera addCamera(final int width, final int height, final double fov) {
-		final Camera camera = new Camera(this, width, height, fov);
-		cameras.add(camera);
-		return camera;
-	}
-
 	public Camera addCamera(final int width, final int height,
-			final double fov, final Transform transform) {
-		final Camera camera = new Camera(this, width, height, fov, transform);
+			final double fov, final Vector4 position, final Vector4 lookAt,
+			final Vector4 up) {
+		final Camera camera = new Camera(this, width, height, fov, position,
+				lookAt, up);
 		cameras.add(camera);
 		return camera;
 	}
