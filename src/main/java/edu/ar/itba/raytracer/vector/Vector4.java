@@ -1,7 +1,15 @@
 package edu.ar.itba.raytracer.vector;
 
 public class Vector4 {
+	
+	public static final Vector4 I = new Vector4(1,0,0,0);
+	public static final Vector4 J = new Vector4(0,1,0,0);
+	public static final Vector4 K = new Vector4(0,0,1,0);
+	public static final Vector4 NI = new Vector4(-1,0,0,0);
+	public static final Vector4 NJ = new Vector4(0,-1,0,0);
+	public static final Vector4 NK = new Vector4(0,0,-1,0);
 
+	
 	public double x, y, z, w;
 
 	// private double norm;

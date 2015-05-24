@@ -17,15 +17,22 @@ public class MeshTriangle extends GeometricObject {
 	private final Vector4 n1;
 	private final Vector4 n2;
 
-//	private final Vector2 uv0;
-//	private final Vector2 uv1;
-//	private final Vector2 uv2;
+	private final Vector2 uv0;
+	private final Vector2 uv1;
+	private final Vector2 uv2;
 
 	private final Vector4 e1;
 	private final Vector4 e2;
 
 	public MeshTriangle(final Vector4 vertex0, final Vector4 vertex1,
 			final Vector4 vertex2, final Vector4 n0, final Vector4 n1,
+			final Vector4 n2) {
+		this(vertex0, vertex1, vertex2, null, null, null, n0, n1, n2);
+	}
+
+	public MeshTriangle(final Vector4 vertex0, final Vector4 vertex1,
+			final Vector4 vertex2, final Vector2 uv0, final Vector2 uv1,
+			final Vector2 uv2, final Vector4 n0, final Vector4 n1,
 			final Vector4 n2) {
 		this.vertex0 = vertex0;
 		this.vertex1 = vertex1;
@@ -38,9 +45,9 @@ public class MeshTriangle extends GeometricObject {
 		this.n2 = n2;
 		this.n2.normalize();
 
-//		this.uv0 = uv0;
-//		this.uv1 = uv1;
-//		this.uv2 = uv2;
+		this.uv0 = uv0;
+		this.uv1 = uv1;
+		this.uv2 = uv2;
 
 		e1 = new Vector4(vertex1);
 		e1.sub(vertex0);
@@ -82,13 +89,15 @@ public class MeshTriangle extends GeometricObject {
 
 		final RayCollisionInfo rci = new RayCollisionInfo(this, ray, dist);
 
-//		final double interpolatedU = uv0.x * (1 - u - v) + uv1.x * u + uv2.x
-//				* v;
-//		final double interpolatedV = uv0.y * (1 - u - v) + uv1.y * u + uv2.y
-//				* v;
+		if (uv0 != null) {
+			final double interpolatedU = uv0.x * (1 - u - v) + uv1.x * u
+					+ uv2.x * v;
+			final double interpolatedV = uv0.y * (1 - u - v) + uv1.y * u
+					+ uv2.y * v;
+			rci.u = interpolatedU;
+			rci.v = interpolatedV;
+		}
 
-//		rci.u = interpolatedU;
-//		rci.v = interpolatedV;
 
 		final Vector4 normal = new Vector4(n0);
 		normal.scalarMult(1 - u - v);

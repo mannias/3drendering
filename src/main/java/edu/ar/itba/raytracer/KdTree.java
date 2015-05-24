@@ -110,9 +110,7 @@ public class KdTree implements Serializable {
 
 	private static double C(final double pl, final double pr, final int nl,
 			final int nr, final double kt, final double ki) {
-		// final double red = nl == 0 || nr == 0 ? .8 : 1;
-
-		final double red = 1;
+		final double red = .8;
 		return red * (kt + ki * (pl * nl + pr * nr));
 	}
 

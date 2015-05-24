@@ -10,7 +10,7 @@ public class ImageTexture implements Texture {
 	private final int hres;
 	private final int vres;
 	private final BufferedImage image;
-	private TextureMapping mapping;
+	private final TextureMapping mapping;
 
 	public ImageTexture(final BufferedImage image, final TextureMapping mapping) {
 		this.image = image;
@@ -23,10 +23,6 @@ public class ImageTexture implements Texture {
 		this(image, null);
 	}
 
-	public void setMapping(TextureMapping mapping) {
-		this.mapping = mapping;
-	}
-
 	@Override
 	public Color getColor(RayCollisionInfo collisionInfo) {
 		int[] point;
@@ -35,8 +31,8 @@ public class ImageTexture implements Texture {
 			point = mapping.getPixelCoordinates(
 					collisionInfo.getLocalCollisionPoint(), hres, vres);
 		} else {
-			point = new int[] { (int) (collisionInfo.v * (vres - 1)),
-					(int) (collisionInfo.u * (hres - 1)) };
+			point = new int[] { (int) (collisionInfo.u * (hres - 1)),
+					(int) (collisionInfo.v * (vres - 1)) };
 		}
 
 		int rgb = image.getRGB(point[0], point[1]);

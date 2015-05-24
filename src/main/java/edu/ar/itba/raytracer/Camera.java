@@ -56,8 +56,8 @@ public class Camera extends SceneElement {
 		picture = new Color[pictureHeight][pictureWidth];
 		initPicture();
 
-		w = new Vector4(lookAt);
-		w.sub(position);
+		w = new Vector4(position);
+		w.sub(lookAt);
 		w.normalize();
 
 		u = up.cross(w);
@@ -66,7 +66,7 @@ public class Camera extends SceneElement {
 		v = w.cross(u);
 
 		forwardVector = new Vector4(w);
-		forwardVector.scalarMult(distToPixels);
+		forwardVector.scalarMult(-distToPixels);
 		// forwardVector.scalarMult(-1);
 
 		pixelPoints = new Vector4[pictureHeight * pictureWidth];
@@ -178,7 +178,7 @@ public class Camera extends SceneElement {
 			halfDim = pictureHeight / 2.0f;
 		}
 
-		return halfDim / (double) Math.tan(fov / 2 * Math.PI / 180);
+		return halfDim / Math.tan(fov / 2 * Math.PI / 180);
 	}
 
 	public BufferedImage render() {
@@ -214,7 +214,7 @@ public class Camera extends SceneElement {
 				@Override
 				public void run() {
 					final CustomStack stack = new CustomStack();
-					final int n = 1;
+					final int n = 4;
 					final long start = System.nanoTime();
 					int currentStart;
 					while ((currentStart = startPixel.getAndAdd(pixelsPerTask)) < pixels) {
@@ -228,15 +228,13 @@ public class Camera extends SceneElement {
 							for (int p = 0; p < n; p++) {
 								for (int q = 0; q < n; q++) {
 									final double ppx = x - .5 * pictureWidth
-									// + (q + Math.random()) / n;
-											+ (q + 0.5) / n;
+											+ (q + Math.random()) / n;
 									final double ppy = -y + .5 * pictureHeight
-									// + (p + Math.random()) / n;
-											+ (p + .5) / n;
+											+ (p + Math.random()) / n;
 									stack.reset();
-									if (x == 332 && y == 303) {
-										System.out.println("LL");
-									}
+									// if (x == 332 && y == 303) {
+									// System.out.println("LL");
+									// }
 									Color c = shade(getPrimaryRay(ppx, ppy), 2,
 											stack, x == 500 && y == 250);
 									pixelRed += c.getRed();
@@ -246,14 +244,17 @@ public class Camera extends SceneElement {
 							}
 
 							double n2 = n * n;
-							// if (x == 332 && y == 303) {
+							// if (x % 32 == 0 || y % 24 == 0) {
+							// if (x == 320 || y == 240) {
+							// picture[y][x] = new Color(1, 0, 1);
+							// } else {
 							// picture[y][x] = new Color(1, 1, 1);
+							// }
 							// continue;
 							// }
 
-							picture[y][width - 1 - x] = new Color(
-									pixelRed / n2, pixelGreen / n2, pixelBlue
-											/ n2);
+							picture[y][x] = new Color(pixelRed / n2, pixelGreen
+									/ n2, pixelBlue / n2);
 						}
 					}
 					System.out.println("TIME THREAD "
