@@ -11,14 +11,14 @@ import java.util.regex.Pattern;
 
 public class CameraParser {
 
-    private static Integer fov = null;
-    private static Integer width = null;
-    private static Integer height = null;
-    private static Vector4 up = null;
-    private static Vector4 position = null;
-    private static Vector4 target = null;
+    private Integer fov = 60;
+    private Integer width = 640;
+    private Integer height = 480;
+    private Vector4 up = new Vector4(0,0,1,0);
+    private Vector4 position = new Vector4(-3, -3, -1, 1);
+    private Vector4 target = new Vector4(0,0,0,0);
 
-    public static void parseFov(String line){
+    public void parseFov(String line){
         String pattern = "\"float fov\" \\[([^]]+)\\]";
         Matcher m;
         if((m = Pattern.compile(pattern).matcher(line)).find()) {
@@ -26,7 +26,7 @@ public class CameraParser {
         }
     }
 
-    public static void parseDimension(String line){
+    public void parseDimension(String line){
         Matcher m;
         String xpattern = "\"integer xresolution\" \\[([^]]+)\\]";
         if((m = Pattern.compile(xpattern).matcher(line)).find()) {
@@ -38,8 +38,8 @@ public class CameraParser {
         }
     }
 
-    public static void parseLookAt(String line){
-        final String lookAt = "lookAt (\\d+)";
+    public void parseLookAt(String line){
+        final String lookAt = "LookAt (-?\\d+) (-?\\d+) (-?\\d+) (-?\\d+) (-?\\d+) (-?\\d+) (-?\\d+) (-?\\d+) (-?\\d+)";
         Matcher m;
         if((m = Pattern.compile(lookAt).matcher(line)).find()) {
             position = new Vector3(Integer.valueOf(m.group(1)),Integer.valueOf(m.group(2)),Integer.valueOf(m.group(3)));
@@ -48,10 +48,7 @@ public class CameraParser {
         }
     }
 
-    public static Camera getCamera(Scene scene){
-        Transform cameraTransform = new Transform();
-        cameraTransform.setPosition(new Vector4(-1.5,0,0,1));
-        cameraTransform.setRotation(new Vector4(0, 90, 0,0));
+    public Camera setCamera(Scene scene){
         return scene.addCamera(width, height, fov, position, target, up);
     }
 }

@@ -96,29 +96,22 @@ public class ShapeParser {
     }
 
     private static Instance parseBox(String line){
-        System.out.println("not implemented yet");
-        return null;
-//        double width = 0d, height = 0d, depth = 0d;
-//        String name;
-//        String widths = "\"float width\" \\[(\\d+\\.\\d+)\\]";
-//        String heights = "\"float height\" \\[(\\d+\\.\\d+)\\]";
-//        String depths = "\"float depth\" \\[(\\d+\\.\\d+)\\]";
-//        String namePattern = "\"string name\" \\[\"([^\"]+)\"\\]";
-//        Matcher m;
-//        if((m = Pattern.compile(widths).matcher(line)).find()){
-//            width = Double.valueOf(m.group(1));
-//        }
-//        if((m = Pattern.compile(heights).matcher(line)).find()){
-//            height = Double.valueOf(m.group(1));
-//        }
-//        if((m = Pattern.compile(depths).matcher(line)).find()){
-//            depth = Double.valueOf(m.group(1));
-//        }
-//        if((m = Pattern.compile(namePattern).matcher(line)).find()){
-//            name = m.group(1);
-//        }
-//        //TODO: add real parameters
-//        return new Box(transform,properties);
+        double width = 0d, height = 0d, depth = 0d;
+        String name;
+        String widths = "\"float width\" \\[(\\d+\\.\\d+)\\]";
+        String heights = "\"float height\" \\[(\\d+\\.\\d+)\\]";
+        String depths = "\"float depth\" \\[(\\d+\\.\\d+)\\]";
+        Matcher m;
+        if((m = Pattern.compile(widths).matcher(line)).find()){
+            width = Double.valueOf(m.group(1));
+        }
+        if((m = Pattern.compile(heights).matcher(line)).find()){
+            height = Double.valueOf(m.group(1));
+        }
+        if((m = Pattern.compile(depths).matcher(line)).find()){
+            depth = Double.valueOf(m.group(1));
+        }
+        return new Instance(new Box(width,height,depth));
     }
 
     private static Instance parseSphere(String line){

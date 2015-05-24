@@ -26,17 +26,18 @@ public class FileInput {
 
     public void parse(){
         String line;
+        CameraParser cameraParser = new CameraParser();
         try {
             while((line = file.readLine()) != null){
                 String[] elements = line.split(" ");
                 if(elements[0].compareTo("LookAt") == 0){
-                    CameraParser.parseLookAt(line);
+                    cameraParser.parseLookAt(line);
                 }else if(elements[0].compareTo("Camera") == 0){
-                    CameraParser.parseFov(line);
+                    cameraParser.parseFov(line);
                 }else if(elements[0].compareTo("Film") == 0){
-                    CameraParser.parseDimension(line);
+                    cameraParser.parseDimension(line);
                 }else if(elements[0].compareTo("WorldBegin") == 0){
-                    CameraParser.getCamera(scene);
+                    cameraParser.setCamera(scene);
                     parseWorld();
                 }
             }
