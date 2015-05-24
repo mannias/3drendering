@@ -1,11 +1,5 @@
 package edu.ar.itba.raytracer.parser;
 
-import edu.ar.itba.raytracer.Instance;
-import edu.ar.itba.raytracer.Material;
-import edu.ar.itba.raytracer.shape.*;
-import edu.ar.itba.raytracer.vector.Vector3;
-import edu.ar.itba.raytracer.vector.Vector4;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.LinkedList;
@@ -13,9 +7,19 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import edu.ar.itba.raytracer.Instance;
+import edu.ar.itba.raytracer.Material;
+import edu.ar.itba.raytracer.shape.Mesh;
+import edu.ar.itba.raytracer.shape.MeshTriangle;
+import edu.ar.itba.raytracer.shape.Plane;
+import edu.ar.itba.raytracer.shape.Sphere;
+import edu.ar.itba.raytracer.vector.Matrix44;
+import edu.ar.itba.raytracer.vector.Vector3;
+import edu.ar.itba.raytracer.vector.Vector4;
+
 public class ShapeParser {
 
-    public static Instance Parse(String line, Material material){
+    public static Instance Parse(String line, Material material, final Matrix44 transform){
         Instance instance = null;
         if(line.contains("box")){
             instance = parseBox(line);
@@ -24,10 +28,12 @@ public class ShapeParser {
         }else if(line.contains("sphere")){
             instance = parseSphere(line);
         }
+        instance.material = material;
+        instance.transform(transform);
         return instance;
     }
 
-    public static Instance ParseMesh(String line, Material Material, BufferedReader file) throws IOException {
+    public static Instance ParseMesh(String line, Material material, BufferedReader file, final Matrix44 transform) throws IOException {
         List<Vector4> normals = null, vertex = null;
         String normalsrx = "\"normal\\[([^\"]+)\\] N\" \\[";
         String vertexrx = "\"vertex\\[([^\"]+)\\] P\" \\[";
@@ -46,6 +52,9 @@ public class ShapeParser {
             int length = Integer.valueOf(m.group(1));
             instance = new Instance(new Mesh(calculateTriangles(normals,vertex,length,file)));
         }
+        
+        instance.transform(transform);
+        instance.material = material;
         return instance;
     }
 
@@ -128,8 +137,7 @@ public class ShapeParser {
         if((m = Pattern.compile(radiusPattern).matcher(line)).find()){
             radius = Double.valueOf(m.group(1));
         }
-        Instance instance = new Instance(new Sphere());
-        instance.scale(radius, radius, radius);
+        Instance instance = new Instance(new Sphere(radius));
         return instance;
     }
 }

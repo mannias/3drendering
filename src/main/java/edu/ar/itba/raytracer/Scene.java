@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import edu.ar.itba.raytracer.light.AmbientLight;
 import edu.ar.itba.raytracer.light.DirectionalLight;
 import edu.ar.itba.raytracer.light.Light;
 import edu.ar.itba.raytracer.light.PointLight;
@@ -20,20 +21,15 @@ public class Scene {
 	private final Set<Camera> cameras = new HashSet<>();
 	private final Set<Light> lights = new HashSet<>();
 
-	private final Color ambientLight;
+	private Color ambientLight = new Color(0,0,0);
 
 	private KdTree tree;
 
-	public Scene(final Color ambientLight) {
-		this.ambientLight = ambientLight;
+	public Scene() {
 	}
 
 	public void setTree(KdTree tree) {
 		this.tree = tree;
-	}
-
-	public Scene() {
-		this(Color.DEFAULT_COLOR);
 	}
 
 	public Camera addCamera(final int width, final int height,
@@ -46,7 +42,11 @@ public class Scene {
 	}
 
 	public void addLight(final Light light) {
-		lights.add(light);
+		if (light instanceof AmbientLight) {
+			ambientLight = ambientLight.add(light.color);
+		} else {
+			lights.add(light);
+		}
 	}
 
 	public Collection<GeometricObject> getGObjects() {

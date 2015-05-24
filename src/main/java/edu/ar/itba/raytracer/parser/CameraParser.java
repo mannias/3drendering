@@ -49,10 +49,10 @@ public class CameraParser {
         }
     }
 
-    public static Camera getCamera(Scene scene){
+    public static Camera getCamera(Scene scene, final Matrix44 transform){
         Transform cameraTransform = new Transform();
         cameraTransform.setPosition(new Vector4(-1.5,0,0,1));
         cameraTransform.setRotation(new Vector4(0, 90, 0,0));
-        return scene.addCamera(width, height, fov, position, target, up, Matrix44.ID);
+        return scene.addCamera(width, height, fov, position, target, up, transform);
     }
 }

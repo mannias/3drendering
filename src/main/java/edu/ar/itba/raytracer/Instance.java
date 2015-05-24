@@ -36,8 +36,7 @@ public class Instance extends GeometricObject {
 
 	public void rotateX(final double x) {
 		final double rad = degToRad(x);
-		final Matrix44 rotX = new Matrix44(1, 0, 0, 0, 0, cos(rad), -sin(rad),
-				0, 0, sin(rad), cos(rad), 0, 0, 0, 0, 1);
+		final Matrix44 rotX = rotationXMatrix(x);
 		final Matrix44 invRotX = new Matrix44(1, 0, 0, 0, 0, cos(rad),
 				sin(rad), 0, 0, -sin(rad), cos(rad), 0, 0, 0, 0, 1);
 		rotateAroundAxis(rotX, invRotX);
@@ -45,8 +44,7 @@ public class Instance extends GeometricObject {
 
 	public void rotateY(final double y) {
 		final double rad = degToRad(y);
-		final Matrix44 rotY = new Matrix44(cos(rad), 0, sin(rad), 0, 0, 1, 0,
-				0, -sin(rad), 0, cos(rad), 0, 0, 0, 0, 1);
+		final Matrix44 rotY = rotationYMatrix(y);
 		final Matrix44 invRotY = new Matrix44(cos(rad), 0, -sin(rad), 0, 0, 1,
 				0, 0, sin(rad), 0, cos(rad), 0, 0, 0, 0, 1);
 		rotateAroundAxis(rotY, invRotY);
@@ -59,10 +57,6 @@ public class Instance extends GeometricObject {
 		final Matrix44 invRotZ = new Matrix44(cos(rad), sin(rad), 0, 0,
 				-sin(rad), cos(rad), 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
 		rotateAroundAxis(rotZ, invRotZ);
-	}
-
-	private static double degToRad(final double deg) {
-		return deg * Math.PI / 180;
 	}
 
 	private void rotateAroundAxis(final Matrix44 rot, final Matrix44 invRot) {
@@ -82,7 +76,14 @@ public class Instance extends GeometricObject {
 		invMatrixT = invMatrix.traspose();
 	}
 
-	public RayCollisionInfo hit(final Ray ray, final CustomStack stack, final int top) {
+	public void transform(final Matrix44 transform) {
+		matrix = transform;
+		invMatrix = matrix.invert();
+		invMatrixT = invMatrix.traspose();
+	}
+
+	public RayCollisionInfo hit(final Ray ray, final CustomStack stack,
+			final int top) {
 		final Vector4 invOrigin = invMatrix.multiplyVec(ray.getSource());
 		final Vector4 invDir = invMatrix.multiplyVec(ray.getDir());
 
