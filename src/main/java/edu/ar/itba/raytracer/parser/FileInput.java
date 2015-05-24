@@ -29,13 +29,13 @@ public class FileInput {
         CameraParser cameraParser = new CameraParser();
         try {
             while((line = file.readLine()) != null){
-                String[] elements = line.split(" ");
+                String[] elements = line.split("\\s");
                 if(elements[0].compareTo("LookAt") == 0){
-                    cameraParser.parseLookAt(line);
+                    cameraParser.parseLookAt(mergeLine(line, file));
                 }else if(elements[0].compareTo("Camera") == 0){
-                    cameraParser.parseFov(line);
+                    cameraParser.parseFov(mergeLine(line, file));
                 }else if(elements[0].compareTo("Film") == 0){
-                    cameraParser.parseDimension(line);
+                    cameraParser.parseDimension(mergeLine(line, file));
                 }else if(elements[0].compareTo("WorldBegin") == 0){
                     cameraParser.setCamera(scene);
                     parseWorld();
@@ -83,9 +83,9 @@ public class FileInput {
             BufferedReader reader = new BufferedReader(new FileReader(filename));
             while((line = reader.readLine()) != null) {
                 if(line.contains("Texture")) {
-                    TextureParser.parseTexture(line, textureMap);
+                    TextureParser.parseTexture(mergeLine(line, reader), textureMap);
                 }else if(line.contains("MakeNamedMaterial")){
-                    MaterialParser.parseNamedMaterial(line,materialMap,textureMap);
+                    MaterialParser.parseNamedMaterial(mergeLine(line, reader),materialMap,textureMap);
                 }
             }
         } catch (Exception e) {
@@ -117,15 +117,15 @@ public class FileInput {
             if(line.contains("NamedMaterial")){
                 material = MaterialParser.getNamedMaterial(line,materialMap);
             }else if(line.contains("Material")){
-                material = MaterialParser.Parse(line, textureMap);
+                material = MaterialParser.Parse(mergeLine(line, reader), textureMap);
             }else if(line.contains("Shape") && line.contains("mesh")){
-                instance = ShapeParser.ParseMesh(line, reader);
+                instance = ShapeParser.ParseMesh(mergeLine(line, reader));
             }else if(line.contains("Shape")){
-                instance = ShapeParser.Parse(line, material);
+                instance = ShapeParser.Parse(mergeLine(line, reader), material);
             }else if(line.contains("Texture")){
-                TextureParser.parseTexture(line, textureMap);
+                TextureParser.parseTexture(mergeLine(line, reader), textureMap);
             }else if(line.contains("LightSource")){
-                scene.addLight(LightParser.parseLight(line));
+                scene.addLight(LightParser.parseLight(mergeLine(line, reader)));
             }else if(line.contains("TransformBegin")){
                 if(instance == null){
                     throw new IllegalArgumentException("Incorrect parameter order");
@@ -143,12 +143,21 @@ public class FileInput {
         String line;
         while(!(line = file.readLine()).contains("TransformEnd")){
             if(line.contains("Translate")){
-                TransformationParser.parseTranslate(line,instance);
+                TransformationParser.parseTranslate(mergeLine(line, file),instance);
             }else if(line.contains("Rotate")){
-                TransformationParser.parseRotate(line, instance);
+                TransformationParser.parseRotate(mergeLine(line, file), instance);
             }else if(line.contains("Scale")){
-                TransformationParser.parseScale(line,instance);
+                TransformationParser.parseScale(mergeLine(line, file),instance);
             }
         }
+    }
+
+    private String mergeLine(String actual, BufferedReader reader) throws IOException {
+        StringBuilder line = new StringBuilder(actual);
+        String read;
+        while((read = reader.readLine()) != null && !read.isEmpty()){
+            line.append(read);
+        }
+        return line.toString();
     }
 }

@@ -28,28 +28,27 @@ public class ShapeParser {
         return instance;
     }
 
-    public static Instance ParseMesh(String line, BufferedReader file) throws IOException {
+    public static Instance ParseMesh(String line){
         List<Vector4> normals = null, vertex = null;
         List<Vector2> uv = null;
         final String normalsrx = "\"normal N\" \\[([^]]+)\\]";
         final String vertexrx = "\"vertex P\" \\[([^]]+)\\]";
         final String triindicesrx = "\"integer triindices\" \\[([^]]+)\\]";
         final String uvrx = "\"float uv\" \\[([^]]+)\\]";
-        Instance instance = null;
         Matcher m;
         if((m = Pattern.compile(vertexrx).matcher(line)).find()){
             vertex = parseVectors(m.group(1));
         }
-        if((m = Pattern.compile(normalsrx).matcher(file.readLine())).find()){
+        if((m = Pattern.compile(normalsrx).matcher(line)).find()){
             normals = parseVectors(m.group(1));
         }
-        if((m = Pattern.compile(uvrx).matcher(file.readLine())).find()){
+        if((m = Pattern.compile(uvrx).matcher(line)).find()){
             uv = parseUv(m.group(1));
         }
-        if((m = Pattern.compile(triindicesrx).matcher(file.readLine())).find()){
-            instance = new Instance(new Mesh(calculateTriangles(m.group(1), normals,vertex, uv)));
+        if((m = Pattern.compile(triindicesrx).matcher(line)).find()){
+            return new Instance(new Mesh(calculateTriangles(m.group(1), normals,vertex, uv)));
         }
-        return instance;
+        return null;
     }
 
     private static List<Vector4> parseVectors(String line){
@@ -85,6 +84,7 @@ public class ShapeParser {
                     uv.get(loc1),uv.get(loc2), uv.get(loc3),
                     normals.get(loc1),normals.get(loc2),normals.get(loc3)));
         }
+        return list;
     }
 
     private static Instance parsePlane(String line){
