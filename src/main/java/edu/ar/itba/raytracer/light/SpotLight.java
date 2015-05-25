@@ -1,40 +1,51 @@
 package edu.ar.itba.raytracer.light;
 
 import edu.ar.itba.raytracer.properties.Color;
+import edu.ar.itba.raytracer.vector.Matrix44;
 import edu.ar.itba.raytracer.vector.Vector4;
 
-public class SpotLight extends Light {
+public class SpotLight extends PositionLight {
 
 	private final Vector4 dir;
-	private final double angle;
-	
-	public SpotLight(final Vector4 dir, final double angle) {
-        super(new Color(1,1,1));
-		this.dir = dir;
-		this.angle = angle;
-	}
-	
-	public void m(final Vector4 x, final Vector4 w) {
-		final Vector4 L = new Vector4(x);
-		//L.sub(getTransform().getPosition());
+	private final double coneAngle;
+	private final double coneDeltaAngle;
+
+	public SpotLight(final Color color, final Vector4 from, final Vector4 to,
+			final double coneAngle, final double coneDeltaAngle,
+			final Matrix44 transform) {
+		super(color, from, transform);
+		final Vector4 dir = new Vector4(from);
+		dir.sub(to);
+
+		this.dir = transform.multiplyVec(dir);
+		this.dir.normalize();
 		
-		final double res = Math.max(0, L.dot(dir)/Math.acos(angle)) * dirac(w.sub(L));
+		this.coneAngle = coneAngle;
+		this.coneDeltaAngle = coneDeltaAngle;
 	}
-	
-	public double dirac(final Vector4 arg) {
-		if (arg.x == 0 && arg.y ==0 && arg.z == 0 && arg.w==0){
-			return 1;
+
+	@Override
+	public Color getIntensity(final Vector4 hitPoint) {
+		final Vector4 v = new Vector4(position);
+		v.sub(hitPoint);
+		v.normalize();
+
+		final double angle = Math.acos(v.dot(dir)) * 180 / Math.PI;
+		if (angle > coneAngle) {
+			return new Color(0, 0, 0);
 		}
-		return 0;
+		if (angle > coneDeltaAngle) {
+			final double portion = 1 - ((angle - coneDeltaAngle) / (coneAngle - coneDeltaAngle));
+			return new Color(Math.max(0, color.getRed() * portion), Math.max(0,
+					color.getGreen() * portion), Math.max(0, color.getBlue()
+					* portion));
+		} else
+			return this.color;
 	}
 
-    @Override
-    public Vector4 getDirection(Vector4 hitPoint) {
-        return null;
-    }
+	@Override
+	public Vector4 getDirection(final Vector4 hitPoint) {
+		return dir;
+	}
 
-    @Override
-    public Color getIntensity(Vector4 hitPoint) {
-        return null;
-    }
 }

@@ -331,7 +331,7 @@ public class Camera extends SceneElement {
 			final double ln = lightVersor.dot(normal);
 
 			if (ln > 0) {
-				final Color lightColor = light.color;
+				final Color lightColor = light.getIntensity(collisionPoint);
 
 				final Color diffuse = new Color(lightColor);
 				diffuse.scalarMult(ln);

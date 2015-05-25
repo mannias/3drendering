@@ -8,7 +8,7 @@ import java.util.Set;
 import edu.ar.itba.raytracer.light.AmbientLight;
 import edu.ar.itba.raytracer.light.DirectionalLight;
 import edu.ar.itba.raytracer.light.Light;
-import edu.ar.itba.raytracer.light.PointLight;
+import edu.ar.itba.raytracer.light.PositionLight;
 import edu.ar.itba.raytracer.properties.Color;
 import edu.ar.itba.raytracer.shape.CustomStack;
 import edu.ar.itba.raytracer.shape.GeometricObject;
@@ -67,7 +67,7 @@ public class Scene {
 		if (light instanceof DirectionalLight) {
 			return true;
 		}
-		final PointLight pointLight = (PointLight) light;
+		final PositionLight pointLight = (PositionLight) light;
 		Vector4 aux = new Vector4(pointLight.position);
 		aux.sub(point);
 		Ray ray = new Ray(point, aux);
