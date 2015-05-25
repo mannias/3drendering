@@ -4,13 +4,11 @@ import edu.ar.itba.raytracer.properties.Color;
 import edu.ar.itba.raytracer.vector.Matrix44;
 import edu.ar.itba.raytracer.vector.Vector4;
 
-public class PointLight extends Light {
+public class PointLight extends PositionLight {
 
-	public final Vector4 position;
-	
-	public PointLight(final Vector4 position, final Matrix44 transform, final Color color) {
-		super(color);
-		this.position = transform.multiplyVec(position);
+	public PointLight(final Vector4 position, final Matrix44 transform,
+			final Color color) {
+		super(color, position, transform);
 	}
 
 	public Vector4 getDirection(final Vector4 hitPoint) {
