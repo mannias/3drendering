@@ -185,7 +185,7 @@ public class Camera extends SceneElement {
 	 */
 	private double calculateDistanceToPixels(final double fov) {
 		final double halfDim;
-		if (pictureWidth < pictureHeight) {
+		if (pictureWidth > pictureHeight) {
 			halfDim = pictureWidth / 2.0f;
 		} else {
 			halfDim = pictureHeight / 2.0f;
