@@ -8,8 +8,11 @@ import java.io.IOException;
  * Created by matiasdomingues on 5/24/15.
  */
 public class Main {
-    public static void main(String[] argv) throws IOException {
-        FileInput input = new FileInput(new File("pikachu/untitled.lxs"));
-        input.parse();
+	public static void main(String[] argv) throws IOException {
+		for (int i = 0; i < 5; i++) {
+			FileInput input = new FileInput(new File("pikachu\\untitled.lxs"));
+			input.parse();
+		}
+
 	}
 }

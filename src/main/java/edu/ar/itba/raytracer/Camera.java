@@ -10,7 +10,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import edu.ar.itba.raytracer.light.Light;
 import edu.ar.itba.raytracer.properties.Color;
 import edu.ar.itba.raytracer.shape.CustomStack;
-import edu.ar.itba.raytracer.shape.Mesh;
 import edu.ar.itba.raytracer.vector.Matrix44;
 import edu.ar.itba.raytracer.vector.Vector4;
 
@@ -65,8 +64,8 @@ public class Camera extends SceneElement {
 		w.sub(lookAt);
 		w.normalize();
 
-//		final Vector4 transformedW = transform.multiplyVec(w);
-        final Vector4 transformedW = transform.multiplyVec(w);
+		// final Vector4 transformedW = transform.multiplyVec(w);
+		final Vector4 transformedW = transform.multiplyVec(w);
 		transformedW.normalize();
 
 		final Vector4 transformedUp = transform.multiplyVec(up);
@@ -227,13 +226,11 @@ public class Camera extends SceneElement {
 							for (int p = 0; p < aaSamplesSqrt; p++) {
 								for (int q = 0; q < aaSamplesSqrt; q++) {
 									final double ppx = x - .5 * pictureWidth
-//											+ (q + Math.random())
-											+ (q + .5)
-											/ aaSamplesSqrt;
+									// + (q + Math.random())
+											+ (q + .5) / aaSamplesSqrt;
 									final double ppy = -y + .5 * pictureHeight
-//											+ (p + Math.random())
-											+ (p + .5)
-											/ aaSamplesSqrt;
+									// + (p + Math.random())
+											+ (p + .5) / aaSamplesSqrt;
 									stack.reset();
 									if (x == 321 && y == 221) {
 										System.out.println("LL");
@@ -247,10 +244,10 @@ public class Camera extends SceneElement {
 							}
 
 							double n2 = aaSamples;
-//							if (x == 320 && y == 221) {
-//								picture[y][x] = new Color(1, 1, 1);
-//								continue;
-//							}
+							// if (x == 320 && y == 221) {
+							// picture[y][x] = new Color(1, 1, 1);
+							// continue;
+							// }
 
 							picture[y][x] = new Color(pixelRed / n2, pixelGreen
 									/ n2, pixelBlue / n2);
@@ -387,22 +384,28 @@ public class Camera extends SceneElement {
 			}
 
 			final double xx = 1 - (1 - cosThetaI * cosThetaI) / (eta * eta);
-			if (xx >= 0 && objectMaterial.transparency != 0) {
-				final Vector4 aux = new Vector4(tNormal);
-				aux.scalarMult(Math.sqrt(xx) - cosThetaI / eta);
-				final Vector4 refractedDir = new Vector4(v);
-				refractedDir.scalarMult(-1 / eta);
-				refractedDir.sub(aux);
-				final Vector4 aux2 = new Vector4(collisionPoint);
-				tNormal.scalarMult(.001f);
-				aux2.sub(tNormal);
-				final Ray refractedRay = new Ray(aux2, refractedDir);
+			if (xx >= 0) {
+				final Color materialRefractionColor = objectMaterial.transparency
+						.getColor(collision);
+				if (materialRefractionColor.getRed() != 0
+						|| materialRefractionColor.getGreen() != 0
+						|| materialRefractionColor.getBlue() != 0) {
+					final Vector4 aux = new Vector4(tNormal);
+					aux.scalarMult(Math.sqrt(xx) - cosThetaI / eta);
+					final Vector4 refractedDir = new Vector4(v);
+					refractedDir.scalarMult(-1 / eta);
+					refractedDir.sub(aux);
+					final Vector4 aux2 = new Vector4(collisionPoint);
+					tNormal.scalarMult(.001f);
+					aux2.sub(tNormal);
+					final Ray refractedRay = new Ray(aux2, refractedDir);
 
-				final Color refractedColor = shade(refractedRay, rayDepth - 1,
-						stack);
-				refractedColor.scalarMult(objectMaterial.transparency);
+					final Color refractedColor = shade(refractedRay,
+							rayDepth - 1, stack);
+					refractedColor.mult(materialRefractionColor);
 
-				intensity = intensity.add(refractedColor);
+					intensity = intensity.add(refractedColor);
+				}
 			}
 		}
 
