@@ -108,6 +108,7 @@ public class ShapeParser {
                         normals.get(loc1), normals.get(loc2), normals.get(loc3)));
             }
         }
+        System.out.println(list.size());
         return list;
     }
 
