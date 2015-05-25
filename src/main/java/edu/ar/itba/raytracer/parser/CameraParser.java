@@ -16,8 +16,8 @@ public class CameraParser {
     private int width = 640;
     private int height = 480;
     private Vector4 up = new Vector4(0,0,1,0);
-    private Vector4 position = new Vector4(-3, -3, -1, 1);
-    private Vector4 target = new Vector4(0,0,0,0);
+    private Vector4 position = new Vector4(1, 1, 1, 1);
+    private Vector4 target = new Vector4(0,0,0,1);
 
     public void parseFov(String line){
         String pattern = "\"float fov\" \\[([^]]+)\\]";
@@ -40,16 +40,18 @@ public class CameraParser {
     }
 
     public void parseLookAt(String line){
-        final String lookAt = "LookAt (-?\\d+) (-?\\d+) (-?\\d+) (-?\\d+) (-?\\d+) (-?\\d+) (-?\\d+) (-?\\d+) (-?\\d+)";
+        final String lookAt = "LookAt (-?\\d+.\\d+) (-?\\d+.\\d+) (-?\\d+.\\d+) (-?\\d+.\\d+) (-?\\d+.\\d+) " +
+                "(-?\\d+.\\d+) (-?\\d+.\\d+) (-?\\d+.\\d+) (-?\\d+.\\d+)";
         Matcher m;
         if((m = Pattern.compile(lookAt).matcher(line)).find()) {
-            position = new Vector3(Integer.valueOf(m.group(1)),Integer.valueOf(m.group(2)),Integer.valueOf(m.group(3)));
-            target = new Vector3(Integer.valueOf(m.group(4)),Integer.valueOf(m.group(5)),Integer.valueOf(m.group(6)));
-            up = new Vector3(Integer.valueOf(m.group(7)),Integer.valueOf(m.group(8)),Integer.valueOf(m.group(9)));
+            position = new Vector4(Double.valueOf(m.group(1)),Double.valueOf(m.group(2)),Double.valueOf(m.group(3)),1);
+            target = new Vector4(Double.valueOf(m.group(4)),Double.valueOf(m.group(5)),Double.valueOf(m.group(6)),1);
+            up = new Vector3(Double.valueOf(m.group(7)),Double.valueOf(m.group(8)),Double.valueOf(m.group(9)));
         }
     }
 
+
     public Camera setCamera(Scene scene, final Matrix44 transform){
-        return scene.addCamera(width, height, fov, position, target, up, transform);
+        return scene.addCamera(width, height, fov, position, target, up, transform,1,5);
     }
 }

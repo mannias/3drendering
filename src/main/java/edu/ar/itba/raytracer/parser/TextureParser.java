@@ -15,8 +15,8 @@ public class TextureParser {
     public static void parseTexture(String line, Map<String,Texture> textureMap) throws IOException {
         String name = null;
         String filename = null;
-        String namerx = "Texture \"([^\"]+)\" \"imagemap\"";
-        String filenamerx = "\"string filename\" \"([^\"]+)\"";
+        String namerx = "Texture \"([^\"]+)\"";
+        String filenamerx = "\"string filename\" \\[\"([^\"]+)\"\\]";
         Matcher m;
         if((m = Pattern.compile(namerx).matcher(line)).find()) {
             name = m.group(1);

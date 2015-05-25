@@ -12,7 +12,7 @@ import edu.ar.itba.raytracer.vector.Vector4;
 
 public class Instance extends GeometricObject {
 
-	private final GeometricObject obj;
+	public final GeometricObject obj;
 	private Matrix44 invMatrix = new Matrix44(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1,
 			0, 0, 0, 0, 1);
 	private Matrix44 invMatrixT = new Matrix44(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1,
@@ -94,6 +94,7 @@ public class Instance extends GeometricObject {
 			return null;
 		}
 		collision.normal = invMatrixT.multiplyVec(collision.normal);
+		collision.normal.w = 0;
 		collision.normal.normalize();
 		collision.worldCollisionPoint = matrix.multiplyVec(collision
 				.getLocalCollisionPoint());

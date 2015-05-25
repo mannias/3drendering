@@ -9,7 +9,7 @@ import java.io.IOException;
  */
 public class Main {
     public static void main(String[] argv) throws IOException {
-        FileInput input = new FileInput(new File("charizard/untitled.lxs"));
+        FileInput input = new FileInput(new File("pikachu/untitled.lxs"));
         input.parse();
 
     }

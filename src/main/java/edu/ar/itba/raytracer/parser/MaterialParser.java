@@ -56,7 +56,7 @@ public class MaterialParser {
     private static Material parseMatte(String line, Map<String,Texture> textureMap){
         Texture diffuseColor = new ConstantColorTexture(new Color(1,1,1));
         String kdcolor = "\"color Kd\" \\[(\\d?\\.\\d+) (\\d?\\.\\d+) (\\d?\\.\\d+)\\]";
-        String kdtexture = "\"texture Kd\" \"([^\"]+)\"";
+        String kdtexture = "\"texture Kd\" \\[\"([^\"]+)\"\\]";
         Matcher m;
         if((m = Pattern.compile(kdcolor).matcher(line)).find()) {
             diffuseColor = new ConstantColorTexture(new Color(Double.valueOf(m.group(1)),

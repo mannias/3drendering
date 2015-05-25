@@ -1,5 +1,7 @@
 package edu.ar.itba.raytracer.parser;
 
+import edu.ar.itba.raytracer.light.DirectionalLight;
+import edu.ar.itba.raytracer.properties.Color;
 import edu.ar.itba.raytracer.texture.Texture;
 
 import javax.imageio.ImageIO;
@@ -19,6 +21,7 @@ import edu.ar.itba.raytracer.KdTree;
 import edu.ar.itba.raytracer.Material;
 import edu.ar.itba.raytracer.Scene;
 import edu.ar.itba.raytracer.vector.Matrix44;
+import edu.ar.itba.raytracer.vector.Vector4;
 
 public class FileInput {
 
@@ -59,6 +62,12 @@ public class FileInput {
             KdTree tree = KdTree.from(scene);
             System.out.println("Finished building tree in "
                     + (System.currentTimeMillis() - start));
+
+            scene.addLight(new DirectionalLight(new Vector4(0, 0, 0, 1),
+                    new Vector4(0, 0, -1, 1), Matrix44.ID, new Color(1, 1, 1)));
+            scene.addLight(new DirectionalLight(new Vector4(0, 0, 0, 1),
+                    new Vector4(0, 0, 1, 1), Matrix44.ID, new Color(1, 1, 1)));
+
             scene.setTree(tree);
             int i = 0;
             for(Camera camera: scene.getCameras()) {

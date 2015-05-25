@@ -99,7 +99,7 @@ public class ShapeParser {
 
     private static Instance parsePlane(String line){
         Vector4 n = new Vector4(1,1,1,0);
-        String normal = "\"normal N\" \\[(-?\\d+\\.?\\d*) (-?\\d+\\.?\\d*) (-?\\d+\\.?\\d*)\\]";
+        String normal = "\"normal N\" \\[(-?\\d+\\.\\d+) (-?\\d+\\.\\d+) (-?\\d+\\.\\d+)\\]";
         Matcher m;
         if((m = Pattern.compile(normal).matcher(line)).find()){
             n = new Vector4(Double.valueOf(m.group(1)), Double.valueOf(m.group(2)),Double.valueOf(m.group(3)),0);
