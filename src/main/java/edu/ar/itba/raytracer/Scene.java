@@ -21,7 +21,7 @@ public class Scene {
 	private final Set<Camera> cameras = new HashSet<>();
 	private final Set<Light> lights = new HashSet<>();
 
-	private Color ambientLight = new Color(0,0,0);
+	private Color ambientLight = new Color(0, 0, 0);
 
 	private KdTree tree;
 
@@ -34,9 +34,10 @@ public class Scene {
 
 	public Camera addCamera(final int width, final int height,
 			final double fov, final Vector4 position, final Vector4 lookAt,
-			final Vector4 up, final Matrix44 transform) {
+			final Vector4 up, final Matrix44 transform, final int aaSamples,
+			final int rayDepth) {
 		final Camera camera = new Camera(this, width, height, fov, position,
-				lookAt, up, transform);
+				lookAt, up, transform, aaSamples, rayDepth);
 		cameras.add(camera);
 		return camera;
 	}
@@ -70,9 +71,8 @@ public class Scene {
 		Vector4 aux = new Vector4(pointLight.position);
 		aux.sub(point);
 		Ray ray = new Ray(point, aux);
-		return !tree.intersectionExists(
-				point.distanceTo(pointLight.position), ray,
-				stack, 0);
+		return !tree.intersectionExists(point.distanceTo(pointLight.position),
+				ray, stack, 0);
 	}
 
 	public Color getAmbientLight() {
