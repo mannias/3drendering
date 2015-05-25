@@ -134,7 +134,6 @@ public class FileInput {
     private void parseAttribute(BufferedReader reader) throws IOException {
         String line;
         Material material = null;
-        System.out.println("started");
         transforms.push(transforms.peek());
         while(!(line = reader.readLine()).contains("AttributeEnd")){
             if(line.contains("NamedMaterial")){
@@ -148,7 +147,6 @@ public class FileInput {
             }else if(line.contains("Texture")){
                 TextureParser.parseTexture(mergeLine(line, reader), textureMap);
             }else if(line.contains("LightSource")){
-                System.out.println("added Light!");
                 scene.addLight(LightParser.parseLight(mergeLine(line, reader), transforms.peek()));
             } else if (line.contains("TransformBegin")) {
                 parseAttribute(reader);

@@ -13,7 +13,7 @@ public class Matte extends Material{
     }
 
     public Matte(Texture tex){
-        super(new ConstantColorTexture(new Color(0,0,0)), tex,
+        super(tex, tex,
                 new ConstantColorTexture(new Color(0,0,0)),0,0,0);
     }
 }

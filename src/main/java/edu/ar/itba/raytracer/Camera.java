@@ -218,7 +218,6 @@ public class Camera extends SceneElement {
 					int currentStart;
 					while ((currentStart = startPixel.getAndAdd(pixelsPerTask)) < pixels) {
 						final int endPixel = (currentStart + pixelsPerTask)>= pixels ? pixels:currentStart + pixelsPerTask;
-                        System.out.println(currentStart + " " + endPixel);
                         for (int i = currentStart; i < endPixel; i++) {
 							final int x = i % width;
 							final int y = i / width;
