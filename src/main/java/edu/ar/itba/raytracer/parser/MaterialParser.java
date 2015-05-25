@@ -22,7 +22,7 @@ public class MaterialParser {
     final static String krtexture = "\"texture Kr\" \"([^\"]+)\"";
     final static String ktcolor = "\"color Kt\" \\[(\\d?\\.\\d+) (\\d?\\.\\d+) (\\d?\\.\\d+)\\]";
     final static String kttexture = "\"texture Kt\" \"([^\"]+)\"";
-    final static String roughnessrx = "\"float roughness\" (\\d?\\.\\d+)";
+    final static String roughnessrx = "\"float roughness\" \\[(\\d?\\.\\d+)\\]";
 
     public static Material Parse(String line,Map<String,Texture> textureMap){
         Material mat = null;
@@ -75,7 +75,7 @@ public class MaterialParser {
     }
 
     private static Material parseGlass(String line, Map<String,Texture> textureMap){
-        Texture reflectivity = new ConstantColorTexture(new Color(1.0,1.0,1.0));
+        Texture reflectivity = new ConstantColorTexture(0.588235, 0.670588, 0.729412);
         Texture transmited =  new ConstantColorTexture(new Color(1.0,1.0,1.0));
         double refractionIndex = 1.5;
 
@@ -99,7 +99,7 @@ public class MaterialParser {
         if((m = Pattern.compile(index).matcher(line)).find()) {
             refractionIndex = Double.valueOf(m.group(1));
         }
-        return new Glass(refractionIndex);
+        return new Glass(refractionIndex, transmited, reflectivity);
     }
 
     private static Material parseMirror(String line, Map<String,Texture> textureMap){

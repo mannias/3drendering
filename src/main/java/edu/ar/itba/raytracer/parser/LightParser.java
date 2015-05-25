@@ -27,7 +27,7 @@ public class LightParser {
         }else if(line.contains("spot")){
             light = parseSpotLight(line, transform);
         }else if(line.contains("point")){
-            //beware, the element itself contains the world point
+            //beware, all the elements contain the world point, so it' kind of a default now
             light = parsePointLight(line, transform);
         }
         return light;
