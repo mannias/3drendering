@@ -40,7 +40,7 @@ public class ShapeParser {
         List<Vector2> uv = null;
         Instance instance = null;
         final String normalsrx = "\"normal N\" \\[([^]]+)\\]";
-        final String vertexrx = "\"vertex P\" \\[([^]]+)\\]";
+        final String vertexrx = "\"point P\" \\[([^]]+)\\]";
         final String triindicesrx = "\"integer triindices\" \\[([^]]+)\\]";
         final String uvrx = "\"float uv\" \\[([^]]+)\\]";
         Matcher m;
@@ -98,8 +98,8 @@ public class ShapeParser {
     }
 
     private static Instance parsePlane(String line){
-        Vector4 n = new Vector4(0,0,0,0);
-        String normal = "\"normal N\" \\[(-?\\d+\\.\\d+) (-?\\d+\\.\\d+) (-?\\d+\\.\\d+)\\]";
+        Vector4 n = new Vector4(1,1,1,0);
+        String normal = "\"normal N\" \\[(-?\\d+\\.?\\d*) (-?\\d+\\.?\\d*) (-?\\d+\\.?\\d*)\\]";
         Matcher m;
         if((m = Pattern.compile(normal).matcher(line)).find()){
             n = new Vector4(Double.valueOf(m.group(1)), Double.valueOf(m.group(2)),Double.valueOf(m.group(3)),0);

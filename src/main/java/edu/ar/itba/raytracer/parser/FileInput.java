@@ -15,23 +15,23 @@ import java.util.regex.Pattern;
 import java.util.Stack;
 
 import edu.ar.itba.raytracer.Camera;
-import edu.ar.itba.raytracer.Instance;
 import edu.ar.itba.raytracer.KdTree;
 import edu.ar.itba.raytracer.Material;
 import edu.ar.itba.raytracer.Scene;
-import edu.ar.itba.raytracer.shape.GeometricObject;
 import edu.ar.itba.raytracer.vector.Matrix44;
 
 public class FileInput {
 
     private final BufferedReader file;
     private final Scene scene;
+    private final File originalFile;
     private final HashMap<String, Texture> textureMap = new HashMap<>();
     private final HashMap<String, Material> materialMap = new HashMap<>();
     final Stack<Matrix44> transforms = new Stack<>();
 
 	public FileInput(File file) throws FileNotFoundException, IOException {
 		this.file = new BufferedReader(new FileReader(file));
+        originalFile = file;
 		this.scene = new Scene();
 	}
 
@@ -42,15 +42,14 @@ public class FileInput {
         CameraParser cameraParser = new CameraParser();
         try {
             while((line = file.readLine()) != null){
-                String[] elements = line.split("\\s");
-                if(elements[0].compareTo("LookAt") == 0){
-                    cameraTransform = transforms.peek();
+                if(line.contains("LookAt")){
                     cameraParser.parseLookAt(mergeLine(line, file));
-                }else if(elements[0].compareTo("Camera") == 0){
+                }else if(line.contains("Camera")){
+                    cameraTransform = transforms.peek();
                     cameraParser.parseFov(mergeLine(line, file));
-                }else if(elements[0].compareTo("Film") == 0){
+                }else if(line.contains("Film")){
                     cameraParser.parseDimension(mergeLine(line, file));
-                }else if(elements[0].compareTo("WorldBegin") == 0){
+                }else if(line.contains("WorldBegin")){
                     cameraParser.setCamera(scene, cameraTransform);
                     parseWorld();
                 }
@@ -76,7 +75,7 @@ public class FileInput {
         final String filerx = "Include \"([^\"]+)\"";
         Matcher m;
         while(!(line = file.readLine()).contains("WorldEnd")){
-            if(line.contains("AttributeBegin")){
+            if(line.contains("AttributeBegin") || line.contains("TransformBegin")){
                 parseAttribute(file);
             }else if(line.contains("Include")){
                 if((m = Pattern.compile(filerx).matcher(line)).find()) {
@@ -94,7 +93,7 @@ public class FileInput {
     private void parseLxm(String filename){
         String line;
         try {
-            BufferedReader reader = new BufferedReader(new FileReader(filename));
+            BufferedReader reader = new BufferedReader(new FileReader(originalFile.getParent() + "/" + filename));
             while((line = reader.readLine()) != null) {
                 if(line.contains("Texture")) {
                     TextureParser.parseTexture(mergeLine(line, reader), textureMap);
@@ -110,7 +109,7 @@ public class FileInput {
     private void parseLxo(String filename){
         String line;
         try {
-            BufferedReader reader = new BufferedReader(new FileReader(filename));
+            BufferedReader reader = new BufferedReader(new FileReader(originalFile.getParent() + "/" + filename));
             while((line = reader.readLine()) != null) {
                 if(line.contains("AttributeBegin")) {
                     parseAttribute(reader);
@@ -126,7 +125,8 @@ public class FileInput {
     private void parseAttribute(BufferedReader reader) throws IOException {
         String line;
         Material material = null;
-        Instance instance = null;
+        System.out.println("started");
+        transforms.push(transforms.peek());
         while(!(line = reader.readLine()).contains("AttributeEnd")){
             if(line.contains("NamedMaterial")){
                 material = MaterialParser.getNamedMaterial(line,materialMap);
@@ -139,15 +139,19 @@ public class FileInput {
             }else if(line.contains("Texture")){
                 TextureParser.parseTexture(mergeLine(line, reader), textureMap);
             }else if(line.contains("LightSource")){
+                System.out.println("added Light!");
                 scene.addLight(LightParser.parseLight(mergeLine(line, reader), transforms.peek()));
             } else if (line.contains("TransformBegin")) {
-                transforms.push(transforms.peek());
+                parseAttribute(reader);
             } else if (line.contains("TransformEnd")) {
-                transforms.pop();
+                break;
+            } else if(line.contains("AttributeBegin")){
+                parseAttribute(reader);
             } else {
-                TransformationParser.parseTransformation(mergeLine(line, reader),transforms);
+                TransformationParser.parseTransformation(line,transforms);
             }
         }
+        transforms.pop();
     }
 
     private String mergeLine(String actual, BufferedReader reader) throws IOException {

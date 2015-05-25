@@ -9,13 +9,14 @@ public class SpotLight extends Light {
 	private final double angle;
 	
 	public SpotLight(final Vector4 dir, final double angle) {
+        super(new Color(1,1,1));
 		this.dir = dir;
 		this.angle = angle;
 	}
 	
 	public void m(final Vector4 x, final Vector4 w) {
 		final Vector4 L = new Vector4(x);
-		L.sub(getTransform().getPosition());
+		//L.sub(getTransform().getPosition());
 		
 		final double res = Math.max(0, L.dot(dir)/Math.acos(angle)) * dirac(w.sub(L));
 	}

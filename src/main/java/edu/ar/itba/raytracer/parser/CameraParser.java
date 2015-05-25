@@ -12,9 +12,9 @@ import java.util.regex.Pattern;
 
 public class CameraParser {
 
-    private Integer fov = 60;
-    private Integer width = 640;
-    private Integer height = 480;
+    private double fov = 60;
+    private int width = 640;
+    private int height = 480;
     private Vector4 up = new Vector4(0,0,1,0);
     private Vector4 position = new Vector4(-3, -3, -1, 1);
     private Vector4 target = new Vector4(0,0,0,0);
@@ -23,7 +23,7 @@ public class CameraParser {
         String pattern = "\"float fov\" \\[([^]]+)\\]";
         Matcher m;
         if((m = Pattern.compile(pattern).matcher(line)).find()) {
-            fov = Integer.valueOf(m.group(1));
+            fov = Double.valueOf(m.group(1));
         }
     }
 

@@ -18,12 +18,10 @@ public class TextureParser {
         String namerx = "Texture \"([^\"]+)\" \"imagemap\"";
         String filenamerx = "\"string filename\" \"([^\"]+)\"";
         Matcher m;
-        m = Pattern.compile(namerx).matcher(line);
-        if(m.find()) {
+        if((m = Pattern.compile(namerx).matcher(line)).find()) {
             name = m.group(1);
         }
-        m = Pattern.compile(filenamerx).matcher(line);
-        if(m.find()){
+        if((m = Pattern.compile(filenamerx).matcher(line)).find()){
             filename = m.group(1);
         }
         if(filename != null && name != null){
