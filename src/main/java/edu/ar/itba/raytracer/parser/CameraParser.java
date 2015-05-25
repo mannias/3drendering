@@ -53,6 +53,7 @@ public class CameraParser {
         Transform cameraTransform = new Transform();
         cameraTransform.setPosition(new Vector4(-1.5,0,0,1));
         cameraTransform.setRotation(new Vector4(0, 90, 0,0));
-        return scene.addCamera(width, height, fov, position, target, up, transform);
+        // TODO: Enganchar con los parametros del main.
+        return scene.addCamera(width, height, fov, position, target, up, transform,1,5);
     }
 }
