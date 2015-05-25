@@ -66,10 +66,10 @@ public class Camera extends SceneElement {
 		w.normalize();
 
 //		final Vector4 transformedW = transform.multiplyVec(w);
-        final Vector4 transformedW = transform.vecMultMat(w);
+        final Vector4 transformedW = transform.multiplyVec(w);
 		transformedW.normalize();
 
-		final Vector4 transformedUp = transform.vecMultMat(up);
+		final Vector4 transformedUp = transform.multiplyVec(up);
 		transformedUp.normalize();
 
 		u = transformedUp.cross(transformedW);
@@ -79,7 +79,6 @@ public class Camera extends SceneElement {
 
 		forwardVector = new Vector4(transformedW);
 		forwardVector.scalarMult(-distToPixels);
-
 		pixelPoints = new Vector4[pictureHeight * pictureWidth];
 		for (int i = 0; i < pictureHeight * pictureWidth; i++) {
 			final int x = i % pictureWidth;
@@ -191,7 +190,6 @@ public class Camera extends SceneElement {
 		} else {
 			halfDim = pictureHeight / 2.0f;
 		}
-
 		return halfDim / Math.tan(fov / 2 * Math.PI / 180);
 	}
 
