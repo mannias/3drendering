@@ -16,6 +16,14 @@ import java.util.regex.Pattern;
 
 public class MaterialParser {
 
+    final static String kdcolor = "\"color Kd\" \\[(\\d?\\.\\d+) (\\d?\\.\\d+) (\\d?\\.\\d+)\\]";
+    final static String kdtexture = "\"texture Kd\" \\[\"([^\"]+)\"\\]";
+    final static String krcolor = "\"color Kr\" \\[(\\d?\\.\\d+) (\\d?\\.\\d+) (\\d?\\.\\d+)\\]";
+    final static String krtexture = "\"texture Kr\" \"([^\"]+)\"";
+    final static String ktcolor = "\"color Kt\" \\[(\\d?\\.\\d+) (\\d?\\.\\d+) (\\d?\\.\\d+)\\]";
+    final static String kttexture = "\"texture Kt\" \"([^\"]+)\"";
+    final static String roughnessrx = "\"float roughness\" (\\d?\\.\\d+)";
+
     public static Material Parse(String line,Map<String,Texture> textureMap){
         Material mat = null;
         if(line.contains("matte")){
@@ -55,8 +63,6 @@ public class MaterialParser {
 
     private static Material parseMatte(String line, Map<String,Texture> textureMap){
         Texture diffuseColor = new ConstantColorTexture(new Color(1,1,1));
-        String kdcolor = "\"color Kd\" \\[(\\d?\\.\\d+) (\\d?\\.\\d+) (\\d?\\.\\d+)\\]";
-        String kdtexture = "\"texture Kd\" \\[\"([^\"]+)\"\\]";
         Matcher m;
         if((m = Pattern.compile(kdcolor).matcher(line)).find()) {
             diffuseColor = new ConstantColorTexture(new Color(Double.valueOf(m.group(1)),
@@ -69,18 +75,27 @@ public class MaterialParser {
     }
 
     private static Material parseGlass(String line, Map<String,Texture> textureMap){
-        Color reflectivity = new Color(1.0,1.0,1.0), transmited =  new Color(1.0,1.0,1.0);
+        Texture reflectivity = new ConstantColorTexture(new Color(1.0,1.0,1.0));
+        Texture transmited =  new ConstantColorTexture(new Color(1.0,1.0,1.0));
         double refractionIndex = 1.5;
-        String kr = "\"color Kr\" \\[(\\d?\\.\\d+) (\\d?\\.\\d+) (\\d?\\.\\d+)\\]";
-        String kt = "\"color Kt\" \\[(\\d?\\.\\d+) (\\d?\\.\\d+) (\\d?\\.\\d+)\\]";
+
         String index = "\"float index\" (\\d?\\.\\d+)";
         Matcher m;
-        if((m = Pattern.compile(kr).matcher(line)).find()) {
-            reflectivity = new Color(Double.valueOf(m.group(1)), Double.valueOf(m.group(2)), Double.valueOf(m.group(3)));
+        if((m = Pattern.compile(krcolor).matcher(line)).find()) {
+            reflectivity = new ConstantColorTexture(new Color(Double.valueOf(m.group(1)),
+                    Double.valueOf(m.group(2)), Double.valueOf(m.group(3))));
         }
-        if((m = Pattern.compile(kt).matcher(line)).find()) {
-            transmited = new Color(Double.valueOf(m.group(1)), Double.valueOf(m.group(2)), Double.valueOf(m.group(3)));
+        if((m= Pattern.compile(krtexture).matcher(line)).find()) {
+            reflectivity = textureMap.get(m.group(1));
         }
+        if((m = Pattern.compile(ktcolor).matcher(line)).find()) {
+            transmited = new ConstantColorTexture(new Color(Double.valueOf(m.group(1)),
+                    Double.valueOf(m.group(2)), Double.valueOf(m.group(3))));
+        }
+        if((m = Pattern.compile(kttexture).matcher(line)).find()) {
+            transmited = textureMap.get(m.group(1));
+        }
+
         if((m = Pattern.compile(index).matcher(line)).find()) {
             refractionIndex = Double.valueOf(m.group(1));
         }
@@ -89,9 +104,7 @@ public class MaterialParser {
 
     private static Material parseMirror(String line, Map<String,Texture> textureMap){
         Texture reflectivity = new ConstantColorTexture(new Color(1,1,1));
-        String kr = "\"color Kr\" \\[(\\d?\\.\\d+) (\\d?\\.\\d+) (\\d?\\.\\d+)\\]";
-        String krtexture = "\"texture Kr\" \"([^\"]+)\"";
-        Matcher m = Pattern.compile(kr).matcher(line);
+        Matcher m = Pattern.compile(krcolor).matcher(line);
         if(m.find()) {
             reflectivity = new ConstantColorTexture(new Color(Double.valueOf(m.group(1)),
                     Double.valueOf(m.group(2)), Double.valueOf(m.group(3))));
@@ -106,13 +119,10 @@ public class MaterialParser {
         double roughness = 0.001;
         Texture reflectivity = new ConstantColorTexture(new Color(1,1,1));
         Matcher m;
-        final String roughnessregexp = "\"float roughness\" (\\d?\\.\\d+)";
-        final String kr = "\"color Kr\" \\[(\\d?\\.\\d+) (\\d?\\.\\d+) (\\d?\\.\\d+)\\]";
-        String krtexture = "\"texture Kr\" \"([^\"]+)\"";
-        if((m = Pattern.compile(roughnessregexp).matcher(line)).find()) {
+        if((m = Pattern.compile(roughnessrx).matcher(line)).find()) {
             roughness = Double.valueOf(m.group(1));
         }
-        if((m = Pattern.compile(kr).matcher(line)).find()) {
+        if((m = Pattern.compile(krcolor).matcher(line)).find()) {
             reflectivity = new ConstantColorTexture(new Color(Double.valueOf(m.group(1)),
                     Double.valueOf(m.group(2)), Double.valueOf(m.group(3))));
         }

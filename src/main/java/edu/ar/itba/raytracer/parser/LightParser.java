@@ -15,20 +15,24 @@ import edu.ar.itba.raytracer.vector.Vector4;
 
 public class LightParser {
 
+    final static String colorrx = "\"color L\" \\[(\\d?\\.\\d+) (\\d?\\.\\d+) (\\d?\\.\\d+)\\]";
+    final static String from = "\"point from\" \\[(-?\\d?\\.\\d+) (-?\\d?\\.\\d+) (-?\\d?\\.\\d+)\\]";
+    final static String to = "\"point to\" \\[(-?\\d?\\.\\d+) (-?\\d?\\.\\d+) (-?\\d?\\.\\d+)\\]";
+
     public static Light parseLight(final String line, final Matrix44 transform){
         Light light = null;
-        if(line.contains("point")){
-            light = parsePointLight(line, transform);
-        }else if(line.contains("distant")){
-        	light = parseDistantLight(line, transform);
+        if(line.contains("distant")){
+            light = parseDistantLight(line, transform);
         }else if(line.contains("infinite")){
-        	light = parseInfiniteLight(line);
+            light = parseInfiniteLight(line);
+        }else if(line.contains("point")){
+            //beware, the element itself contains the world point
+            light = parsePointLight(line, transform);
         }
         return light;
     }
 
     private static Light parseInfiniteLight(String line) {
-        final String colorrx = "\"color l\" \\[(\\d?\\.\\d+) (\\d?\\.\\d+) (\\d?\\.\\d+)\\]";
         Matcher m;
         Color lightColor = new Color(1,1,1);
         if((m = Pattern.compile(colorrx).matcher(line)).find()) {
@@ -39,9 +43,6 @@ public class LightParser {
 	}
 
 	private static Light parseDistantLight(String line, Matrix44 transform) {
-    	final String colorrx = "\"color l\" \\[(\\d?\\.\\d+) (\\d?\\.\\d+) (\\d?\\.\\d+)\\]";
-        final String from = "\"point from\" \\[(\\d?\\.\\d+) (\\d?\\.\\d+) (\\d?\\.\\d+)\\]";
-        final String to = "\"point to\" \\[(\\d?\\.\\d+) (\\d?\\.\\d+) (\\d?\\.\\d+)\\]";
         Matcher m;
         Color lightColor = new Color(1,1,1);
         Vector4 fromPoint = new Vector4(0,0,0,1), toPoint = new Vector4(1,1,1,1);
@@ -59,15 +60,13 @@ public class LightParser {
 	}
 
 	private static Light parsePointLight(final String line, final Matrix44 transform){
-        final String colorrx = "\"color L\" \\[(\\d?\\.\\d+) (\\d?\\.\\d+) (\\d?\\.\\d+)\\]";
-        final String locationrx = "\"point from\" \\[(\\d?\\.\\d+) (\\d?\\.\\d+) (\\d?\\.\\d+)\\]";
         Matcher m;
         Vector4 locationPoint = new Vector4(0,0,0,1);
         Color lightColor = new Color(1,1,1);
         if((m = Pattern.compile(colorrx).matcher(line)).find()) {
             lightColor = new Color(Double.valueOf(m.group(1)), Double.valueOf(m.group(2)), Double.valueOf(m.group(3)));
         }
-        if((m = Pattern.compile(locationrx).matcher(line)).find()) {
+        if((m = Pattern.compile(from).matcher(line)).find()) {
             locationPoint = new Vector4(Double.valueOf(m.group(1)), Double.valueOf(m.group(2)),
                     Double.valueOf(m.group(3)),1);
         }

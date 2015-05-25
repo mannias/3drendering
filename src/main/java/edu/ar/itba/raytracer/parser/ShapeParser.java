@@ -63,9 +63,14 @@ public class ShapeParser {
 
     private static List<Vector4> parseVectors(String line){
         List<Vector4> list = new LinkedList<>();
-        String[] elems = line.split("\\s");
+        String[] elems = line.split("[\\s]+");
         for(int i = 0; i+2 < elems.length; i+=3){
-            list.add(new Vector3(Double.valueOf(elems[i]), Double.valueOf(elems[i+1]), Double.valueOf(elems[i+2])));
+            if(i == 0 && elems[i].isEmpty()){
+                i++;
+            }
+            list.add(new Vector3(Double.valueOf(elems[i]), Double.valueOf(elems[i + 1]), Double.valueOf(elems[i + 2])));
+
+
         }
         return list;
     }
@@ -85,14 +90,23 @@ public class ShapeParser {
     private static List<MeshTriangle> calculateTriangles(String line, List<Vector4> normals,
                                                          List<Vector4> vertex, List<Vector2> uv){
         List<MeshTriangle> list = new LinkedList<>();
-        String[] elems = line.split("\\s");
+        String[] elems = line.split("[\\s]+");
+        System.out.println(normals.size() + " "+ vertex.size());
         for(int i = 0; i+2 < elems.length; i+=3){
+            if(i == 0 && elems[i].isEmpty()){
+                i++;
+            }
             int loc1 = Integer.valueOf(elems[i]);
             int loc2 = Integer.valueOf(elems[i+1]);
             int loc3 = Integer.valueOf(elems[i+2]);
-            list.add(new MeshTriangle(vertex.get(loc1),vertex.get(loc2),vertex.get(loc3),
-                    uv.get(loc1),uv.get(loc2), uv.get(loc3),
-                    normals.get(loc1),normals.get(loc2),normals.get(loc3)));
+            if(uv == null){
+                list.add(new MeshTriangle(vertex.get(loc1),vertex.get(loc2),vertex.get(loc3),
+                        normals.get(loc1),normals.get(loc2),normals.get(loc3)));
+            }else {
+                list.add(new MeshTriangle(vertex.get(loc1), vertex.get(loc2), vertex.get(loc3),
+                        uv.get(loc1), uv.get(loc2), uv.get(loc3),
+                        normals.get(loc1), normals.get(loc2), normals.get(loc3)));
+            }
         }
         return list;
     }

@@ -157,7 +157,7 @@ public class FileInput {
     }
 
     private String mergeLine(String actual, BufferedReader reader) throws IOException {
-        StringBuilder line = new StringBuilder(actual);
+        StringBuilder line = new StringBuilder(actual.replaceAll("[\\t]+",""));
         String read;
         while((read = reader.readLine()) != null && !read.isEmpty()){
             line.append(read.replaceAll("[\\t]+", " "));
