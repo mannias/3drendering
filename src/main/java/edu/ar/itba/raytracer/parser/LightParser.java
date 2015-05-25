@@ -62,7 +62,7 @@ public class LightParser {
         final String colorrx = "\"color L\" \\[(\\d?\\.\\d+) (\\d?\\.\\d+) (\\d?\\.\\d+)\\]";
         final String locationrx = "\"point from\" \\[(\\d?\\.\\d+) (\\d?\\.\\d+) (\\d?\\.\\d+)\\]";
         Matcher m;
-        Vector4 locationPoint = new Vector3(0,0,0);
+        Vector4 locationPoint = new Vector4(0,0,0,1);
         Color lightColor = new Color(1,1,1);
         if((m = Pattern.compile(colorrx).matcher(line)).find()) {
             lightColor = new Color(Double.valueOf(m.group(1)), Double.valueOf(m.group(2)), Double.valueOf(m.group(3)));

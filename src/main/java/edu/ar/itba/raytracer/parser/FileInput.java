@@ -62,12 +62,7 @@ public class FileInput {
             KdTree tree = KdTree.from(scene);
             System.out.println("Finished building tree in "
                     + (System.currentTimeMillis() - start));
-
-            scene.addLight(new DirectionalLight(new Vector4(0, 0, 0, 1),
-                    new Vector4(0, 0, -1, 1), Matrix44.ID, new Color(1, 1, 1)));
-            scene.addLight(new DirectionalLight(new Vector4(0, 0, 0, 1),
-                    new Vector4(0, 0, 1, 1), Matrix44.ID, new Color(1, 1, 1)));
-
+            
             scene.setTree(tree);
             int i = 0;
             for(Camera camera: scene.getCameras()) {
