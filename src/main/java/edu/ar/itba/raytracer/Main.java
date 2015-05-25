@@ -74,9 +74,8 @@ public class Main {
 			}
 		}
 
-		final int height = 480;
-		final int width = 640;
 		BufferedImage image = null;
+
 		final Scene scene = new FileInput(new File(parameters.input)).parse(
 				parameters.aaSamples, parameters.rayDepth);
 
@@ -84,7 +83,7 @@ public class Main {
 		// one.
 		final Camera c = scene.getCameras().iterator().next();
 		for (int i = 0; i < parameters.benchmark; i++) {
-			image = c.render(width, height);
+			image = c.render();
 		}
 
 		ImageIO.write(image, extension, new File(parameters.output));
