@@ -5,6 +5,9 @@ import edu.ar.itba.raytracer.properties.Color;
 
 public class ConstantColorTexture implements Texture {
 
+	public static final ConstantColorTexture BLACK = new ConstantColorTexture(
+			0, 0, 0);
+
 	private final Color color;
 
 	public ConstantColorTexture(final Color color) {

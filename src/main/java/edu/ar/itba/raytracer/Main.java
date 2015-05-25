@@ -20,6 +20,7 @@ import edu.ar.itba.raytracer.light.AmbientLight;
 import edu.ar.itba.raytracer.light.PointLight;
 import edu.ar.itba.raytracer.properties.Color;
 import edu.ar.itba.raytracer.shape.Box;
+import edu.ar.itba.raytracer.shape.GeometricObject;
 import edu.ar.itba.raytracer.shape.Mesh;
 import edu.ar.itba.raytracer.shape.MeshTriangle;
 import edu.ar.itba.raytracer.texture.ConstantColorTexture;
@@ -283,18 +284,18 @@ public class Main {
 		// .read(new File(
 		// "C:\\Program Files\\Eclipse\\workspace\\cg-2015-05\\earth.jpg"));
 		// Texture t = new ImageTexture(image, new SphericalTextureMapping());
-		final Material GLASS = new Material(new ConstantColorTexture(0.0, 0.0,
-				0.0), new ConstantColorTexture(0.588235, 0.670588, 0.729412),
-				new ConstantColorTexture(0.9, 0.9, 0.9), 96, 1, 1.52);
-
-		final Instance box = new Instance(new Box(1, 1, 1));
-		box.translate(-2.5, 0, 0);
-		box.material = GLASS;
-
-		// new Material(new ConstantColorTexture(0, 0, 0),
-		// new ConstantColorTexture(0,0,0), new ConstantColorTexture(0,
-		// 0, 0), 0, 1, 1.52);
-		scene.add(box);
+//		final Material GLASS = new Material(new ConstantColorTexture(0.0, 0.0,
+//				0.0), new ConstantColorTexture(0.588235, 0.670588, 0.729412),
+//				new ConstantColorTexture(0.9, 0.9, 0.9), 96, 1, 1.52);
+//
+//		final Instance box = new Instance(new Box(1, 1, 1));
+//		box.translate(-2.5, 0, 0);
+//		box.material = GLASS;
+//
+//		// new Material(new ConstantColorTexture(0, 0, 0),
+//		// new ConstantColorTexture(0,0,0), new ConstantColorTexture(0,
+//		// 0, 0), 0, 1, 1.52);
+//		scene.add(box);
 
 		// final Instance mirror = new Instance(new Plane(Vector4.I));
 		// mirror.translate(-3, 0, 0);
@@ -390,7 +391,7 @@ public class Main {
 		// scene.addLight(new DirectionalLight(new Vector4(0, -1, 1, 0),
 		// light2Properties));
 
-		scene.addLight(new PointLight(new Vector4(0, 5, 0, 1), Matrix44.ID,
+		scene.addLight(new PointLight(new Vector4(0, 5, 0, 1), GeometricObject.translationMatrix(0, 0, 1),
 				new Color(1, 1, 1)));
 		// scene.addLight(new PointLight(new Vector4(0,0, 3, 1), Matrix44.ID,
 		// new Color(1, 1, 1)));
