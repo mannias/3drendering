@@ -202,7 +202,7 @@ public class Camera extends SceneElement {
 		final int pixels = width * height;
 		final int cores = Runtime.getRuntime().availableProcessors();
 
-		final int pixelsPerTask = 32*32;
+		final int pixelsPerTask = 32 * 32;
 		// final int pixelsPerTask = pixels;
 
 		final ForkJoinTask<?>[] threads = new ForkJoinTask[cores];
@@ -217,8 +217,9 @@ public class Camera extends SceneElement {
 					final long start = System.nanoTime();
 					int currentStart;
 					while ((currentStart = startPixel.getAndAdd(pixelsPerTask)) < pixels) {
-						final int endPixel = (currentStart + pixelsPerTask)>= pixels ? pixels:currentStart + pixelsPerTask;
-                        for (int i = currentStart; i < endPixel; i++) {
+						final int endPixel = (currentStart + pixelsPerTask) >= pixels ? pixels
+								: currentStart + pixelsPerTask;
+						for (int i = currentStart; i < endPixel; i++) {
 							final int x = i % width;
 							final int y = i / width;
 							double pixelRed = 0;
@@ -227,15 +228,17 @@ public class Camera extends SceneElement {
 							for (int p = 0; p < aaSamplesSqrt; p++) {
 								for (int q = 0; q < aaSamplesSqrt; q++) {
 									final double ppx = x - .5 * pictureWidth
-											+ (q + Math.random())
+//											+ (q + Math.random())
+											+ (q + .5)
 											/ aaSamplesSqrt;
 									final double ppy = -y + .5 * pictureHeight
-											+ (p + Math.random())
+//											+ (p + Math.random())
+											+ (p + .5)
 											/ aaSamplesSqrt;
 									stack.reset();
-									// if (x == 332 && y == 303) {
-									// System.out.println("LL");
-									// }
+									if (x == 321 && y == 221) {
+										System.out.println("LL");
+									}
 									Color c = shade(getPrimaryRay(ppx, ppy),
 											rayDepth, stack);
 									pixelRed += c.getRed();
@@ -245,14 +248,10 @@ public class Camera extends SceneElement {
 							}
 
 							double n2 = aaSamples;
-							// if (x % 32 == 0 || y % 24 == 0) {
-							// if (x == 320 || y == 240) {
-							// picture[y][x] = new Color(1, 0, 1);
-							// } else {
-							// picture[y][x] = new Color(1, 1, 1);
-							// }
-							// continue;
-							// }
+//							if (x == 320 && y == 221) {
+//								picture[y][x] = new Color(1, 1, 1);
+//								continue;
+//							}
 
 							picture[y][x] = new Color(pixelRed / n2, pixelGreen
 									/ n2, pixelBlue / n2);

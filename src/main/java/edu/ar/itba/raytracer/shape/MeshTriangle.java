@@ -71,19 +71,19 @@ public class MeshTriangle extends GeometricObject {
 
 		final double u = invDiv * t.dot(p);
 
-		if (u < EPSILON || u > 1 + EPSILON) {
+		if (u < 0|| u > 1) {
 			return null;
 		}
 
 		final Vector4 q = t.cross(e1);
 
 		final double v = invDiv * d.dot(q);
-		if (v < EPSILON || u + v > 1 + EPSILON) {
+		if (v < 0 || u + v > 1) {
 			return null;
 		}
 
 		final double dist = invDiv * e2.dot(q);
-		if (dist < -EPSILON) {
+		if (dist < EPSILON) {
 			return null;
 		}
 

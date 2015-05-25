@@ -406,8 +406,8 @@ public class KdTree implements Serializable {
 			Collection<GeometricObject> shapes, AABB bb, final Event[] events,
 			final Set<Split> prevSplits) {
 
-		final double cisec = 1.5;
-		final double ctrav = 1;
+		final double cisec = 20;
+		final double ctrav = 15;
 
 		Split p = findPlane(shapes.size(), bb, events, ctrav, cisec);
 
@@ -715,7 +715,7 @@ public class KdTree implements Serializable {
 			for (GeometricObject ss : leaf.shapes) {
 				final RayCollisionInfo collision = ss
 						.hit(ray, stack, stack.top);
-				if (collision != null && collision.getDistance() < tFar) {
+				if (collision != null && collision.getDistance() < tFar + EPSILON) {
 					stack.top = top;
 					return true;
 				}

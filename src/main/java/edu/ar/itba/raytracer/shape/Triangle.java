@@ -83,12 +83,14 @@ public class Triangle extends GeometricObject {
 		}
 
 		final double dist = invDiv * e2.dot(q);
-		if (dist < -EPSILON) {
+		if (dist < EPSILON) {
 			return null;
 		}
 
 		final RayCollisionInfo rci = new RayCollisionInfo(this, ray, dist);
 		rci.normal = normal;
+		rci.u = u;
+		rci.v = v;
 		return rci;
 	}
 
