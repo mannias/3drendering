@@ -73,8 +73,8 @@ public class ShapeParser {
     private static List<Vector2> parseUv(String line){
         List<Vector2> list = new LinkedList<>();
         String[] elems = line.split("\\s");
-        for(int i = 0; i+1 < elems.length; i+=2){
-            list.add(new Vector2(Double.valueOf(elems[i]), Double.valueOf(elems[i+1])));
+        for(int i = 0; i < elems.length /2 ; i++){
+            list.add(new Vector2(Double.valueOf(elems[2*i]), 1- Double.valueOf(elems[2*i + 1])));
         }
         return list;
     }
