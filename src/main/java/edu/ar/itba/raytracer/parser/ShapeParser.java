@@ -6,7 +6,6 @@ import edu.ar.itba.raytracer.shape.*;
 import edu.ar.itba.raytracer.vector.Vector2;
 import edu.ar.itba.raytracer.vector.Vector3;
 import edu.ar.itba.raytracer.vector.Vector4;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.LinkedList;
@@ -14,9 +13,15 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import edu.ar.itba.raytracer.shape.Mesh;
+import edu.ar.itba.raytracer.shape.MeshTriangle;
+import edu.ar.itba.raytracer.shape.Plane;
+import edu.ar.itba.raytracer.shape.Sphere;
+import edu.ar.itba.raytracer.vector.Matrix44;
+
 public class ShapeParser {
 
-    public static Instance Parse(String line, Material material){
+    public static Instance Parse(String line, Material material, final Matrix44 transform){
         Instance instance = null;
         if(line.contains("box")){
             instance = parseBox(line);
@@ -25,12 +30,15 @@ public class ShapeParser {
         }else if(line.contains("sphere")){
             instance = parseSphere(line);
         }
+        instance.material = material;
+        instance.transform(transform);
         return instance;
     }
 
-    public static Instance ParseMesh(String line){
+    public static Instance ParseMesh(String line, Material material, final Matrix44 transform) throws IOException {
         List<Vector4> normals = null, vertex = null;
         List<Vector2> uv = null;
+        Instance instance = null;
         final String normalsrx = "\"normal N\" \\[([^]]+)\\]";
         final String vertexrx = "\"vertex P\" \\[([^]]+)\\]";
         final String triindicesrx = "\"integer triindices\" \\[([^]]+)\\]";
@@ -46,9 +54,11 @@ public class ShapeParser {
             uv = parseUv(m.group(1));
         }
         if((m = Pattern.compile(triindicesrx).matcher(line)).find()){
-            return new Instance(new Mesh(calculateTriangles(m.group(1), normals,vertex, uv)));
+            instance = new Instance(new Mesh(calculateTriangles(m.group(1), normals,vertex, uv)));
         }
-        return null;
+        instance.transform(transform);
+        instance.material = material;
+        return instance;
     }
 
     private static List<Vector4> parseVectors(String line){
@@ -123,8 +133,7 @@ public class ShapeParser {
         if((m = Pattern.compile(radiusPattern).matcher(line)).find()){
             radius = Double.valueOf(m.group(1));
         }
-        Instance instance = new Instance(new Sphere());
-        instance.scale(radius, radius, radius);
+        Instance instance = new Instance(new Sphere(radius));
         return instance;
     }
 }

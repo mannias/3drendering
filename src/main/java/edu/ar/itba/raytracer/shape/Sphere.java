@@ -5,6 +5,12 @@ import edu.ar.itba.raytracer.RayCollisionInfo;
 import edu.ar.itba.raytracer.vector.Vector4;
 
 public class Sphere extends GeometricObject {
+	
+	private final double radius;
+	
+	public Sphere(final double radius) {
+		this.radius = radius;
+	}
 
     @Override
 	public RayCollisionInfo hit(Ray ray, final CustomStack stack, final int top) {
@@ -17,20 +23,20 @@ public class Sphere extends GeometricObject {
 
 		final double l2 = lx * lx + ly * ly + lz * lz;
 
-		final double radius2 = 1;
+		final double radius2 = radius * radius;
 
 		final boolean originIsInsideSphere = l2 < radius2;
 
 		final double s = lx * rayDir.x + ly * rayDir.y + lz * rayDir.z;
 
 		if (s < 0 && !originIsInsideSphere) {
-			return null;// RayCollisionInfo.noCollision(ray);
+			return null;
 		}
 
 		final double m2 = l2 - s * s;
 
 		if (m2 > radius2) {
-			return null;// RayCollisionInfo.noCollision(ray);
+			return null;
 		}
 
 		final double q2 = radius2 - m2;
@@ -60,7 +66,7 @@ public class Sphere extends GeometricObject {
 
 	@Override
 	public AABB getAABB() {
-        return new AABB(-1, 1, -1, 1, -1, 1);
+        return new AABB(-radius, radius, -radius, radius, -radius, radius);
 	}
 
 }

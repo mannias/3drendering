@@ -5,11 +5,14 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import edu.ar.itba.raytracer.light.AmbientLight;
 import edu.ar.itba.raytracer.light.DirectionalLight;
 import edu.ar.itba.raytracer.light.Light;
+import edu.ar.itba.raytracer.light.PointLight;
 import edu.ar.itba.raytracer.properties.Color;
 import edu.ar.itba.raytracer.shape.CustomStack;
 import edu.ar.itba.raytracer.shape.GeometricObject;
+import edu.ar.itba.raytracer.vector.Matrix44;
 import edu.ar.itba.raytracer.vector.Vector4;
 
 public class Scene {
@@ -18,33 +21,32 @@ public class Scene {
 	private final Set<Camera> cameras = new HashSet<>();
 	private final Set<Light> lights = new HashSet<>();
 
-	private final Color ambientLight;
+	private Color ambientLight = new Color(0,0,0);
 
 	private KdTree tree;
 
-	public Scene(final Color ambientLight) {
-		this.ambientLight = ambientLight;
+	public Scene() {
 	}
 
 	public void setTree(KdTree tree) {
 		this.tree = tree;
 	}
 
-	public Scene() {
-		this(Color.DEFAULT_COLOR);
-	}
-
 	public Camera addCamera(final int width, final int height,
 			final double fov, final Vector4 position, final Vector4 lookAt,
-			final Vector4 up) {
+			final Vector4 up, final Matrix44 transform) {
 		final Camera camera = new Camera(this, width, height, fov, position,
-				lookAt, up);
+				lookAt, up, transform);
 		cameras.add(camera);
 		return camera;
 	}
 
 	public void addLight(final Light light) {
-		lights.add(light);
+		if (light instanceof AmbientLight) {
+			ambientLight = ambientLight.add(light.color);
+		} else {
+			lights.add(light);
+		}
 	}
 
 	public Collection<GeometricObject> getGObjects() {
@@ -64,11 +66,12 @@ public class Scene {
 		if (light instanceof DirectionalLight) {
 			return true;
 		}
-		Vector4 aux = new Vector4(light.getTransform().getPosition());
+		final PointLight pointLight = (PointLight) light;
+		Vector4 aux = new Vector4(pointLight.position);
 		aux.sub(point);
 		Ray ray = new Ray(point, aux);
 		return !tree.intersectionExists(
-				point.distanceTo(light.getTransform().getPosition()), ray,
+				point.distanceTo(pointLight.position), ray,
 				stack, 0);
 	}
 

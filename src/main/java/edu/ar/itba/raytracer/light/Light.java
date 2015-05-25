@@ -1,25 +1,15 @@
 package edu.ar.itba.raytracer.light;
 
-import edu.ar.itba.raytracer.SceneElement;
 import edu.ar.itba.raytracer.properties.Color;
-import edu.ar.itba.raytracer.properties.Transform;
+import edu.ar.itba.raytracer.vector.Matrix44;
 import edu.ar.itba.raytracer.vector.Vector4;
 
-public abstract class Light extends SceneElement {
+public abstract class Light {
 
-	private final LightProperties properties;
+	public final Color color;
 
-	public Light(final Transform transform, final LightProperties properties) {
-		super(transform);
-		this.properties = properties;
-	}
-
-	public Light() {
-		this(new Transform(), new LightProperties());
-	}
-
-	public LightProperties getProperties() {
-		return properties;
+	public Light(final Color color) {
+		this.color = color;
 	}
 
 	public abstract Vector4 getDirection(final Vector4 hitPoint);

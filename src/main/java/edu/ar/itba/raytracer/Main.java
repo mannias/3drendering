@@ -1,5 +1,9 @@
 package edu.ar.itba.raytracer;
 
+import static java.lang.Math.PI;
+import static java.lang.Math.cos;
+import static java.lang.Math.sin;
+
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.nio.file.Paths;
@@ -16,16 +20,18 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 import com.beust.jcommander.Parameters;
 
-import edu.ar.itba.raytracer.light.LightProperties;
-import edu.ar.itba.raytracer.light.PointLight;
+import edu.ar.itba.raytracer.light.AmbientLight;
+import edu.ar.itba.raytracer.light.DirectionalLight;
 import edu.ar.itba.raytracer.properties.Color;
-import edu.ar.itba.raytracer.properties.Transform;
+import edu.ar.itba.raytracer.shape.GeometricObject;
 import edu.ar.itba.raytracer.shape.Mesh;
 import edu.ar.itba.raytracer.shape.MeshTriangle;
-import edu.ar.itba.raytracer.shape.Plane;
+import edu.ar.itba.raytracer.shape.Sphere;
 import edu.ar.itba.raytracer.texture.ConstantColorTexture;
 import edu.ar.itba.raytracer.texture.ImageTexture;
+import edu.ar.itba.raytracer.texture.SphericalTextureMapping;
 import edu.ar.itba.raytracer.texture.Texture;
+import edu.ar.itba.raytracer.vector.Matrix44;
 import edu.ar.itba.raytracer.vector.Vector2;
 import edu.ar.itba.raytracer.vector.Vector4;
 
@@ -196,15 +202,24 @@ public class Main {
 
 	private static Camera loadTestScene(final int w, final int h)
 			throws Exception {
-		final Scene scene = new Scene(new Color(0, 0, 0));
+		final Scene scene = new Scene();
+		scene.addLight(new AmbientLight(new Color(1,1,1)));
+		final double rot = 0 * PI / 180;
 		final Camera camera = scene.addCamera(w, h, 50,
-				new Vector4(0, 2, 0, 1), new Vector4(0, 0, 0, 1), new Vector4(
-						0, 0, 1, 0));
+				new Vector4(0, 0, 4, 1), new Vector4(0, 0, 0, 1), new Vector4(
+						0, 1, 0, 0), new Matrix44(cos(rot), -sin(rot), 0, 0,
+						sin(rot), cos(rot), 0, 0, 0, 0, 1, 0, 0, 0, 0, 1));
 
-		// Instance i = new Instance(new Sphere());
-		// i.material = Material.GOLD;
-		// i.translate(0, 0, 5);
-		// scene.add(i);
+		Instance i = new Instance(new Sphere(1));
+		BufferedImage image = ImageIO
+				.read(new File(
+						"C:\\Program Files\\Eclipse\\workspace\\cg-2015-05\\earth.jpg"));
+		Texture t = new ImageTexture(image, new SphericalTextureMapping());
+		i.material = new Material(t, t, new ConstantColorTexture(new Color(0,
+				0, 0)), 50, 0, 1);
+		i.transform(GeometricObject.translationMatrix(0, 0, 0).multiply(
+				GeometricObject.scaleMatrix(2, 1, 1)));
+		scene.add(i);
 
 		// Instance i1 = new Instance(new Sphere2());
 		// i1.material = new Material(new Color(1, .5, 0), 1, 1, 1, 1, 0, 1);
@@ -312,14 +327,14 @@ public class Main {
 
 		// for (int i = 0; i < 10; i += 2) {
 
-//		final Instance ii = new Instance(parseBunny());
-//		// ii.rotateZ(20);
-//		// ii.translate(0, 0, 1);
-//		ii.material = new Material(new ConstantColorTexture(.9, .9, .9),
-//				new ConstantColorTexture(.5, .5, .5), new ConstantColorTexture(
-//						0, 0, 0), 0, 0, 1);
-//		// ii.material = Material.GOLD;
-//		scene.add(ii);
+		// final Instance ii = new Instance(parseBunny());
+		// // ii.rotateZ(20);
+		// // ii.translate(0, 0, 1);
+		// ii.material = new Material(new ConstantColorTexture(.9, .9, .9),
+		// new ConstantColorTexture(.5, .5, .5), new ConstantColorTexture(
+		// 0, 0, 0), 0, 0, 1);
+		// // ii.material = Material.GOLD;
+		// scene.add(ii);
 
 		// final Instance ii = new Instance(new Sphere());
 		// BufferedImage image = ImageIO
@@ -332,16 +347,16 @@ public class Main {
 		// ii.rotateZ(90);
 		// scene.add(ii);
 
-		 final Instance ii = new Instance(new Plane(new Vector4(0, 1, 0, 0)));
-		 ii.scale(2, 1, 1);
-		 BufferedImage image = ImageIO
-		 .read(new File(
-		 "C:\\Program Files\\Eclipse\\workspace\\cg-2015-05\\earth.jpg"));
-		 Texture t = new ImageTexture(image);
-		 ii.material = new Material(t, t, new ConstantColorTexture(new
-		 Color(0,
-		 0, 0)), 50, 0, 1);
-		 scene.add(ii);
+		// final Instance ii = new Instance(new Plane(new Vector4(0, 1, 0, 0)));
+		// ii.scale(2, 1, 1);
+		// BufferedImage image = ImageIO
+		// .read(new File(
+		// "C:\\Program Files\\Eclipse\\workspace\\cg-2015-05\\earth.jpg"));
+		// Texture t = new ImageTexture(image);
+		// ii.material = new Material(t, t, new ConstantColorTexture(new
+		// Color(0,
+		// 0, 0)), 50, 0, 1);
+		// scene.add(ii);
 
 		// final Instance ii = new Instance(
 		// new Mesh(Arrays.asList(new MeshTriangle(
@@ -397,11 +412,13 @@ public class Main {
 		// scene.addLight(new DirectionalLight(new Vector4(0, -1, 1, 0),
 		// light2Properties));
 
-		final Transform lightTransform2 = new Transform();
-		lightTransform2.setPosition(new Vector4(-10, 10, -6, 1));
-		final LightProperties lightProperties2 = new LightProperties(new Color(
-				1, 1, 1));
-		scene.addLight(new PointLight(lightTransform2, lightProperties2));
+		scene.addLight(new DirectionalLight(new Vector4(0, 0, 0, 1),
+				new Vector4(1, 0, 0, 1), Matrix44.ID,/*
+													 * new Matrix44(1, 0, 0, 3,
+													 * 0, 1, 0, 3, 0, 0, 1, 3,
+													 * 0, 0, 0, 1),
+													 */
+				new Color(1, 1, 1)));
 
 		scene.setTree(tree);
 

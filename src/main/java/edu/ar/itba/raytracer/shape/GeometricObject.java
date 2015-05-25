@@ -1,5 +1,8 @@
 package edu.ar.itba.raytracer.shape;
 
+import static java.lang.Math.cos;
+import static java.lang.Math.sin;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -16,6 +19,33 @@ public abstract class GeometricObject {
 	public static Matrix44 translationMatrix(final double x, final double y,
 			final double z) {
 		return new Matrix44(1, 0, 0, x, 0, 1, 0, y, 0, 0, 1, z, 0, 0, 0, 1);
+	}
+
+	public static Matrix44 rotationXMatrix(final double deg) {
+		final double rad = degToRad(deg);
+		return new Matrix44(1, 0, 0, 0, 0, cos(rad), -sin(rad), 0, 0, sin(rad),
+				cos(rad), 0, 0, 0, 0, 1);
+	}
+
+	public static Matrix44 rotationYMatrix(final double deg) {
+		final double rad = degToRad(deg);
+		return new Matrix44(cos(rad), 0, sin(rad), 0, 0, 1, 0, 0, -sin(rad), 0,
+				cos(rad), 0, 0, 0, 0, 1);
+	}
+
+	public static Matrix44 rotationZMatrix(final double deg) {
+		final double rad = degToRad(deg);
+		return new Matrix44(cos(rad), -sin(rad), 0, 0, sin(rad), cos(rad), 0,
+				0, 0, 0, 1, 0, 0, 0, 0, 1);
+	}
+
+	public static Matrix44 scaleMatrix(final double x, final double y,
+			final double z) {
+		return new Matrix44(x, 0, 0, 0, 0, y, 0, 0, 0, 0, z, 0, 0, 0, 0, 1);
+	}
+
+	public static double degToRad(final double deg) {
+		return deg * Math.PI / 180;
 	}
 
 	public static class AABB {

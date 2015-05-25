@@ -1,16 +1,26 @@
 package edu.ar.itba.raytracer.parser;
 
-
-import edu.ar.itba.raytracer.*;
-import edu.ar.itba.raytracer.properties.Color;
 import edu.ar.itba.raytracer.texture.Texture;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.Stack;
+
+import edu.ar.itba.raytracer.Camera;
+import edu.ar.itba.raytracer.Instance;
+import edu.ar.itba.raytracer.KdTree;
+import edu.ar.itba.raytracer.Material;
+import edu.ar.itba.raytracer.Scene;
+import edu.ar.itba.raytracer.shape.GeometricObject;
+import edu.ar.itba.raytracer.vector.Matrix44;
 
 public class FileInput {
 
@@ -18,26 +28,30 @@ public class FileInput {
     private final Scene scene;
     private final HashMap<String, Texture> textureMap = new HashMap<>();
     private final HashMap<String, Material> materialMap = new HashMap<>();
+    final Stack<Matrix44> transforms = new Stack<>();
 
-    public FileInput(File file) throws FileNotFoundException {
-        this.file = new BufferedReader(new FileReader(file));
-        this.scene = new Scene(new Color(1,1,1));
-    }
+	public FileInput(File file) throws FileNotFoundException, IOException {
+		this.file = new BufferedReader(new FileReader(file));
+		this.scene = new Scene();
+	}
 
     public void parse(){
         String line;
+        transforms.push(Matrix44.ID);
+        Matrix44 cameraTransform = Matrix44.ID;
         CameraParser cameraParser = new CameraParser();
         try {
             while((line = file.readLine()) != null){
                 String[] elements = line.split("\\s");
                 if(elements[0].compareTo("LookAt") == 0){
+                    cameraTransform = transforms.peek();
                     cameraParser.parseLookAt(mergeLine(line, file));
                 }else if(elements[0].compareTo("Camera") == 0){
                     cameraParser.parseFov(mergeLine(line, file));
                 }else if(elements[0].compareTo("Film") == 0){
                     cameraParser.parseDimension(mergeLine(line, file));
                 }else if(elements[0].compareTo("WorldBegin") == 0){
-                    cameraParser.setCamera(scene);
+                    cameraParser.setCamera(scene, cameraTransform);
                     parseWorld();
                 }
             }
@@ -118,36 +132,20 @@ public class FileInput {
                 material = MaterialParser.getNamedMaterial(line,materialMap);
             }else if(line.contains("Material")){
                 material = MaterialParser.Parse(mergeLine(line, reader), textureMap);
-            }else if(line.contains("Shape") && line.contains("mesh")){
-                instance = ShapeParser.ParseMesh(mergeLine(line, reader));
-            }else if(line.contains("Shape")){
-                instance = ShapeParser.Parse(mergeLine(line, reader), material);
+            }else if(line.contains("Shape") && line.contains("mesh")) {
+                scene.add(ShapeParser.ParseMesh(mergeLine(line, reader), material, transforms.peek()));
+            }else if(line.contains("Shape")) {
+                scene.add(ShapeParser.Parse(mergeLine(line, reader),material, transforms.peek()));
             }else if(line.contains("Texture")){
                 TextureParser.parseTexture(mergeLine(line, reader), textureMap);
             }else if(line.contains("LightSource")){
-                scene.addLight(LightParser.parseLight(mergeLine(line, reader)));
-            }else if(line.contains("TransformBegin")){
-                if(instance == null){
-                    throw new IllegalArgumentException("Incorrect parameter order");
-                }
-                parseTransformation(instance);
-            }
-        }
-        if(instance != null && material != null) {
-            instance.material = material;
-            scene.add(instance);
-        }
-    }
-
-    private void parseTransformation(Instance instance) throws IOException {
-        String line;
-        while(!(line = file.readLine()).contains("TransformEnd")){
-            if(line.contains("Translate")){
-                TransformationParser.parseTranslate(mergeLine(line, file),instance);
-            }else if(line.contains("Rotate")){
-                TransformationParser.parseRotate(mergeLine(line, file), instance);
-            }else if(line.contains("Scale")){
-                TransformationParser.parseScale(mergeLine(line, file),instance);
+                scene.addLight(LightParser.parseLight(mergeLine(line, reader), transforms.peek()));
+            } else if (line.contains("TransformBegin")) {
+                transforms.push(transforms.peek());
+            } else if (line.contains("TransformEnd")) {
+                transforms.pop();
+            } else {
+                TransformationParser.parseTransformation(mergeLine(line, reader),transforms);
             }
         }
     }
@@ -160,4 +158,6 @@ public class FileInput {
         }
         return line.toString();
     }
+
+
 }
