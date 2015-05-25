@@ -77,6 +77,7 @@ public class Main {
 		final int height = 480;
 		final int width = 640;
 		BufferedImage image = null;
+
 		final Scene scene = new FileInput(new File(parameters.input)).parse(
 				parameters.aaSamples, parameters.rayDepth);
 
