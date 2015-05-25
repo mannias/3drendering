@@ -62,7 +62,7 @@ public class FileInput {
             KdTree tree = KdTree.from(scene);
             System.out.println("Finished building tree in "
                     + (System.currentTimeMillis() - start));
-            
+
             scene.setTree(tree);
             int i = 0;
             for(Camera camera: scene.getCameras()) {
@@ -160,7 +160,7 @@ public class FileInput {
         StringBuilder line = new StringBuilder(actual);
         String read;
         while((read = reader.readLine()) != null && !read.isEmpty()){
-            line.append(read);
+            line.append(read.replaceAll("[\\t]+", " "));
         }
         return line.toString();
     }

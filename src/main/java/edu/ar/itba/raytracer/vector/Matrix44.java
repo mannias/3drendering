@@ -46,6 +46,17 @@ public class Matrix44 {
 		return new Vector4(res[0], res[1], res[2], res[3]);
 	}
 
+    public Vector4 vecMultMat(final Vector4 vec){
+        final double[] res = new double[4];
+
+        res[0] = vec.x * m[0][0] + vec.y * m[1][0] + vec.z * m[2][0] + vec.w * m[3][0];
+        res[1] = vec.x * m[0][1] + vec.y * m[1][1] + vec.z * m[2][1] + vec.w * m[3][1];
+        res[2] = vec.x * m[0][2] + vec.y * m[1][2] + vec.z * m[2][2] + vec.w * m[3][2];
+        res[3] = vec.x * m[0][3] + vec.y * m[1][3] + vec.z * m[2][3] + vec.w * m[3][3];
+
+        return new Vector4(res[0], res[1], res[2], res[3]);
+    }
+
 	public Matrix44() {
 
 	}

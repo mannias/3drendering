@@ -65,10 +65,11 @@ public class Camera extends SceneElement {
 		w.sub(lookAt);
 		w.normalize();
 
-		final Vector4 transformedW = transform.multiplyVec(w);
+//		final Vector4 transformedW = transform.multiplyVec(w);
+        final Vector4 transformedW = transform.vecMultMat(w);
 		transformedW.normalize();
 
-		final Vector4 transformedUp = transform.multiplyVec(up);
+		final Vector4 transformedUp = transform.vecMultMat(up);
 		transformedUp.normalize();
 
 		u = transformedUp.cross(transformedW);

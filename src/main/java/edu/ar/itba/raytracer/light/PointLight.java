@@ -10,7 +10,7 @@ public class PointLight extends Light {
 	
 	public PointLight(final Vector4 position, final Matrix44 transform, final Color color) {
 		super(color);
-		this.position = transform.multiplyVec(position);
+		this.position = transform.vecMultMat(position);
 	}
 
 	public Vector4 getDirection(final Vector4 hitPoint) {
