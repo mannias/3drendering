@@ -17,11 +17,11 @@ import java.util.regex.Pattern;
 public class MaterialParser {
 
     final static String kdcolor = "\"color Kd\" \\[(\\d?\\.\\d+) (\\d?\\.\\d+) (\\d?\\.\\d+)\\]";
-    final static String kdtexture = "\"texture Kd\" \"([^\"]+)\"";
+    final static String kdtexture = "\"texture Kd\" \\[\"([^\"]+)\"\\]";
     final static String krcolor = "\"color Kr\" \\[(\\d?\\.\\d+) (\\d?\\.\\d+) (\\d?\\.\\d+)\\]";
-    final static String krtexture = "\"texture Kr\" \"([^\"]+)\"";
+    final static String krtexture = "\"texture Kr\" \\[\"([^\"]+)\"\\]";
     final static String ktcolor = "\"color Kt\" \\[(\\d?\\.\\d+) (\\d?\\.\\d+) (\\d?\\.\\d+)\\]";
-    final static String kttexture = "\"texture Kt\" \"([^\"]+)\"";
+    final static String kttexture = "\"texture Kt\" \\[\"([^\"]+)\"\\]";
     final static String roughnessrx = "\"float roughness\" \\[(\\d?\\.\\d+)\\]";
     final static String uroughnessrx = "\"float uroughness\" \\[(\\d?\\.\\d+)\\]";
     final static String vroughnessrx = "\"float vroughness\" \\[(\\d?\\.\\d+)\\]";
@@ -128,10 +128,10 @@ public class MaterialParser {
         if((m = Pattern.compile(roughnessrx).matcher(line)).find()) {
             roughness = Double.valueOf(m.group(1));
         }
-        if((m = Pattern.compile(roughnessrx).matcher(line)).find()) {
+        if((m = Pattern.compile(uroughnessrx).matcher(line)).find()) {
             uroughness = Double.valueOf(m.group(1));
         }
-        if((m = Pattern.compile(roughnessrx).matcher(line)).find()) {
+        if((m = Pattern.compile(vroughnessrx).matcher(line)).find()) {
             vroughness = Double.valueOf(m.group(1));
         }
         if(!simpleRough){

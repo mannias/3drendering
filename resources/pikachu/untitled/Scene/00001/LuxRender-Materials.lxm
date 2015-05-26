@@ -1,0 +1,26 @@
+# Materials File
+
+MakeNamedMaterial "mat3"
+	"color Kr" [0.10000 0.60000 0.10000]
+	"float roughness" [0.500000000000000]
+	"string type" ["metal2"]
+
+MakeNamedMaterial "mat5"
+	"color Kr" [1.00000 1.00000 1.00000]
+	"float roughness" [0.500000000000000]
+	"string type" ["metal2"]
+
+MakeNamedMaterial "mat4"
+	"color Kr" [0.10000 0.60000 0.10000]
+	"float roughness" [0.500000000000000]
+	"string type" ["metal2"]
+
+MakeNamedMaterial "mat2"
+	"color Kr" [1.00000 1.00000 1.00000]
+	"float roughness" [0.500000000000000]
+	"string type" ["metal2"]
+
+MakeNamedMaterial "mat1"
+	"color Kr" [0.580594 0.223257 0.0695701]
+	"float roughness" [0.80000000000000]
+	"string type" ["metal2"]
