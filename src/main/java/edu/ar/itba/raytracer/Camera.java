@@ -212,7 +212,6 @@ public class Camera extends SceneElement {
 				@Override
 				public void run() {
 					final CustomStack stack = new CustomStack();
-					final long start = System.nanoTime();
 					int currentStart;
 					while ((currentStart = startPixel.getAndAdd(pixelsPerTask)) < pixels) {
 						final int endPixel = (currentStart + pixelsPerTask) >= pixels ? pixels
@@ -226,15 +225,12 @@ public class Camera extends SceneElement {
 							for (int p = 0; p < aaSamplesSqrt; p++) {
 								for (int q = 0; q < aaSamplesSqrt; q++) {
 									final double ppx = x - .5 * pictureWidth
-									// + (q + Math.random())
-											+ (q + .5) / aaSamplesSqrt;
+											+ (q + Math.random())
+											/ aaSamplesSqrt;
 									final double ppy = -y + .5 * pictureHeight
-									// + (p + Math.random())
-											+ (p + .5) / aaSamplesSqrt;
+											+ (p + Math.random())
+											/ aaSamplesSqrt;
 									stack.reset();
-									if (x == 321 && y == 221) {
-										System.out.println("LL");
-									}
 									Color c = shade(getPrimaryRay(ppx, ppy),
 											rayDepth, stack);
 									pixelRed += c.getRed();
@@ -253,33 +249,19 @@ public class Camera extends SceneElement {
 									/ n2, pixelBlue / n2);
 						}
 					}
-					System.out.println("TIME THREAD "
-							+ ((System.nanoTime() - start) / 1000000));
 				}
 			};
 			threads[i] = ForkJoinTask.adapt(runnables[i]);
 		}
 		final ForkJoinPool fjp = new ForkJoinPool(Runtime.getRuntime()
 				.availableProcessors());
-		final long start = System.nanoTime();
 		for (ForkJoinTask<?> fjt : threads) {
 			fjp.execute(fjt);
-			// fjt.fork();
 		}
 
 		for (ForkJoinTask<?> fjt : threads) {
 			fjt.join();
 		}
-		System.out.println((System.nanoTime() - start) / 1000000);
-
-		// System.out.println(String.format("SPHERE INTERSECTIONS / CALLS %d/%d",
-		// Sphere.intersections.get(), Sphere.calls.get()));
-		// System.out.println(String.format("RATIO %f",
-		// (double) Sphere.intersections.get() / Sphere.calls.get()));
-		// System.out.println(String.format("PLANE INTERSECTIONS / CALLS %d/%d",
-		// Plane.intersections.get(), Plane.calls.get()));
-		// System.out.println(String.format("RATIO %f",
-		// (double) Plane.intersections.get() / Plane.calls.get()));
 
 		return takePicture();
 	}
