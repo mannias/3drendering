@@ -3,6 +3,8 @@ package edu.ar.itba.raytracer.parser;
 import edu.ar.itba.raytracer.Instance;
 import edu.ar.itba.raytracer.Material;
 import edu.ar.itba.raytracer.shape.*;
+import edu.ar.itba.raytracer.texture.SphericalTextureMapping;
+import edu.ar.itba.raytracer.texture.TextureMapping;
 import edu.ar.itba.raytracer.vector.Vector2;
 import edu.ar.itba.raytracer.vector.Vector3;
 import edu.ar.itba.raytracer.vector.Vector4;
@@ -29,10 +31,19 @@ public class ShapeParser {
             instance = parsePlane(line);
         }else if(line.contains("sphere")){
             instance = parseSphere(line);
+            setSphericMapping(material);
         }
         instance.material = material;
         instance.transform(transform);
         return instance;
+    }
+
+    private static void setSphericMapping(Material material){
+        TextureMapping mapping = new SphericalTextureMapping();
+        material.ka.setTextureMapping(mapping);
+        material.kd.setTextureMapping(mapping);
+        material.ks.setTextureMapping(mapping);
+        material.transparency.setTextureMapping(mapping);
     }
 
     public static Instance ParseMesh(String line, Material material, final Matrix44 transform) throws IOException {

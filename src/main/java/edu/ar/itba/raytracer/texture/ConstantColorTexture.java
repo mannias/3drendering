@@ -23,4 +23,9 @@ public class ConstantColorTexture implements Texture {
 		return color;
 	}
 
+    @Override
+    public void setTextureMapping(TextureMapping textureMapping) {
+        return;
+    }
+
 }

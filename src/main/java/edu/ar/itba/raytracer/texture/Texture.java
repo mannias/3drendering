@@ -6,4 +6,6 @@ import edu.ar.itba.raytracer.properties.Color;
 public interface Texture {
 
         Color getColor(final RayCollisionInfo collisionInfo);
+
+        void setTextureMapping(TextureMapping textureMapping);
 }

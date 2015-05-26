@@ -10,7 +10,7 @@ public class ImageTexture implements Texture {
 	private final int hres;
 	private final int vres;
 	private final BufferedImage image;
-	private final TextureMapping mapping;
+	private TextureMapping mapping;
 
 	public ImageTexture(final BufferedImage image, final TextureMapping mapping) {
 		this.image = image;
@@ -40,5 +40,10 @@ public class ImageTexture implements Texture {
 		return new Color(((rgb >> 16) & 0x0FF) * 1.0 / 255,
 				((rgb >> 8) & 0x0FF) * 1.0 / 255, (rgb & 0x0FF) * 1.0 / 255);
 	}
+
+    @Override
+    public void setTextureMapping(TextureMapping textureMapping) {
+        this.mapping = textureMapping;
+    }
 
 }

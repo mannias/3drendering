@@ -17,12 +17,13 @@ import java.util.regex.Pattern;
 public class MaterialParser {
 
     final static String kdcolor = "\"color Kd\" \\[(\\d?\\.\\d+) (\\d?\\.\\d+) (\\d?\\.\\d+)\\]";
-    final static String kdtexture = "\"texture Kd\" \\[\"([^\"]+)\"\\]";
+    final static String kdtexture = "\"texture Kd\" \"([^\"]+)\"";
     final static String krcolor = "\"color Kr\" \\[(\\d?\\.\\d+) (\\d?\\.\\d+) (\\d?\\.\\d+)\\]";
     final static String krtexture = "\"texture Kr\" \"([^\"]+)\"";
     final static String ktcolor = "\"color Kt\" \\[(\\d?\\.\\d+) (\\d?\\.\\d+) (\\d?\\.\\d+)\\]";
     final static String kttexture = "\"texture Kt\" \"([^\"]+)\"";
     final static String roughnessrx = "\"float roughness\" \\[(\\d?\\.\\d+)\\]";
+    final static String index = "\"float index\" (\\d?\\.\\d+)";
 
     public static Material Parse(String line,Map<String,Texture> textureMap){
         Material mat = null;
@@ -78,8 +79,6 @@ public class MaterialParser {
         Texture reflectivity = new ConstantColorTexture(0.588235, 0.670588, 0.729412);
         Texture transmited =  new ConstantColorTexture(new Color(1.0,1.0,1.0));
         double refractionIndex = 1.5;
-
-        String index = "\"float index\" (\\d?\\.\\d+)";
         Matcher m;
         if((m = Pattern.compile(krcolor).matcher(line)).find()) {
             reflectivity = new ConstantColorTexture(new Color(Double.valueOf(m.group(1)),
