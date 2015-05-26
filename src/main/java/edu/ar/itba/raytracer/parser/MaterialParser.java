@@ -23,6 +23,8 @@ public class MaterialParser {
     final static String ktcolor = "\"color Kt\" \\[(\\d?\\.\\d+) (\\d?\\.\\d+) (\\d?\\.\\d+)\\]";
     final static String kttexture = "\"texture Kt\" \"([^\"]+)\"";
     final static String roughnessrx = "\"float roughness\" \\[(\\d?\\.\\d+)\\]";
+    final static String uroughnessrx = "\"float uroughness\" \\[(\\d?\\.\\d+)\\]";
+    final static String vroughnessrx = "\"float vroughness\" \\[(\\d?\\.\\d+)\\]";
     final static String index = "\"float index\" (\\d?\\.\\d+)";
 
     public static Material Parse(String line,Map<String,Texture> textureMap){
@@ -115,11 +117,25 @@ public class MaterialParser {
     }
 
     private static Material parseMetal2(String line, Map<String,Texture> textureMap){
-        double roughness = 0.001;
+        double roughness = 0.001, uroughness = 0.001, vroughness = 0.001;
+        boolean simpleRough = false;
         Texture reflectivity = new ConstantColorTexture(new Color(1,1,1));
         Matcher m;
         if((m = Pattern.compile(roughnessrx).matcher(line)).find()) {
             roughness = Double.valueOf(m.group(1));
+            simpleRough = true;
+        }
+        if((m = Pattern.compile(roughnessrx).matcher(line)).find()) {
+            roughness = Double.valueOf(m.group(1));
+        }
+        if((m = Pattern.compile(roughnessrx).matcher(line)).find()) {
+            uroughness = Double.valueOf(m.group(1));
+        }
+        if((m = Pattern.compile(roughnessrx).matcher(line)).find()) {
+            vroughness = Double.valueOf(m.group(1));
+        }
+        if(!simpleRough){
+            roughness = Math.sqrt(Math.pow(uroughness,2)+Math.pow(vroughness,2));
         }
         if((m = Pattern.compile(krcolor).matcher(line)).find()) {
             reflectivity = new ConstantColorTexture(new Color(Double.valueOf(m.group(1)),
