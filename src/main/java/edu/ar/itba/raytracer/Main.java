@@ -82,11 +82,23 @@ public class Main {
 		// We support multiple cameras, but we'll only be taking pictures from
 		// one.
 		final Camera c = scene.getCameras().iterator().next();
+		final long globalStart = System.nanoTime();
 		for (int i = 0; i < parameters.benchmark; i++) {
+			final long start = System.nanoTime();
 			image = c.render();
+			if (parameters.time) {
+				System.out.println("Time for render " + i + ": "
+						+ (System.nanoTime() - start) / 1e6 + " ms");
+			}
 		}
+		final long end = System.nanoTime();
+
+		System.out.println("Total time: " + (end - globalStart) / 1e6 + " ms");
+		System.out.println("Average time: " + (end - globalStart) * 1.0
+				/ parameters.benchmark / 1e6 + " ms");
 
 		ImageIO.write(image, extension, new File(parameters.output));
+		System.out.println("Last image saved to " + parameters.output);
 	}
 
 	@Deprecated
@@ -129,12 +141,10 @@ public class Main {
 					if (z > maxZ) {
 						maxZ = z;
 					}
-					System.out.println(i + " " + x + " " + y + " " + z);
 					i++;
 					vertexes.add(new Vector4(x, y, z, 1));
 				} else if (tokens[0].equals("f")) {
 					if (tokens.length > 4) {
-						System.out.println(Arrays.toString(tokens));
 						throw new AssertionError();
 					}
 					final String[] p1s = tokens[1].split("/");

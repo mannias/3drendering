@@ -256,9 +256,6 @@ public class KdTree implements Serializable {
 				npx = pplanex;
 				nrx -= pplanex;
 				nrx -= pminusx;
-				if (nrx < 0) {
-					System.out.println("X " + nrx);
-				}
 				sah = SAH(p, voxel, nlx, nrx, npx, kt, ki);
 				nlx += pplusx;
 				nlx += pplanex;
@@ -268,9 +265,6 @@ public class KdTree implements Serializable {
 				npy = pplaney;
 				nry -= pplaney;
 				nry -= pminusy;
-				if (nry < 0) {
-					System.out.println("Y " + nry);
-				}
 				sah = SAH(p, voxel, nly, nry, npy, kt, ki);
 				nly += pplusy;
 				nly += pplaney;
@@ -280,9 +274,6 @@ public class KdTree implements Serializable {
 				npz = pplanez;
 				nrz -= pplanez;
 				nrz -= pminusz;
-				if (nrz < 0) {
-					System.out.println("Z " + nrz);
-				}
 				sah = SAH(p, voxel, nlz, nrz, npz, kt, ki);
 				nlz += pplusz;
 				nlz += pplanez;
@@ -298,10 +289,6 @@ public class KdTree implements Serializable {
 				minP.left = sah.left;
 				minP.minCost = sah.c;
 			}
-		}
-
-		if (minP == null && numberTris != 0) {
-			System.out.println("WTF");
 		}
 
 		return minP;
@@ -390,11 +377,8 @@ public class KdTree implements Serializable {
 
 		Arrays.sort(orderedEvents);
 
-		final long start = System.currentTimeMillis();
 		tree.root = recBuild(0, objs, tree.rootBb, orderedEvents,
 				new HashSet<>());
-		System.out.println("Tree built in "
-				+ (System.currentTimeMillis() - start) + " milliseconds.");
 		return tree;
 	}
 

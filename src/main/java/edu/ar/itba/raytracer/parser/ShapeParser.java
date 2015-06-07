@@ -102,7 +102,6 @@ public class ShapeParser {
                                                          List<Vector4> vertex, List<Vector2> uv){
         List<MeshTriangle> list = new LinkedList<>();
         String[] elems = line.split("[\\s]+");
-        System.out.println(normals.size() + " "+ vertex.size());
         for(int i = 0; i+2 < elems.length; i+=3){
             if(i == 0 && elems[i].isEmpty()){
                 i++;
@@ -119,7 +118,6 @@ public class ShapeParser {
                         normals.get(loc1), normals.get(loc2), normals.get(loc3)));
             }
         }
-        System.out.println(list.size());
         return list;
     }
 
