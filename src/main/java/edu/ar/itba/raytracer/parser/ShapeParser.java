@@ -10,6 +10,7 @@ import edu.ar.itba.raytracer.vector.Vector3;
 import edu.ar.itba.raytracer.vector.Vector4;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -55,8 +56,12 @@ public class ShapeParser {
         final String triindicesrx = "\"integer triindices\" \\[([^]]+)\\]";
         final String uvrx = "\"float uv\" \\[([^]]+)\\]";
         Matcher m;
+        long time = System.currentTimeMillis();
         if((m = Pattern.compile(vertexrx).matcher(line)).find()){
+            System.out.println("Match vertex: " + (System.currentTimeMillis() - time));
+            long time2 = System.currentTimeMillis();
             vertex = parseVectors(m.group(1));
+            System.out.println("Parse Vectors vertex: " + (System.currentTimeMillis() - time2));
         }
         if((m = Pattern.compile(normalsrx).matcher(line)).find()){
             normals = parseVectors(m.group(1));
@@ -67,14 +72,17 @@ public class ShapeParser {
         if((m = Pattern.compile(triindicesrx).matcher(line)).find()){
             instance = new Instance(new Mesh(calculateTriangles(m.group(1), normals,vertex, uv)));
         }
+        System.out.println("Total Parse: " + (System.currentTimeMillis() - time));
         instance.transform(transform);
         instance.material = material;
         return instance;
     }
 
     private static List<Vector4> parseVectors(String line){
-        List<Vector4> list = new LinkedList<>();
+        List<Vector4> list = new ArrayList<>();
+        long time = System.currentTimeMillis();
         String[] elems = line.split("[\\s]+");
+        System.out.println("Split: " + (System.currentTimeMillis() - time));
         for(int i = 0; i+2 < elems.length; i+=3){
             if(i == 0 && elems[i].isEmpty()){
                 i++;
@@ -86,8 +94,13 @@ public class ShapeParser {
         return list;
     }
 
+    private static List<Vector4> parseVectors2(String line){
+
+        return null;
+    }
+
     private static List<Vector2> parseUv(String line){
-        List<Vector2> list = new LinkedList<>();
+        List<Vector2> list = new ArrayList<>();
         String[] elems = line.split("\\s");
         for(int i = 0; i < elems.length /2 ; i++){
             list.add(new Vector2(Double.valueOf(elems[2*i]), 1- Double.valueOf(elems[2*i + 1])));
@@ -100,7 +113,7 @@ public class ShapeParser {
 
     private static List<MeshTriangle> calculateTriangles(String line, List<Vector4> normals,
                                                          List<Vector4> vertex, List<Vector2> uv){
-        List<MeshTriangle> list = new LinkedList<>();
+        List<MeshTriangle> list = new ArrayList<>();
         String[] elems = line.split("[\\s]+");
         for(int i = 0; i+2 < elems.length; i+=3){
             if(i == 0 && elems[i].isEmpty()){
