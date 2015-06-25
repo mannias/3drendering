@@ -206,49 +206,15 @@ public class Camera extends SceneElement {
 		final ForkJoinTask<?>[] threads = new ForkJoinTask[cores];
 		final Runnable[] runnables = new Runnable[cores];
 		final AtomicInteger startPixel = new AtomicInteger();
-		final int aaSamplesSqrt = (int) Math.sqrt(aaSamples);
 		for (int i = 0; i < cores; i++) {
 			runnables[i] = new Runnable() {
 				@Override
 				public void run() {
-					final CustomStack stack = new CustomStack();
-					int currentStart;
-					while ((currentStart = startPixel.getAndAdd(pixelsPerTask)) < pixels) {
-						final int endPixel = (currentStart + pixelsPerTask) >= pixels ? pixels
-								: currentStart + pixelsPerTask;
-						for (int i = currentStart; i < endPixel; i++) {
-							final int x = i % width;
-							final int y = i / width;
-							double pixelRed = 0;
-							double pixelGreen = 0;
-							double pixelBlue = 0;
-							for (int p = 0; p < aaSamplesSqrt; p++) {
-								for (int q = 0; q < aaSamplesSqrt; q++) {
-									final double ppx = x - .5 * pictureWidth
-											+ (q + Math.random())
-											/ aaSamplesSqrt;
-									final double ppy = -y + .5 * pictureHeight
-											+ (p + Math.random())
-											/ aaSamplesSqrt;
-									stack.reset();
-									Color c = shade(getPrimaryRay(ppx, ppy),
-											rayDepth, stack);
-									pixelRed += c.getRed();
-									pixelGreen += c.getGreen();
-									pixelBlue += c.getBlue();
-								}
-							}
-
-							double n2 = aaSamples;
-							// if (x == 320 && y == 221) {
-							// picture[y][x] = new Color(1, 1, 1);
-							// continue;
-							// }
-
-							picture[y][x] = new Color(pixelRed / n2, pixelGreen
-									/ n2, pixelBlue / n2);
-						}
-					}
+                    if(false) {
+                        trace(startPixel, pixelsPerTask, pixels, width, aaSamples, (x,y,z) -> shade(x,y,z));
+                    }else{
+                        trace(startPixel, pixelsPerTask, pixels, width, aaSamples, (x,y,z) -> pathShade(x,y,z));
+                    }
 				}
 			};
 			threads[i] = ForkJoinTask.adapt(runnables[i]);
@@ -265,6 +231,155 @@ public class Camera extends SceneElement {
 
 		return takePicture();
 	}
+
+    private void trace(AtomicInteger startPixel, int pixelsPerTask, int pixels, int width, int samples,
+                          ShadeFunction function){
+        final CustomStack stack = new CustomStack();
+        int currentStart;
+        int samplesSqrt = (int)Math.sqrt(samples);
+        while ((currentStart = startPixel.getAndAdd(pixelsPerTask)) < pixels) {
+            final int endPixel = (currentStart + pixelsPerTask) >= pixels ? pixels
+                    : currentStart + pixelsPerTask;
+            for (int i = currentStart; i < endPixel; i++) {
+                final int x = i % width;
+                final int y = i / width;
+                double pixelRed = 0;
+                double pixelGreen = 0;
+                double pixelBlue = 0;
+                for (int p = 0; p < samplesSqrt; p++) {
+                    for (int q = 0; q < samplesSqrt; q++) {
+                        final double ppx = x - .5 * pictureWidth
+                                + (q + Math.random())
+                                / samplesSqrt;
+                        final double ppy = -y + .5 * pictureHeight
+                                + (p + Math.random())
+                                / samplesSqrt;
+                        stack.reset();
+                        Color c = function.shade(getPrimaryRay(ppx, ppy),
+                                rayDepth, stack);
+                        pixelRed += c.getRed();
+                        pixelGreen += c.getGreen();
+                        pixelBlue += c.getBlue();
+                    }
+                }
+
+                double n2 = samples;
+                // if (x == 320 && y == 221) {
+                // picture[y][x] = new Color(1, 1, 1);
+                // continue;
+                // }
+
+                picture[y][x] = new Color(pixelRed / n2, pixelGreen
+                        / n2, pixelBlue / n2);
+            }
+        }
+    }
+
+    private Color pathShade(final Ray ray, final int rayDepth,
+                            final CustomStack stack){
+        final RayCollisionInfo collision = castRay(ray, stack);
+
+        if (collision == null) {
+            return scene.getAmbientLight();
+        }
+
+        final Vector4 collisionPoint = collision.getWorldCollisionPoint();
+        final Vector4 normal = collision.normal;
+        final Vector4 deltaNormal = new Vector4(normal);
+        deltaNormal.scalarMult(.001f);
+        final Vector4 collisionPointPlusDelta = new Vector4(collisionPoint);
+        collisionPointPlusDelta.add(deltaNormal);
+
+        // Invert the ray direction to get the view versor. The direction is
+        // already normalized, so there is no need to normalize again.
+        final Vector4 v = new Vector4(ray.getDir());
+        v.scalarMult(-1);
+
+        final Material objectMaterial = collision.getObj().material;
+        final Color ka = objectMaterial.ka.getColor(collision);
+        final Color kd = objectMaterial.kd.getColor(collision);
+        final Color ks = objectMaterial.ks.getColor(collision);
+        final double shininess = objectMaterial.shininess;
+
+        Color intensity = new Color(scene.getAmbientLight());
+        intensity.mult(ka);
+
+        for (final Light light : scene.getLights()) {
+            // Move the from point a little in the direction of the normal
+            // vector, to avoid rounding problems and intersecting with the same
+            // object we're starting from.
+            if (!scene.isIlluminati(collisionPointPlusDelta, light, stack)) {
+                continue;
+            }
+
+            final Vector4 lightVersor = light.getDirection(collisionPoint);
+
+            // final Vector4 lightVersor = new Vector4(light.getTransform()
+            // .getPosition());
+            // lightVersor.sub(collisionPoint);
+            // lightVersor.normalize();
+
+            final double ln = lightVersor.dot(normal);
+
+            if (ln > 0) {
+                final Color lightColor = light.getIntensity(collisionPoint);
+
+                final Color diffuse = new Color(lightColor);
+                diffuse.scalarMult(ln);
+                diffuse.mult(kd);
+
+                // final Color diffuse = new Color(diffuseRed, diffuseGreen,
+                // diffuseBlue);
+                intensity = intensity.add(diffuse);
+
+                final Vector4 r = new Vector4(normal);
+                r.scalarMult(2 * ln);
+                r.sub(lightVersor);
+                final double rv = r.dot(v);
+                if (rv > 0) {
+                    final Color specular = new Color(lightColor);
+
+                    final Color ksAux = new Color(ks);
+                    ksAux.scalarMult(Math.pow(rv, shininess));
+
+                    specular.mult(ksAux);
+                    intensity = intensity.add(specular);
+                }
+            }
+        }
+
+
+        if (rayDepth > 0) {
+            final double nv = normal.dot(v);
+            if (shininess != 0) {
+                final Vector4 reflectedDir = new Vector4(normal);
+                reflectedDir.scalarMult(2 * nv);
+                reflectedDir.sub(v);
+                reflectedDir.w = 0;
+                final Ray reflectedRay = new Ray(collisionPointPlusDelta,
+                        reflectedDir);
+
+                final Color reflectedColor = pathShade(reflectedRay, rayDepth - 1,
+                        stack);
+                reflectedColor.scalarMult(shininess / Material.MAX_SHININESS);
+
+                intensity = intensity.add(reflectedColor);
+            } else {
+                final Vector4 reflectedDir = new Vector4(normal);
+                reflectedDir.scalarMult(2*Math.random() * nv);
+                reflectedDir.sub(v);
+                reflectedDir.w = 0;
+                final Ray reflectedRay = new Ray(collisionPointPlusDelta,
+                        reflectedDir);
+
+                final Color reflectedColor = pathShade(reflectedRay, rayDepth - 1,
+                        stack);
+                intensity = intensity.add(reflectedColor);
+            }
+        }
+        return intensity;
+
+    }
 
 	private Color shade(final Ray ray, final int rayDepth,
 			final CustomStack stack) {
@@ -397,5 +512,9 @@ public class Camera extends SceneElement {
 	public RayCollisionInfo castRay(final Ray ray, final CustomStack stack) {
 		return scene.getTree().getCollision(Double.MAX_VALUE, ray, stack, 0);
 	}
+
+    public interface ShadeFunction{
+        public Color shade(final Ray ray, final int rayDepth, final CustomStack stack);
+    }
 
 }
