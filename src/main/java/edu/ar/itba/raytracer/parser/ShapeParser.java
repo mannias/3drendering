@@ -26,7 +26,11 @@ public class ShapeParser {
 
     public static Instance Parse(String line, Material material, final Matrix44 transform){
         Instance instance = null;
-        if(line.contains("box")){
+        if(line.contains("trianglemesh")){
+            instance = parseTriangleMesh(line);
+        }else if(line.contains("mesh")) {
+            instance = parseMesh(line);
+        }else if(line.contains("box")){
             instance = parseBox(line);
         }else if(line.contains("plane")){
             instance = parsePlane(line);
@@ -47,7 +51,7 @@ public class ShapeParser {
         material.transparency.setTextureMapping(mapping);
     }
 
-    public static Instance ParseMesh(String line, Material material, final Matrix44 transform) throws IOException {
+    private static Instance parseMesh(String line){
         List<Vector4> normals = null, vertex = null;
         List<Vector2> uv = null;
         Instance instance = null;
@@ -73,8 +77,24 @@ public class ShapeParser {
             instance = new Instance(new Mesh(calculateTriangles(m.group(1), normals,vertex, uv)));
         }
         System.out.println("Total Parse: " + (System.currentTimeMillis() - time));
-        instance.transform(transform);
-        instance.material = material;
+        return instance;
+    }
+
+    private static Instance parseTriangleMesh(String line) {
+        List<Vector4> normals = null, vertex = null;
+        List<Vector2> uv = null;
+        Instance instance = null;
+        final String vertexrx = "\"point P\" \\[([^]]+)\\]";
+        final String indicesrx = "\"integer indices\" \\[([^]]+)\\]";
+        Matcher m;
+        long time = System.currentTimeMillis();
+        if((m = Pattern.compile(vertexrx).matcher(line)).find()){
+            vertex = parseVectors(m.group(1));
+        }
+        if((m = Pattern.compile(indicesrx).matcher(line)).find()){
+            instance = new Instance(new Mesh(calculateTriangles(m.group(1), normals,vertex, uv)));
+        }
+        System.out.println("Total Parse: " + (System.currentTimeMillis() - time));
         return instance;
     }
 
@@ -94,7 +114,7 @@ public class ShapeParser {
         return list;
     }
 
-    private static List<Vector4> parseVectors2(String line){
+    private static List<Vector4> parseIndex(String line){
 
         return null;
     }
@@ -122,7 +142,9 @@ public class ShapeParser {
             int loc1 = Integer.valueOf(elems[i]);
             int loc2 = Integer.valueOf(elems[i+1]);
             int loc3 = Integer.valueOf(elems[i+2]);
-            if(uv == null){
+            if(normals == null){
+                list.add(new MeshTriangle(vertex.get(loc1),vertex.get(loc2),vertex.get(loc3)));
+            }else if (uv == null){
                 list.add(new MeshTriangle(vertex.get(loc1),vertex.get(loc2),vertex.get(loc3),
                         normals.get(loc1),normals.get(loc2),normals.get(loc3)));
             }else {

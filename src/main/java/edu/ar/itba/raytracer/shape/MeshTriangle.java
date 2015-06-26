@@ -24,6 +24,25 @@ public class MeshTriangle extends GeometricObject {
 	private final Vector4 e1;
 	private final Vector4 e2;
 
+    public MeshTriangle(final Vector4 vertex0, final Vector4 vertex1,
+                        final Vector4 vertex2){
+        this.vertex0 = vertex0;
+        this.vertex1 = vertex1;
+        this.vertex2 = vertex2;
+        e1 = new Vector4(vertex1);
+        e1.sub(vertex0);
+        e2 = new Vector4(vertex2);
+        e2.sub(vertex0);
+        this.n0 = e1.cross(e2);
+        n0.normalize();
+        this.n1 = n0;
+        this.n2 = n0;
+        this.uv0 = null;
+        this.uv1 = null;
+        this.uv2 = null;
+
+    }
+
 	public MeshTriangle(final Vector4 vertex0, final Vector4 vertex1,
 			final Vector4 vertex2, final Vector4 n0, final Vector4 n1,
 			final Vector4 n2) {

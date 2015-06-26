@@ -28,7 +28,7 @@ public class MaterialParser {
     final static String index = "\"float index\" (\\d?\\.\\d+)";
 
     public static Material Parse(String line,Map<String,Texture> textureMap){
-        Material mat = null;
+        Material mat = new Matte(new Color(1,1,1));
         if(line.contains("matte")){
             mat = parseMatte(line, textureMap);
         }else if(line.contains("glass")){

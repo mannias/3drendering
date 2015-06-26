@@ -24,13 +24,24 @@ public class LightParser {
             light = parseDistantLight(line, transform);
         }else if(line.contains("infinite")) {
             light = parseInfiniteLight(line);
-        }else if(line.contains("spot")){
+        }else if(line.contains("spot")) {
             light = parseSpotLight(line, transform);
+        }else if(line.contains("area")){
+            light = parseAreaLight(line,transform);
         }else if(line.contains("point")){
             //beware, all the elements contain the world point, so it' kind of a default now
             light = parsePointLight(line, transform);
         }
         return light;
+    }
+
+    private static Light parseAreaLight(String line, Matrix44 transform){
+        Matcher m;
+        Color lightColor = new Color(1,1,1);
+        if((m = Pattern.compile(colorrx).matcher(line)).find()) {
+            lightColor = new Color(Double.valueOf(m.group(1)), Double.valueOf(m.group(2)), Double.valueOf(m.group(3)));
+        }
+        return new AreaLight(lightColor);
     }
 
     private static Light parseSpotLight(String line, Matrix44 transform){

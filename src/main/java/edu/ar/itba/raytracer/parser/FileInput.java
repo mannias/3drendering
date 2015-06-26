@@ -13,6 +13,8 @@ import java.util.regex.Pattern;
 import edu.ar.itba.raytracer.KdTree;
 import edu.ar.itba.raytracer.Material;
 import edu.ar.itba.raytracer.Scene;
+import edu.ar.itba.raytracer.materials.Matte;
+import edu.ar.itba.raytracer.properties.Color;
 import edu.ar.itba.raytracer.texture.Texture;
 import edu.ar.itba.raytracer.vector.Matrix44;
 
@@ -119,26 +121,26 @@ public class FileInput {
 
 	private void parseAttribute(BufferedReader reader) throws IOException {
 		String line;
-		Material material = null;
+        //default material
+		Material material = new Matte(new Color(1,1,1));
 		transforms.push(transforms.peek());
 		while (!(line = reader.readLine()).contains("AttributeEnd")) {
-			if (line.contains("NamedMaterial")) {
-				material = MaterialParser.getNamedMaterial(line, materialMap);
-			} else if (line.contains("Material")) {
-				material = MaterialParser.Parse(mergeLine(line, reader),
-						textureMap);
-			} else if (line.contains("Shape") && line.contains("mesh")) {
-				scene.add(ShapeParser.ParseMesh(mergeLine(line, reader),
-						material, transforms.peek()));
-			} else if (line.contains("Shape")) {
-				scene.add(ShapeParser.Parse(mergeLine(line, reader), material,
-						transforms.peek()));
-			} else if (line.contains("Texture")) {
-				TextureParser.parseTexture(mergeLine(line, reader), textureMap);
-			} else if (line.contains("LightSource")) {
-				scene.addLight(LightParser.parseLight(mergeLine(line, reader),
-						transforms.peek()));
-			} else if (line.contains("TransformBegin")) {
+            if (line.contains("NamedMaterial")) {
+                material = MaterialParser.getNamedMaterial(line, materialMap);
+            } else if (line.contains("Material")) {
+                material = MaterialParser.Parse(mergeLine(line, reader),
+                        textureMap);
+            } else if (line.contains("Shape")) {
+                scene.add(ShapeParser.Parse(mergeLine(line, reader), material,
+                        transforms.peek()));
+            } else if (line.contains("Texture")) {
+                TextureParser.parseTexture(mergeLine(line, reader), textureMap);
+            }else if(line.contains("AreaLightSource")) {
+                material.setLight(LightParser.parseLight(mergeLine(line, reader), transforms.peek()));
+            }else if (line.contains("LightSource")) {
+                scene.addLight(LightParser.parseLight(mergeLine(line, reader),
+                        transforms.peek()));
+            }else if (line.contains("TransformBegin")) {
 				parseAttribute(reader);
 			} else if (line.contains("TransformEnd")) {
 				break;

@@ -1,7 +1,9 @@
 package edu.ar.itba.raytracer;
 
+import edu.ar.itba.raytracer.light.Light;
 import edu.ar.itba.raytracer.texture.ConstantColorTexture;
 import edu.ar.itba.raytracer.texture.Texture;
+import edu.ar.itba.raytracer.vector.Vector4;
 
 public class Material {
 
@@ -36,15 +38,31 @@ public class Material {
 
 	public final double refractionIndex;
 
+    public Light light;
+
 	public Material(final Texture ka, final Texture kd, final Texture ks,
 			final double shininess, final Texture transparency,
 			final double refractionIndex) {
-		this.ka = ka;
-		this.kd = kd;
-		this.ks = ks;
-		this.shininess = shininess;
-		this.transparency = transparency;
-		this.refractionIndex = refractionIndex;
+        this(ka,kd,ks,shininess,transparency,refractionIndex,null);
 	}
+
+    public Material(final Texture ka, final Texture kd, final Texture ks,
+                    final double shininess, final Texture transparency,
+                    final double refractionIndex, Light light) {
+
+        this.ka = ka;
+        this.kd = kd;
+        this.ks = ks;
+        this.shininess = shininess;
+        this.transparency = transparency;
+        this.refractionIndex = refractionIndex;
+        this.light = null;
+        this.light = light;
+    }
+
+
+    public void setLight(Light light){
+        this.light = light;
+    }
 
 }

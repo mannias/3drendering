@@ -39,6 +39,7 @@ public class Camera extends SceneElement {
 
 	private final int aaSamples;
 	private final int rayDepth;
+    private final int samplesPerPixel;
 
 	private Vector4 forwardVector;
 
@@ -95,6 +96,9 @@ public class Camera extends SceneElement {
 
 		this.aaSamples = aaSamples;
 		this.rayDepth = rayDepth;
+
+        //TODO: Wire
+        this.samplesPerPixel = 1;
 	}
 
 	private final Vector4 position;
@@ -210,10 +214,10 @@ public class Camera extends SceneElement {
 			runnables[i] = new Runnable() {
 				@Override
 				public void run() {
-                    if(false) {
-                        trace(startPixel, pixelsPerTask, pixels, width, aaSamples, (x,y,z) -> shade(x,y,z));
+                    if(true) {
+                        trace(startPixel, pixelsPerTask, pixels, width, aaSamples, (x, y, z) -> shade(x, y, z));
                     }else{
-                        trace(startPixel, pixelsPerTask, pixels, width, aaSamples, (x,y,z) -> pathShade(x,y,z));
+                        trace(startPixel, pixelsPerTask, pixels, width, samplesPerPixel, (x, y, z) -> pathShade(x, y, z));
                     }
 				}
 			};
@@ -303,6 +307,11 @@ public class Camera extends SceneElement {
 
         Color intensity = new Color(scene.getAmbientLight());
         intensity.mult(ka);
+
+        if(objectMaterial.light != null){
+            intensity.add(objectMaterial.light.getIntensity(null));
+            System.out.println("light!");
+        }
 
         for (final Light light : scene.getLights()) {
             // Move the from point a little in the direction of the normal
@@ -409,6 +418,11 @@ public class Camera extends SceneElement {
 
 		Color intensity = new Color(scene.getAmbientLight());
 		intensity.mult(ka);
+
+        if(objectMaterial.light != null){
+            intensity.add(objectMaterial.light.getIntensity(null));
+
+        }
 
 		for (final Light light : scene.getLights()) {
 			// Move the from point a little in the direction of the normal
