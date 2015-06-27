@@ -84,4 +84,5 @@ LightSource "point"
 	"point from" [0.000000000000000 0.000000000000000 0.000000000000000]
 
 TransformEnd # ""
+
 WorldEnd

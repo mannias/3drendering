@@ -6,7 +6,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Stack;
 import java.util.regex.Matcher;
@@ -137,9 +136,6 @@ public class FileInput {
 			} else if (line.contains("Material")) {
 				material = MaterialParser.Parse(mergeLine(line, reader),
 						textureMap);
-			} else if (line.contains("Shape") && line.contains("mesh")) {
-				scene.add(ShapeParser.Parse(mergeLine(line, reader),
-						material, transforms.peek()));
 			} else if (line.contains("Shape")) {
 				scene.add(ShapeParser.Parse(mergeLine(line, reader), material,
 						transforms.peek()));
