@@ -25,7 +25,7 @@ public class MaterialParser {
     final static String roughnessrx = "\"float roughness\" \\[(\\d?\\.\\d+)\\]";
     final static String uroughnessrx = "\"float uroughness\" \\[(\\d?\\.\\d+)\\]";
     final static String vroughnessrx = "\"float vroughness\" \\[(\\d?\\.\\d+)\\]";
-    final static String index = "\"float index\" (\\d?\\.\\d+)";
+    final static String index = "\"float index\" \\[(\\d*\\.\\d+)\\]";
 
     public static Material Parse(String line,Map<String,Texture> textureMap){
         Material mat = new Matte(new Color(1,1,1));

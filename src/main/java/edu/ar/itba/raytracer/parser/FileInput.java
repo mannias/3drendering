@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Stack;
 import java.util.regex.Matcher;
@@ -26,11 +28,15 @@ public class FileInput {
 	private final HashMap<String, Texture> textureMap = new HashMap<>();
 	private final HashMap<String, Material> materialMap = new HashMap<>();
 	final Stack<Matrix44> transforms = new Stack<>();
+	
+	final Path path;
 
 	public FileInput(File file) throws FileNotFoundException, IOException {
 		this.file = new BufferedReader(new FileReader(file));
 		originalFile = file;
 		this.scene = new Scene();
+		
+		path = file.toPath();
 	}
 
 	public Scene parse(final int aaSamples, final int rayDepth) throws IOException {
@@ -84,14 +90,15 @@ public class FileInput {
 	}
 
 	private void parseLxm(String filename) {
+		
 		String line;
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader(
-					originalFile.getParent() + "/" + filename));
+					path.resolveSibling(filename).toFile()));
 			while ((line = reader.readLine()) != null) {
 				if (line.contains("Texture")) {
 					TextureParser.parseTexture(mergeLine(line, reader),
-							textureMap);
+							textureMap, path);
 				} else if (line.contains("MakeNamedMaterial")) {
 					MaterialParser.parseNamedMaterial(mergeLine(line, reader),
 							materialMap, textureMap);
@@ -106,7 +113,7 @@ public class FileInput {
 		String line;
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader(
-					originalFile.getParent() + "/" + filename));
+					path.resolveSibling(filename).toFile()));
 			while ((line = reader.readLine()) != null) {
 				if (line.contains("AttributeBegin")) {
 					parseAttribute(reader);
@@ -125,22 +132,25 @@ public class FileInput {
 		Material material = new Matte(new Color(1,1,1));
 		transforms.push(transforms.peek());
 		while (!(line = reader.readLine()).contains("AttributeEnd")) {
-            if (line.contains("NamedMaterial")) {
-                material = MaterialParser.getNamedMaterial(line, materialMap);
-            } else if (line.contains("Material")) {
-                material = MaterialParser.Parse(mergeLine(line, reader),
-                        textureMap);
-            } else if (line.contains("Shape")) {
-                scene.add(ShapeParser.Parse(mergeLine(line, reader), material,
-                        transforms.peek()));
-            } else if (line.contains("Texture")) {
-                TextureParser.parseTexture(mergeLine(line, reader), textureMap);
-            }else if(line.contains("AreaLightSource")) {
-                material.setLight(LightParser.parseLight(mergeLine(line, reader), transforms.peek()));
-            }else if (line.contains("LightSource")) {
-                scene.addLight(LightParser.parseLight(mergeLine(line, reader),
-                        transforms.peek()));
-            }else if (line.contains("TransformBegin")) {
+			if (line.contains("NamedMaterial")) {
+				material = MaterialParser.getNamedMaterial(line, materialMap);
+			} else if (line.contains("Material")) {
+				material = MaterialParser.Parse(mergeLine(line, reader),
+						textureMap);
+			} else if (line.contains("Shape") && line.contains("mesh")) {
+				scene.add(ShapeParser.Parse(mergeLine(line, reader),
+						material, transforms.peek()));
+			} else if (line.contains("Shape")) {
+				scene.add(ShapeParser.Parse(mergeLine(line, reader), material,
+						transforms.peek()));
+			} else if (line.contains("Texture")) {
+				TextureParser.parseTexture(mergeLine(line, reader), textureMap, path);
+			} else if(line.contains("AreaLightSource")) {
+	                material.setLight(LightParser.parseLight(mergeLine(line, reader), transforms.peek()));
+			} else if (line.contains("LightSource")) {
+				scene.addLight(LightParser.parseLight(mergeLine(line, reader),
+						transforms.peek()));
+			} else if (line.contains("TransformBegin")) {
 				parseAttribute(reader);
 			} else if (line.contains("TransformEnd")) {
 				break;

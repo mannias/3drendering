@@ -13,10 +13,10 @@ import edu.ar.itba.raytracer.vector.Vector4;
 public class LightParser {
 
     final static String colorrx = "\"color L\" \\[(\\d?\\.\\d+) (\\d?\\.\\d+) (\\d?\\.\\d+)\\]";
-    final static String from = "\"point from\" \\[(-?\\d?\\.\\d+) (-?\\d?\\.\\d+) (-?\\d?\\.\\d+)\\]";
-    final static String to = "\"point to\" \\[(-?\\d?\\.\\d+) (-?\\d?\\.\\d+) (-?\\d?\\.\\d+)\\]";
-    final static String coneanglerx = "\"float coneangle\" (-?\\d?\\.\\d+)";
-    final static String conedeltaanglerx = "\"float conedeltaangle\" (-?\\d?\\.\\d+)";
+    final static String from = "\"point from\" \\[(-?\\d+\\.\\d+) (-?\\d+\\.\\d+) (-?\\d+\\.\\d+)\\]";
+    final static String to = "\"point to\" \\[(-?\\d+\\.\\d+) (-?\\d+\\.\\d+) (-?\\d+\\.\\d+)\\]";
+    final static String coneanglerx = "\"float coneangle\" (-?\\d+\\.\\d+)";
+    final static String conedeltaanglerx = "\"float conedeltaangle\" (-?\\d+\\.\\d+)";
 
     public static Light parseLight(final String line, final Matrix44 transform){
         Light light = null;
