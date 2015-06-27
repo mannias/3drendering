@@ -10,11 +10,15 @@ import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import edu.ar.itba.raytracer.Instance;
 import edu.ar.itba.raytracer.KdTree;
 import edu.ar.itba.raytracer.Material;
 import edu.ar.itba.raytracer.Scene;
+import edu.ar.itba.raytracer.light.AreaLight;
+import edu.ar.itba.raytracer.light.Light;
 import edu.ar.itba.raytracer.materials.Matte;
 import edu.ar.itba.raytracer.properties.Color;
+import edu.ar.itba.raytracer.shape.GeometricObject;
 import edu.ar.itba.raytracer.texture.Texture;
 import edu.ar.itba.raytracer.vector.Matrix44;
 
@@ -131,12 +135,18 @@ public class FileInput {
                 material = MaterialParser.Parse(mergeLine(line, reader),
                         textureMap);
             } else if (line.contains("Shape")) {
-                scene.add(ShapeParser.Parse(mergeLine(line, reader), material,
-                        transforms.peek()));
+                Instance shape = ShapeParser.Parse(mergeLine(line, reader), material,
+                        transforms.peek());
+                if(material.light != null){
+                    ((AreaLight)material.light).setPosition(shape,transforms.peek());
+                }
+                scene.add(shape);
             } else if (line.contains("Texture")) {
                 TextureParser.parseTexture(mergeLine(line, reader), textureMap);
             }else if(line.contains("AreaLightSource")) {
-                material.setLight(LightParser.parseLight(mergeLine(line, reader), transforms.peek()));
+                Light light = LightParser.parseLight(mergeLine(line, reader), transforms.peek());
+                material.setLight(light);
+                scene.addLight(light);
             }else if (line.contains("LightSource")) {
                 scene.addLight(LightParser.parseLight(mergeLine(line, reader),
                         transforms.peek()));

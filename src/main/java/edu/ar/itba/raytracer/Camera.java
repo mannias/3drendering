@@ -53,6 +53,8 @@ public class Camera extends SceneElement {
 
 	private final Scene scene;
 
+    private final Sampler sampler;
+
 	public Camera(final Scene scene, final int pictureWidth,
 			final int pictureHeight, final double fov, final Vector4 position,
 			final Vector4 lookAt, final Vector4 up, final Matrix44 transform,
@@ -101,7 +103,10 @@ public class Camera extends SceneElement {
 		this.rayDepth = rayDepth;
 
         //TODO: Wired
-        this.samplesPerPixel = 1;
+        this.samplesPerPixel = 50;
+        sampler = new Sampler(100);
+        sampler.generateSamples2();
+        sampler.sampleHemisphere();
 	}
 
 	private final Vector4 position;
@@ -219,7 +224,7 @@ public class Camera extends SceneElement {
                     if(false) {
                         trace(startPixel, pixelsPerTask, pixels, width, aaSamples,(x,y,z) -> shade(x,y,z));
                     }else{
-                        trace(startPixel, pixelsPerTask, pixels, width, samplesPerPixel, (x,y,z) -> pathShade(x,y,z));
+                        trace(startPixel, pixelsPerTask, pixels, width, samplesPerPixel, (x,y,z) -> pathShade(x, y, z));
                     }
 				}
 			};
@@ -285,7 +290,7 @@ public class Camera extends SceneElement {
                             final CustomStack stack){
 
         final RayCollisionInfo collision = castRay(ray, stack);
-        if(rayDepth < 0 || collision == null){
+        if(collision == null){
             return scene.getAmbientLight();
         }
 
@@ -302,31 +307,49 @@ public class Camera extends SceneElement {
             return objectMaterial.light.getIntensity(null);
         }
 
-        if(objectMaterial.shininess == 0){
-            //THIS IS DIFFUSE
-            for (final Light light : scene.getLights()) {
-                if (!scene.isIlluminati(collisionPointPlusDelta, light, stack)) {
-                    continue;
-                }
-                final Vector4 lightVersor = light.getDirection(collisionPoint);
-                final double ln = lightVersor.dot(collision.normal);
-                if (ln > 0) {
-                    final Color lightColor = light.getIntensity(collisionPoint);
+        for (final Light light : scene.getLights()) {
+            if (!scene.isIlluminati(collisionPointPlusDelta, light, stack)) {
+                continue;
+            }
+            final Vector4 lightVersor = light.getDirection(collisionPoint);
+            final double ln = lightVersor.dot(collision.normal);
+            if (ln > 0) {
+                final Color lightColor = light.getIntensity(collisionPoint);
 
-                    final Color diffuse = new Color(lightColor);
-                    diffuse.scalarMult(ln);
-                    diffuse.mult(objectMaterial.kd.getColor(collision));
+                final Color diffuse = new Color(lightColor);
+                diffuse.scalarMult(ln);
+                diffuse.mult(objectMaterial.kd.getColor(collision));
 
-                    intensity = intensity.add(diffuse);
+                intensity = intensity.add(diffuse);
+                final Vector4 r = new Vector4(collision.normal);
+                r.scalarMult(2 * ln);
+                r.sub(lightVersor);
+                final double rv = r.dot(v);
+                if (rv > 0) {
+                    final Color specular = new Color(lightColor);
+
+                    final Color ksAux = new Color(objectMaterial.ks.getColor(collision));
+                    ksAux.scalarMult(Math.pow(rv, objectMaterial.shininess));
+
+                    specular.mult(ksAux);
+                    intensity = intensity.add(specular);
                 }
             }
+        }
+
+        if(rayDepth < 0){
+            return intensity;
+        }
+
+        if(objectMaterial.shininess == 0){
+            //THIS IS DIFFUSE
 
             Vector4 w = new Vector4(collision.normal);
             Vector4 v = new Vector3(0.0034, 1, 0.0071).cross(w);
             v.normalize();
             Vector4 u = v.cross(w);
 
-            Vector4 hem = Sampler.uniformSampleHemisphere();
+            Vector4 hem = sampler.getSample();
             Vector4 reflectedDir = u.scalarMult(hem.x).add(v.scalarMult(hem.y)).add(w.scalarMult(hem.z));
             reflectedDir.normalize();
 
@@ -335,16 +358,16 @@ public class Camera extends SceneElement {
             double pdf = collision.normal.dot(reflectedDir) * 0.3183098861837906715;
             double phi = collision.normal.dot(reflectedDir);
 
-            Color color = new Color(objectMaterial.kd.getColor(collision));
+            Color color = new Color(objectMaterial.kd.getColor(collision)).scalarMult(0.3183098861837906715);
 
             Color newColor = pathShade(reflectedRay,rayDepth-1,stack);
 
-            return intensity.add(color.mult(newColor).scalarMult(phi).scalarMult(1d /pdf));
+            return intensity.add(color.mult(newColor).scalarMult(phi/pdf));
         }else{
             //THIS IS REFLECTIVE
             Vector4 wo = ray.dir.neg();
             double ndotwo = collision.normal.dot(wo);
-            Vector4 reflectedDir = wo.neg().add(new Vector4(collision.normal).scalarMult(2 * ndotwo).sub(wo));
+            Vector4 reflectedDir = wo.neg().add(new Vector4(collision.normal).scalarMult(2 * ndotwo));
             double pdf = Math.abs(collision.normal.dot(reflectedDir));
             double phi = collision.normal.dot(reflectedDir);
             Color color = new Color(objectMaterial.ks.getColor(collision));
@@ -354,7 +377,7 @@ public class Camera extends SceneElement {
 
             Color newColor = pathShade(reflectedRay,rayDepth-1,stack);
 
-            return color.mult(newColor).scalarMult(phi).scalarMult(1d/pdf);
+            return intensity.add(color.mult(newColor).scalarMult(phi/pdf));
         }
 
     }

@@ -54,6 +54,13 @@ public class Sampler {
 
     }
 
+    public Vector4 getSample() {
+        if (count % samples == 0)                                    // start of a new pixel
+            jump = (new Random().nextInt() % numSets) * samples;
+
+        return (sampleHemisphere.get((int) (sampleHemisphere.size() * Math.random())));
+    }
+
     public void generateSamples2(){
         int n = (int) Math.sqrt((float) samples);
         for (int j = 0; j < numSets; j++)
