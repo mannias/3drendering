@@ -1,11 +1,7 @@
 package edu.ar.itba.raytracer.light;
 
-import com.sun.tools.classfile.TypeAnnotation;
 import edu.ar.itba.raytracer.Instance;
 import edu.ar.itba.raytracer.properties.Color;
-import edu.ar.itba.raytracer.properties.Transform;
-import edu.ar.itba.raytracer.shape.GeometricObject;
-import edu.ar.itba.raytracer.shape.Mesh;
 import edu.ar.itba.raytracer.vector.Matrix44;
 import edu.ar.itba.raytracer.vector.Vector4;
 
