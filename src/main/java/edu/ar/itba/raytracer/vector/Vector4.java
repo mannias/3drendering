@@ -41,6 +41,10 @@ public class Vector4 {
 		return this;
 	}
 
+    public Vector4 neg(){
+        return new Vector4(-this.x, -this.y, -this.z, this.w);
+    }
+
 	public Vector4 sub(final Vector4 other) {
 		x -= other.x;
 		y -= other.y;
