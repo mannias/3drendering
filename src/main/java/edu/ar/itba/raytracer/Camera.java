@@ -54,6 +54,8 @@ public class Camera extends SceneElement {
 	private final Scene scene;
 
     private final Sampler sampler;
+    
+    private int iteration;
 
 	public Camera(final Scene scene, final int pictureWidth,
 			final int pictureHeight, final double fov, final Vector4 position,
@@ -103,10 +105,10 @@ public class Camera extends SceneElement {
 		this.rayDepth = rayDepth;
 
         //TODO: Wired
-        this.samplesPerPixel = 50;
-        sampler = new Sampler(100);
-        sampler.generateSamples2();
-        sampler.sampleHemisphere();
+        this.samplesPerPixel = 1;
+        sampler = new Sampler(samplesPerPixel * pictureHeight * pictureWidth * 2);
+//        sampler.generateSamples2();
+//        sampler.sampleHemisphere();
 	}
 
 	private final Vector4 position;
@@ -205,7 +207,9 @@ public class Camera extends SceneElement {
 	}
 
 	public BufferedImage render() {
-		return this.render(pictureWidth, pictureHeight);
+		final BufferedImage i = this.render(pictureWidth, pictureHeight);
+		iteration++;
+		return i;
 	}
 
 	public BufferedImage render(final int width, final int height) {
@@ -266,6 +270,9 @@ public class Camera extends SceneElement {
                                 + (p + Math.random())
                                 / samplesSqrt;
                         stack.reset();
+//                        if (x == 450 && y == 200) {
+//                        	System.out.println("STAHP");
+//                            }
                         Color c = func.shade(getPrimaryRay(ppx, ppy),
                                 rayDepth, stack);
                         pixelRed += c.getRed();
@@ -275,13 +282,24 @@ public class Camera extends SceneElement {
                 }
 
                 double n2 = samples;
-                // if (x == 320 && y == 221) {
-                // picture[y][x] = new Color(1, 1, 1);
-                // continue;
-                // }
-
-                picture[y][x] = new Color(pixelRed / n2, pixelGreen
-                        / n2, pixelBlue / n2);
+//                 if (x == 450 && y == 200) {
+//                 picture[y][x] = new Color(1, 1, 1);
+//                 continue;
+//                 }
+                 
+                 final double r = picture[y][x].getRed() * iteration + pixelRed * 100;
+                 final double g = picture[y][x].getGreen() * iteration + pixelGreen* 100;
+                 final double b = picture[y][x].getBlue() * iteration + pixelBlue* 100;
+//
+//                 final int iplus = iteration + 1;
+                 
+                 picture[y][x] = picture[y][x].add(new Color(pixelRed, pixelGreen, pixelBlue));
+                 
+//                 final double max = Math.max(Math.max(r,g),b);
+                 
+//                 picture[y][x] = new Color(r/iplus,g/iplus,b/iplus);
+//                picture[y][x] = new Color(pixelRed / n2, pixelGreen
+//                        / n2, pixelBlue / n2);
             }
         }
     }
@@ -337,24 +355,37 @@ public class Camera extends SceneElement {
             }
         }
 
-        if(rayDepth < 0){
+        if(rayDepth <= 0){
             return intensity;
         }
 
         if(objectMaterial.shininess == 0){
             //THIS IS DIFFUSE
 
-            Vector4 w = new Vector4(collision.normal);
-            Vector4 v = new Vector3(0.0034, 1, 0.0071).cross(w);
-            v.normalize();
-            Vector4 u = v.cross(w);
+//            Vector4 w = new Vector4(collision.normal);
+//            Vector4 v = new Vector3(0.0034, 1, 0.0071).cross(w);
+//            v.normalize();
+//            Vector4 u = v.cross(w);
+//
+//            Vector4 hem = sampler.getSample();
+//            Vector4 reflectedDir = u.scalarMult(hem.x).add(v.scalarMult(hem.y)).add(w.scalarMult(hem.z));
+//            reflectedDir.normalize();
 
-            Vector4 hem = sampler.getSample();
-            Vector4 reflectedDir = u.scalarMult(hem.x).add(v.scalarMult(hem.y)).add(w.scalarMult(hem.z));
-            reflectedDir.normalize();
-
-            final Ray reflectedRay = new Ray(collisionPointPlusDelta,
-                    reflectedDir);
+        	
+        	final double rx = Math.random() - .5;
+        	final double ry = Math.random() - .5;
+        	final double rz = Math.random() - .5;
+        	
+        	final Vector4 reflectedDir = new Vector4(rx,ry,rz, 0);
+        	reflectedDir.normalize();
+        	
+        	if (reflectedDir.dot(collision.normal) < 0) {
+        		reflectedDir.scalarMult(-1);
+        	}
+        	
+        	final Ray reflectedRay = new Ray(collisionPointPlusDelta,
+        			reflectedDir);
+        	
             double pdf = collision.normal.dot(reflectedDir) * 0.3183098861837906715;
             double phi = collision.normal.dot(reflectedDir);
 
