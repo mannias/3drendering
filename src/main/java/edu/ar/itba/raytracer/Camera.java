@@ -7,8 +7,10 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import edu.ar.itba.raytracer.light.AreaLight;
 import edu.ar.itba.raytracer.light.Light;
 import edu.ar.itba.raytracer.materials.MaterialType;
+import edu.ar.itba.raytracer.materials.Matte;
 import edu.ar.itba.raytracer.properties.Color;
 import edu.ar.itba.raytracer.samplers.Sampler;
 import edu.ar.itba.raytracer.shape.CustomStack;
@@ -58,6 +60,8 @@ public class Camera extends SceneElement {
     
     private int iteration;
 
+    private final double p;
+
 	public Camera(final Scene scene, final int pictureWidth,
 			final int pictureHeight, final double fov, final Vector4 position,
 			final Vector4 lookAt, final Vector4 up, final Matrix44 transform,
@@ -106,10 +110,12 @@ public class Camera extends SceneElement {
 		this.rayDepth = rayDepth;
 
         //TODO: Wired
-        this.samplesPerPixel = 1;
-        sampler = new Sampler(samplesPerPixel * pictureHeight * pictureWidth * 2);
-//        sampler.generateSamples2();
-//        sampler.sampleHemisphere();
+        int samples = 1;
+        this.samplesPerPixel = samples;
+        sampler = new Sampler(1);
+        p = 0.4;
+//        sampler.generateSamples();
+//        sampler.mapSampleToHemisphere(1.0);
 	}
 
 	private final Vector4 position;
@@ -244,8 +250,9 @@ public class Camera extends SceneElement {
 		for (ForkJoinTask<?> fjt : threads) {
 			fjt.join();
 		}
+        Sampler.printsum();
 
-		return takePicture();
+        return takePicture();
 	}
 
     private void trace(AtomicInteger startPixel, int pixelsPerTask, int pixels, int width, int samples,
@@ -295,7 +302,6 @@ public class Camera extends SceneElement {
 //                 final int iplus = iteration + 1;
                  
                  picture[y][x] = picture[y][x].add(new Color(pixelRed, pixelGreen, pixelBlue));
-                 
 //                 final double max = Math.max(Math.max(r,g),b);
                  
 //                 picture[y][x] = new Color(r/iplus,g/iplus,b/iplus);
@@ -313,8 +319,6 @@ public class Camera extends SceneElement {
             return scene.getAmbientLight();
         }
 
-        Color intensity = new Color(scene.getAmbientLight());
-
         final Vector4 collisionPoint = collision.getWorldCollisionPoint();
         final Material objectMaterial = collision.getObj().material;
         final Vector4 deltaNormal = new Vector4(collision.normal);
@@ -327,45 +331,27 @@ public class Camera extends SceneElement {
         final Color ks = objectMaterial.ks.getColor(collision);
         final Color transparency = objectMaterial.transparency.getColor(collision);
 
-        double survival = 1d;
 
+        double survival = 1d;
         if (objectMaterial.light != null) {
             return objectMaterial.light.getIntensity(null);
         }
-
-        for (final Light light : scene.getLights()) {
-            if (!scene.isIlluminati(collisionPointPlusDelta, light, stack)) {
-                continue;
-            }
-            final Vector4 lightVersor = light.getDirection(collisionPoint);
-            final double ln = lightVersor.dot(collision.normal);
-            if (ln > 0) {
-                final Color lightColor = light.getIntensity(collisionPoint);
-
-                final Color diffuse = new Color(lightColor);
-                diffuse.scalarMult(ln);
-                diffuse.mult(objectMaterial.kd.getColor(collision));
-
-                intensity = intensity.add(diffuse);
-                final Vector4 r = new Vector4(collision.normal);
-                r.scalarMult(2 * ln);
-                r.sub(lightVersor);
-                final double rv = r.dot(v);
-                if (rv > 0) {
-                    final Color specular = new Color(lightColor);
-
-                    final Color ksAux = new Color(objectMaterial.ks.getColor(collision));
-                    ksAux.scalarMult(Math.pow(rv, objectMaterial.shininess));
-
-                    specular.mult(ksAux);
-                    intensity = intensity.add(specular);
-                }
-            }
-        }
-
+        Color intensity = new Color(0,0,0);
 
         if (rayDepth < 0) {
-            return intensity;
+            Color weight = new Color(0,0,0);
+            switch(objectMaterial.type){
+                case Matte: weight = kd; break;
+                case Specular: weight = ks; break;
+                case Glass: weight = transparency; break;
+                case Glossy: new Color(kd).mult(ks);break;
+            }
+            double max = Math.max(weight.getRed(), Math.max(weight.getGreen(), weight.getBlue()));
+            survival = 1/max;
+            if(max < Math.random()){
+                return intensity;
+            }
+
         }
 
         if (objectMaterial.type == MaterialType.Matte) {
@@ -394,6 +380,8 @@ public class Camera extends SceneElement {
 
 //            Vector4 reflectedDir = Sampler.cosWeightedHemisphere(collision.normal);
 //
+//            Vector4 reflectedDir = sampler.sampleHemisphere(collision.normal);
+
             final Ray reflectedRay = new Ray(collisionPointPlusDelta,
                     reflectedDir);
 
@@ -460,6 +448,7 @@ public class Camera extends SceneElement {
             }
         }
         return intensity;
+
     }
 
 	private Color shade(final Ray ray, final int rayDepth,
