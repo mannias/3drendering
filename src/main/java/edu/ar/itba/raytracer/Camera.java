@@ -8,6 +8,7 @@ import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import edu.ar.itba.raytracer.light.Light;
+import edu.ar.itba.raytracer.materials.MaterialType;
 import edu.ar.itba.raytracer.properties.Color;
 import edu.ar.itba.raytracer.samplers.Sampler;
 import edu.ar.itba.raytracer.shape.CustomStack;
@@ -305,10 +306,10 @@ public class Camera extends SceneElement {
     }
 
     private Color pathShade(final Ray ray, final int rayDepth,
-                            final CustomStack stack){
+                            final CustomStack stack) {
 
         final RayCollisionInfo collision = castRay(ray, stack);
-        if(collision == null){
+        if (collision == null) {
             return scene.getAmbientLight();
         }
 
@@ -321,7 +322,14 @@ public class Camera extends SceneElement {
         final Vector4 collisionPointPlusDelta = new Vector4(collisionPoint);
         collisionPointPlusDelta.add(deltaNormal);
 
-        if(objectMaterial.light != null){
+        final Color ka = objectMaterial.ka.getColor(collision);
+        final Color kd = objectMaterial.kd.getColor(collision);
+        final Color ks = objectMaterial.ks.getColor(collision);
+        final Color transparency = objectMaterial.transparency.getColor(collision);
+
+        double survival = 1d;
+
+        if (objectMaterial.light != null) {
             return objectMaterial.light.getIntensity(null);
         }
 
@@ -355,11 +363,12 @@ public class Camera extends SceneElement {
             }
         }
 
-        if(rayDepth <= 0){
+
+        if (rayDepth < 0) {
             return intensity;
         }
 
-        if(objectMaterial.shininess == 0){
+        if (objectMaterial.type == MaterialType.Matte) {
             //THIS IS DIFFUSE
 
 //            Vector4 w = new Vector4(collision.normal);
@@ -371,30 +380,31 @@ public class Camera extends SceneElement {
 //            Vector4 reflectedDir = u.scalarMult(hem.x).add(v.scalarMult(hem.y)).add(w.scalarMult(hem.z));
 //            reflectedDir.normalize();
 
-        	
+
         	final double rx = Math.random() - .5;
         	final double ry = Math.random() - .5;
         	final double rz = Math.random() - .5;
-        	
+
         	final Vector4 reflectedDir = new Vector4(rx,ry,rz, 0);
         	reflectedDir.normalize();
-        	
+
         	if (reflectedDir.dot(collision.normal) < 0) {
         		reflectedDir.scalarMult(-1);
         	}
-        	
-        	final Ray reflectedRay = new Ray(collisionPointPlusDelta,
-        			reflectedDir);
-        	
-            double pdf = collision.normal.dot(reflectedDir) * 0.3183098861837906715;
+
+//            Vector4 reflectedDir = Sampler.cosWeightedHemisphere(collision.normal);
+//
+            final Ray reflectedRay = new Ray(collisionPointPlusDelta,
+                    reflectedDir);
+
             double phi = collision.normal.dot(reflectedDir);
 
-            Color color = new Color(objectMaterial.kd.getColor(collision)).scalarMult(0.3183098861837906715);
+            Color color = new Color(objectMaterial.kd.getColor(collision));
 
-            Color newColor = pathShade(reflectedRay,rayDepth-1,stack);
+            Color newColor = pathShade(reflectedRay, rayDepth - 1, stack);
 
-            return intensity.add(color.mult(newColor).scalarMult(phi/pdf));
-        }else{
+            return color.mult(newColor).scalarMult(phi * 2 * survival);
+        } else if (objectMaterial.type == MaterialType.Specular) {
             //THIS IS REFLECTIVE
             Vector4 wo = ray.dir.neg();
             double ndotwo = collision.normal.dot(wo);
@@ -406,11 +416,50 @@ public class Camera extends SceneElement {
             final Ray reflectedRay = new Ray(collisionPointPlusDelta,
                     reflectedDir);
 
-            Color newColor = pathShade(reflectedRay,rayDepth-1,stack);
+            Color newColor = pathShade(reflectedRay, rayDepth - 1, stack);
 
-            return intensity.add(color.mult(newColor).scalarMult(phi/pdf));
+            return color.mult(newColor).scalarMult(survival);
+        } else if (objectMaterial.type == MaterialType.Glossy) {
+
+        } else if (objectMaterial.type == MaterialType.Glass) {
+
+
+            Vector4 tNormal = new Vector4(collision.normal);
+            double nv = collision.normal.dot(ray.getDir());
+            double cosThetaI = nv;
+            double eta = objectMaterial.refractionIndex;
+            if (nv < 0) {
+                eta = 1 / eta;
+                tNormal.scalarMult(-1);
+                cosThetaI = -cosThetaI;
+            }
+
+            final double xx = 1 - (1 - cosThetaI * cosThetaI) / (eta * eta);
+            if (xx >= 0) {
+                final Color materialRefractionColor = objectMaterial.transparency
+                        .getColor(collision);
+                if (materialRefractionColor.getRed() != 0
+                        || materialRefractionColor.getGreen() != 0
+                        || materialRefractionColor.getBlue() != 0) {
+                    final Vector4 aux = new Vector4(tNormal);
+                    aux.scalarMult(Math.sqrt(xx) - cosThetaI / eta);
+                    final Vector4 refractedDir = new Vector4(v);
+                    refractedDir.scalarMult(-1 / eta);
+                    refractedDir.sub(aux);
+                    final Vector4 aux2 = new Vector4(collisionPoint);
+                    tNormal.scalarMult(.001f);
+                    aux2.sub(tNormal);
+                    final Ray refractedRay = new Ray(aux2, refractedDir);
+
+                    final Color refractedColor = shade(refractedRay,
+                            rayDepth - 1, stack);
+                    refractedColor.mult(materialRefractionColor);
+
+                    return refractedColor;
+                }
+            }
         }
-
+        return intensity;
     }
 
 	private Color shade(final Ray ray, final int rayDepth,
