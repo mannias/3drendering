@@ -86,14 +86,14 @@ public class Main {
 		for (int i = 0; i < parameters.benchmark; i++) {
 			final long start = System.nanoTime();
 			int it = 0;
-			while(true) {
+//			while(true) {
 			image = c.render();
 //			if (it  % 100 == 0) {
-			ImageIO.write(image, extension, new File(parameters.output));
+//			ImageIO.write(image, extension, new File(parameters.output));
 //			}
 			System.out.println(it);
 			it++;
-			}
+//			}
 //			if (parameters.time) {
 //				System.out.println("Time for render " + i + ": "
 //						+ (System.nanoTime() - start) / 1e6 + " ms");

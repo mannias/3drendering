@@ -1,6 +1,7 @@
 package edu.ar.itba.raytracer;
 
 import java.awt.image.BufferedImage;
+import java.net.PasswordAuthentication;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ForkJoinPool;
@@ -56,6 +57,8 @@ public class Camera extends SceneElement {
     private final Sampler sampler;
     
     private int iteration;
+    
+    private Vector4 up;
 
 	public Camera(final Scene scene, final int pictureWidth,
 			final int pictureHeight, final double fov, final Vector4 position,
@@ -83,6 +86,8 @@ public class Camera extends SceneElement {
 		u.normalize();
 
 		v = transformedW.cross(u);
+		
+		this.up = up;
 
 		forwardVector = new Vector4(transformedW);
 		forwardVector.scalarMult(-distToPixels);
@@ -105,10 +110,10 @@ public class Camera extends SceneElement {
 		this.rayDepth = rayDepth;
 
         //TODO: Wired
-        this.samplesPerPixel = 1;
-        sampler = new Sampler(samplesPerPixel * pictureHeight * pictureWidth * 2);
-//        sampler.generateSamples2();
-//        sampler.sampleHemisphere();
+        this.samplesPerPixel = 400;
+        sampler = new Sampler(samplesPerPixel, pictureWidth * pictureHeight);
+//        sampler.generateSamples();
+//        sampler.sampleHemisphere(1);
 	}
 
 	private final Vector4 position;
@@ -246,12 +251,15 @@ public class Camera extends SceneElement {
 
 		return takePicture();
 	}
+	
+	private final AtomicInteger done = new AtomicInteger();
 
     private void trace(AtomicInteger startPixel, int pixelsPerTask, int pixels, int width, int samples,
                        ShadeFunction func){
         final CustomStack stack = new CustomStack();
         int currentStart;
         int samplesSqrt = (int)Math.sqrt(samples);
+        
         while ((currentStart = startPixel.getAndAdd(pixelsPerTask)) < pixels) {
             final int endPixel = (currentStart + pixelsPerTask) >= pixels ? pixels
                     : currentStart + pixelsPerTask;
@@ -261,45 +269,69 @@ public class Camera extends SceneElement {
                 double pixelRed = 0;
                 double pixelGreen = 0;
                 double pixelBlue = 0;
-                for (int p = 0; p < samplesSqrt; p++) {
-                    for (int q = 0; q < samplesSqrt; q++) {
-                        final double ppx = x - .5 * pictureWidth
-                                + (q + Math.random())
-                                / samplesSqrt;
-                        final double ppy = -y + .5 * pictureHeight
-                                + (p + Math.random())
-                                / samplesSqrt;
-                        stack.reset();
-//                        if (x == 450 && y == 200) {
-//                        	System.out.println("STAHP");
-//                            }
-                        Color c = func.shade(getPrimaryRay(ppx, ppy),
-                                rayDepth, stack);
-                        pixelRed += c.getRed();
-                        pixelGreen += c.getGreen();
-                        pixelBlue += c.getBlue();
-                    }
+                int count = 0;
+                final long start = System.nanoTime();
+                for (int s = 0 ; s < samplesPerPixel; s++) {
+					for (int p = 0; p < 1; p++) {
+						for (int q = 0; q < 1; q++) {
+							final double ppx = x - .5 * pictureWidth
+									+ (q + Math.random()) / 1;
+							final double ppy = -y + .5 * pictureHeight
+									+ (p + Math.random()) / 1;
+							stack.reset();
+							if (x == 450 && y == 200) {
+								System.out.println("STAHP");
+							}
+							Color c = func.shade(getPrimaryRay(ppx, ppy),
+									rayDepth, stack);
+							if (Double.isNaN(c.getRed())
+									|| Double.isNaN(c.getBlue())
+									|| Double.isNaN(c.getGreen())) {
+								System.out.println("SASA");
+							}
+							pixelRed += c.getRed();// * Math.PI;
+							pixelGreen += c.getGreen();//* Math.PI;
+							pixelBlue += c.getBlue();//* Math.PI;
+							if (c.getRed() + c.getGreen() + c.getBlue() > 0) {
+								count++;
+							}
+						}
+					}
                 }
+//                System.out.println("AVG LIGHT =" + (count * 1.0 / samples));
+                final long time = System.nanoTime() - start;
+                
+                final int pixelsDone = done.incrementAndGet();
+                
+                final long remaining = (pixels - pixelsDone) * time;
+                
+                
+//                System.out.println(pixelsDone * 1.0/ pixels + " completed. About " + (remaining / 1e9) + " seconds remaining");
 
                 double n2 = samples;
-//                 if (x == 450 && y == 200) {
-//                 picture[y][x] = new Color(1, 1, 1);
-//                 continue;
-//                 }
+                 if (x == 450 && y == 200) {
+                 picture[y][x] = new Color(1, 1, 1);
+                 continue;
+                 }
                  
-                 final double r = picture[y][x].getRed() * iteration + pixelRed * 100;
-                 final double g = picture[y][x].getGreen() * iteration + pixelGreen* 100;
-                 final double b = picture[y][x].getBlue() * iteration + pixelBlue* 100;
+//                 final double r = (picture[y][x].getRed() * iteration + pixelRed)/(iteration+1);
+//                 final double g = (picture[y][x].getGreen() * iteration + pixelGreen)/(iteration+1);
+//                 final double b = (picture[y][x].getBlue() * iteration + pixelBlue) /(iteration+1);
 //
+//                 picture[y][x] = new Color(r,g,b);
+                 
 //                 final int iplus = iteration + 1;
                  
-                 picture[y][x] = picture[y][x].add(new Color(pixelRed, pixelGreen, pixelBlue));
+//                 picture[y][x] = picture[y][x].add(new Color(pixelRed, pixelGreen, pixelBlue));
                  
 //                 final double max = Math.max(Math.max(r,g),b);
                  
 //                 picture[y][x] = new Color(r/iplus,g/iplus,b/iplus);
-//                picture[y][x] = new Color(pixelRed / n2, pixelGreen
-//                        / n2, pixelBlue / n2);
+                picture[y][x] = new Color(pixelRed / Math.max(count, 1), pixelGreen
+                        / Math.max(count, 1), pixelBlue / Math.max(count, 1));
+                
+//                picture[y][x] = new Color(pixelRed / samplesPerPixel, pixelGreen
+//                        / samplesPerPixel, pixelBlue / samplesPerPixel);
             }
         }
     }
@@ -322,7 +354,11 @@ public class Camera extends SceneElement {
         collisionPointPlusDelta.add(deltaNormal);
 
         if(objectMaterial.light != null){
-            return objectMaterial.light.getIntensity(null);
+        	final Color in = objectMaterial.light.getIntensity(null);
+        	if(Double.isNaN(in.getRed()) || Double.isNaN(in.getBlue()) || Double.isNaN(in.getGreen())) {
+				System.out.println("SASA");
+			}
+            return objectMaterial.kd.getColor(collision);//.scalarMult(17);
         }
 
         for (final Light light : scene.getLights()) {
@@ -356,8 +392,13 @@ public class Camera extends SceneElement {
         }
 
         if(rayDepth <= 0){
+        	if(Double.isNaN(intensity.getRed()) || Double.isNaN(intensity.getBlue()) || Double.isNaN(intensity.getGreen())) {
+				System.out.println("SASA");
+			}
             return intensity;
         }
+        
+        
 
         if(objectMaterial.shininess == 0){
             //THIS IS DIFFUSE
@@ -370,30 +411,77 @@ public class Camera extends SceneElement {
 //            Vector4 hem = sampler.getSample();
 //            Vector4 reflectedDir = u.scalarMult(hem.x).add(v.scalarMult(hem.y)).add(w.scalarMult(hem.z));
 //            reflectedDir.normalize();
+        	
+        	final double r1 = 2 * Math.PI * Math.random();
+        	final double r2 = Math.random();
+        	final double r2s = Math.sqrt(r2);
+        	
+        	final Color f = objectMaterial.kd.getColor(collision);
+        
+			final Vector4 w = new Vector4(collision.normal);
+			final Vector4 v = new Vector4(.0034, 1, .0071, 0).cross(w);
+			v.normalize();
+			final Vector4 u = v.cross(w);
+			
+//			final Vector4 d = new Vector4(u.scalarMult(Math.cos(r1))
+//					.scalarMult(r2s)
+//					.add(v.scalarMult(Math.sin(r1)).scalarMult(r2s))
+//					.add(w.scalarMult(Math.sqrt(1 - r2))));        	
+//        	d.normalize();
+			
+			final Vector4 sample = sampler.getSample();
+			
+			final Vector4 wi = u.scalarMult(sample.x).add(v.scalarMult(sample.y)).add(w.scalarMult(sample.z));
+//			final Vector4 wi = new Vector4(Math.random() - .5,
+//					Math.random() - .5, Math.random() - .5, 0);
+			wi.normalize();
+			
+			if (wi.dot(collision.normal) < 0) {
+				System.out.println("PROBLEM!");
+			}
+			
+//			final Vector4 wi = new Vector4(up);
+			
+			final double pdf = collision.normal.dot(wi);// Math.PI;
+			final Color color = new Color(objectMaterial.kd.getColor(collision));//.scalarMult(1.0 / Math.PI);
+
+			final double ndotwi = collision.normal.dot(new Vector4(wi).scalarMult(-1));
+			
+			final Color newColor = pathShade(new Ray(collisionPointPlusDelta, wi), rayDepth-1, stack); 
+			
+			final Color ret = color.mult(newColor);
+			
+			if(Double.isNaN(ret.getRed()) || Double.isNaN(ret.getBlue()) || Double.isNaN(ret.getGreen())) {
+				System.out.println("SASA");
+			}
+			
+			return ret;
+        	
+//        	return f.mult(pathShade(new Ray(collisionPointPlusDelta, d), rayDepth - 1, stack));
 
         	
-        	final double rx = Math.random() - .5;
-        	final double ry = Math.random() - .5;
-        	final double rz = Math.random() - .5;
-        	
-        	final Vector4 reflectedDir = new Vector4(rx,ry,rz, 0);
-        	reflectedDir.normalize();
-        	
-        	if (reflectedDir.dot(collision.normal) < 0) {
-        		reflectedDir.scalarMult(-1);
-        	}
-        	
-        	final Ray reflectedRay = new Ray(collisionPointPlusDelta,
-        			reflectedDir);
-        	
-            double pdf = collision.normal.dot(reflectedDir) * 0.3183098861837906715;
-            double phi = collision.normal.dot(reflectedDir);
-
-            Color color = new Color(objectMaterial.kd.getColor(collision)).scalarMult(0.3183098861837906715);
-
-            Color newColor = pathShade(reflectedRay,rayDepth-1,stack);
-
-            return intensity.add(color.mult(newColor).scalarMult(phi/pdf));
+//        	final double rx = Math.random() - .5;
+//        	final double ry = Math.random() - .5;
+//        	final double rz = Math.random() - .5;
+//        	
+//        	final Vector4 reflectedDir = new Vector4(rx,ry,rz, 0);
+//        	reflectedDir.normalize();
+//        	
+//        	if (reflectedDir.dot(collision.normal) < 0) {
+//        		reflectedDir.scalarMult(-1);
+//        	}
+//        	
+//        	final Ray reflectedRay = new Ray(collisionPointPlusDelta,
+//        			reflectedDir);
+//        	
+//            double pdf = collision.normal.dot(reflectedDir) * 0.3183098861837906715;
+//            double phi = collision.normal.dot(reflectedDir);
+//
+//            Color color = new Color(objectMaterial.kd.getColor(collision)).scalarMult(0.3183098861837906715);
+//
+//            Color newColor = pathShade(reflectedRay,rayDepth-1,stack);
+//
+//            return intensity.add(color.mult(newColor).scalarMult(phi / pdf));
         }else{
             //THIS IS REFLECTIVE
             Vector4 wo = ray.dir.neg();
@@ -401,6 +489,7 @@ public class Camera extends SceneElement {
             Vector4 reflectedDir = wo.neg().add(new Vector4(collision.normal).scalarMult(2 * ndotwo));
             double pdf = Math.abs(collision.normal.dot(reflectedDir));
             double phi = collision.normal.dot(reflectedDir);
+            
             Color color = new Color(objectMaterial.ks.getColor(collision));
 
             final Ray reflectedRay = new Ray(collisionPointPlusDelta,
