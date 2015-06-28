@@ -6,7 +6,7 @@ import edu.ar.itba.raytracer.vector.Vector4;
 
 public abstract class PositionLight extends Light {
 
-	public Vector4 position;
+	protected Vector4 position;
 
 	public PositionLight(final Color color, final Vector4 position, final Matrix44 transform) {
 		super(color);
@@ -17,8 +17,8 @@ public abstract class PositionLight extends Light {
         super(color);
     }
 
-    public void setPosition(final Vector4 position, final Matrix44 transform){
-        this.position = transform.multiplyVec(position);
+    public Vector4 getPosition(){
+        return position;
     }
 
 }

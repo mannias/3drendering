@@ -128,7 +128,22 @@ public class Triangle extends GeometricObject {
 		return new AABB(minX, maxX, minY, maxY, minZ, maxZ);
 	}
 
-	@Override
+    @Override
+    public Vector4 sampleObject() {
+        return getBaricentricPoint();
+    }
+
+    private Vector4 getBaricentricPoint(){
+        double ran1 = Math.random();
+        double ran2 = Math.random();
+        double u = 1 - Math.sqrt(ran1);
+        double v = ran2 * Math.sqrt(ran1);
+
+        return (new Vector4(vertex0).scalarMult(u)).add(new Vector4(vertex1).scalarMult(1-v))
+                .add(new Vector4(vertex2).scalarMult(v));
+    }
+
+    @Override
 	public String toString() {
 		return "Triangle [vertex0=" + vertex0 + ", vertex1=" + vertex1
 				+ ", vertex2=" + vertex2 + ", normal=" + normal + "]";

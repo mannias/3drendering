@@ -41,7 +41,7 @@ public class LightParser {
         if((m = Pattern.compile(colorrx).matcher(line)).find()) {
             lightColor = new Color(Double.valueOf(m.group(1)), Double.valueOf(m.group(2)), Double.valueOf(m.group(3)));
         }
-        return new AreaLight(lightColor);
+        return new AreaLight(lightColor, transform);
     }
 
     private static Light parseSpotLight(String line, Matrix44 transform){

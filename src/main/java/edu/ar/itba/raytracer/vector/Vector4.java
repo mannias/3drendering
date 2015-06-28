@@ -57,6 +57,10 @@ public class Vector4 {
 		return x * other.x + y * other.y + z * other.z + w * other.w;
 	}
 
+    public double magnitude(){
+        return Math.sqrt(x*x + y*y + z*z);
+    }
+
 	public Vector4 cross(final Vector4 other) {
 		return new Vector4(y * other.z - z * other.y,
 				z * other.x - x * other.z, x * other.y - y * other.x, w);
@@ -69,6 +73,8 @@ public class Vector4 {
 		w *= scalar;
 		return this;
 	}
+
+
 
 	public Vector4 normalize() {
 		final double norm = (double) Math.sqrt(x * x + y * y + z * z);

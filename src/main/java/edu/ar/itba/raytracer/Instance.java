@@ -147,4 +147,9 @@ public class Instance extends GeometricObject {
 		return new AABB(minX, maxX, minY, maxY, minZ, maxZ);
 	}
 
+    @Override
+    public Vector4 sampleObject() {
+        return obj.sampleObject();
+    }
+
 }

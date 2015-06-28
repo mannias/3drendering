@@ -168,4 +168,55 @@ public class MeshTriangle extends GeometricObject {
 
 		return new AABB(minX, maxX, minY, maxY, minZ, maxZ);
 	}
+
+    @Override
+    public Vector4 sampleObject() {
+        return getBaricentricPoint();
+    }
+
+    public double getArea(){
+        Vector4 AB = new Vector4(vertex0).sub(vertex2);
+        Vector4 AC = new Vector4(vertex1).sub(vertex2);
+        return AB.cross(AC).magnitude() * 0.5;
+    }
+
+    public Vector4 getBaricentricPoint(){
+        double ran1 = Math.random();
+        double ran2 = Math.random();
+        double u = 1 - Math.sqrt(ran1);
+        double v = ran2 * Math.sqrt(ran1);
+        double w = 1 - u - v;
+
+        return (new Vector4(vertex0).scalarMult(u)).add(new Vector4(vertex1).scalarMult(v))
+                .add(new Vector4(vertex2).scalarMult(w));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        MeshTriangle that = (MeshTriangle) o;
+
+        if (!n0.equals(that.n0)) return false;
+        if (!n1.equals(that.n1)) return false;
+        if (!n2.equals(that.n2)) return false;
+        if (!vertex0.equals(that.vertex0)) return false;
+        if (!vertex1.equals(that.vertex1)) return false;
+        if (!vertex2.equals(that.vertex2)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = vertex0.hashCode();
+        result = 31 * result + vertex1.hashCode();
+        result = 31 * result + vertex2.hashCode();
+        result = 31 * result + n0.hashCode();
+        result = 31 * result + n1.hashCode();
+        result = 31 * result + n2.hashCode();
+        return result;
+    }
 }
+

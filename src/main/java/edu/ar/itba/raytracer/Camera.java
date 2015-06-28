@@ -336,7 +336,7 @@ public class Camera extends SceneElement {
         if (objectMaterial.light != null) {
             return objectMaterial.light.getIntensity(null);
         }
-        Color intensity = new Color(0,0,0);
+        Color pathColor = new Color(0,0,0);
 
         if (rayDepth < 0) {
             Color weight = new Color(0,0,0);
@@ -349,14 +349,53 @@ public class Camera extends SceneElement {
             double max = Math.max(weight.getRed(), Math.max(weight.getGreen(), weight.getBlue()));
             survival = 1/max;
             if(max < Math.random()){
-                return intensity;
+                return pathColor;
             }
 
         }
 
+
+
         if (objectMaterial.type == MaterialType.Matte) {
             //THIS IS DIFFUSE
+            //DIRECT
+            if(true){
+                for (final Light light : scene.getLights()) {
+                    if (!scene.isIlluminati(collisionPointPlusDelta, light, stack)) {
+                        continue;
+                    }
 
+                    final Vector4 lightVersor = light.getDirection(collisionPoint);
+                    final double ln = lightVersor.dot(collision.normal);
+
+                    if (ln > 0) {
+                        final Color lightColor = light.getIntensity(collisionPoint);
+
+                        final Color diffuse = new Color(lightColor);
+                        diffuse.scalarMult(ln);
+                        diffuse.mult(kd);
+                        pathColor = pathColor.add(diffuse);
+
+                        final Vector4 r = new Vector4(collision.normal);
+                        r.scalarMult(2 * ln);
+                        r.sub(lightVersor);
+                        final double rv = r.dot(v);
+                        if (rv > 0) {
+                            final Color specular = new Color(lightColor);
+
+                            final Color ksAux = new Color(ks);
+                            ksAux.scalarMult(Math.pow(rv, objectMaterial.shininess));
+
+                            specular.mult(ksAux);
+                            pathColor = pathColor.add(specular);
+                        }
+                    }
+                }
+
+            }
+
+            //INDIRECT
+            if(true){
 //            Vector4 w = new Vector4(collision.normal);
 //            Vector4 v = new Vector3(0.0034, 1, 0.0071).cross(w);
 //            v.normalize();
@@ -391,22 +430,21 @@ public class Camera extends SceneElement {
 
             Color newColor = pathShade(reflectedRay, rayDepth - 1, stack);
 
-            return color.mult(newColor).scalarMult(phi * 2 * survival);
+            pathColor = pathColor.add(color.mult(newColor).scalarMult(phi * 2 * survival));
         } else if (objectMaterial.type == MaterialType.Specular) {
-            //THIS IS REFLECTIVE
-            Vector4 wo = ray.dir.neg();
-            double ndotwo = collision.normal.dot(wo);
-            Vector4 reflectedDir = wo.neg().add(new Vector4(collision.normal).scalarMult(2 * ndotwo));
-            double pdf = Math.abs(collision.normal.dot(reflectedDir));
-            double phi = collision.normal.dot(reflectedDir);
-            Color color = new Color(objectMaterial.ks.getColor(collision));
+                //THIS IS REFLECTIVE
+                Vector4 wo = ray.dir.neg();
+                double ndotwo = collision.normal.dot(wo);
+                Vector4 reflectedDir = wo.neg().add(new Vector4(collision.normal).scalarMult(2 * ndotwo));
+                Color color = new Color(objectMaterial.ks.getColor(collision));
 
-            final Ray reflectedRay = new Ray(collisionPointPlusDelta,
-                    reflectedDir);
+                final Ray reflectedRay = new Ray(collisionPointPlusDelta,
+                        reflectedDir);
 
-            Color newColor = pathShade(reflectedRay, rayDepth - 1, stack);
+                Color newColor = pathShade(reflectedRay, rayDepth - 1, stack);
 
-            return color.mult(newColor).scalarMult(survival);
+                pathColor = pathColor.add(color.mult(newColor).scalarMult(survival));
+            }
         } else if (objectMaterial.type == MaterialType.Glossy) {
 
         } else if (objectMaterial.type == MaterialType.Glass) {
@@ -447,7 +485,7 @@ public class Camera extends SceneElement {
                 }
             }
         }
-        return intensity;
+        return pathColor;
 
     }
 
