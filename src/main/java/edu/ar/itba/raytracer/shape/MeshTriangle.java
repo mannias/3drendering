@@ -186,9 +186,10 @@ public class MeshTriangle extends GeometricObject {
         double u = 1 - Math.sqrt(ran1);
         double v = ran2 * Math.sqrt(ran1);
         double w = 1 - u - v;
-
-        return (new Vector4(vertex0).scalarMult(u)).add(new Vector4(vertex1).scalarMult(v))
+        Vector4 resp = (new Vector4(vertex0).scalarMult(u)).add(new Vector4(vertex1).scalarMult(v))
                 .add(new Vector4(vertex2).scalarMult(w));
+        resp.w = 1;
+        return (resp);
     }
 
     @Override

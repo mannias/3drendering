@@ -42,6 +42,7 @@ public class AreaLight extends PositionLight{
 
     public Vector4 getPosition(){
         position = transform.multiplyVec(object.sampleObject());
+        position.z = position.z - 0.001;
         return position;
     }
 }

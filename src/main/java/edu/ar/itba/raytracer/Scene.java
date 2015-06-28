@@ -69,8 +69,7 @@ public class Scene {
 		}
 		final PositionLight pointLight = (PositionLight) light;
         Vector4 position = pointLight.getPosition();
-//        System.out.println(position);
-        Vector4 aux = new Vector4(position);
+		Vector4 aux = new Vector4(position);
 		aux.sub(point);
 		Ray ray = new Ray(point, aux);
 		return !tree.intersectionExists(point.distanceTo(position),

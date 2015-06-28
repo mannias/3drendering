@@ -365,6 +365,7 @@ public class Camera extends SceneElement {
                         continue;
                     }
 
+
                     final Vector4 lightVersor = light.getDirection(collisionPoint);
                     final double ln = lightVersor.dot(collision.normal);
 
@@ -395,7 +396,7 @@ public class Camera extends SceneElement {
             }
 
             //INDIRECT
-            if(true){
+            if(true) {
 //            Vector4 w = new Vector4(collision.normal);
 //            Vector4 v = new Vector3(0.0034, 1, 0.0071).cross(w);
 //            v.normalize();
@@ -406,31 +407,32 @@ public class Camera extends SceneElement {
 //            reflectedDir.normalize();
 
 
-        	final double rx = Math.random() - .5;
-        	final double ry = Math.random() - .5;
-        	final double rz = Math.random() - .5;
+                final double rx = Math.random() - .5;
+                final double ry = Math.random() - .5;
+                final double rz = Math.random() - .5;
 
-        	final Vector4 reflectedDir = new Vector4(rx,ry,rz, 0);
-        	reflectedDir.normalize();
+                final Vector4 reflectedDir = new Vector4(rx, ry, rz, 0);
+                reflectedDir.normalize();
 
-        	if (reflectedDir.dot(collision.normal) < 0) {
-        		reflectedDir.scalarMult(-1);
-        	}
+                if (reflectedDir.dot(collision.normal) < 0) {
+                    reflectedDir.scalarMult(-1);
+                }
 
 //            Vector4 reflectedDir = Sampler.cosWeightedHemisphere(collision.normal);
 //
 //            Vector4 reflectedDir = sampler.sampleHemisphere(collision.normal);
 
-            final Ray reflectedRay = new Ray(collisionPointPlusDelta,
-                    reflectedDir);
+                final Ray reflectedRay = new Ray(collisionPointPlusDelta,
+                        reflectedDir);
 
-            double phi = collision.normal.dot(reflectedDir);
+                double phi = collision.normal.dot(reflectedDir);
 
-            Color color = new Color(objectMaterial.kd.getColor(collision));
+                Color color = new Color(objectMaterial.kd.getColor(collision));
 
-            Color newColor = pathShade(reflectedRay, rayDepth - 1, stack);
+                Color newColor = pathShade(reflectedRay, rayDepth - 1, stack);
 
-            pathColor = pathColor.add(color.mult(newColor).scalarMult(phi * 2 * survival));
+                pathColor = pathColor.add(color.mult(newColor).scalarMult(phi * 2 * survival));
+            }
         } else if (objectMaterial.type == MaterialType.Specular) {
                 //THIS IS REFLECTIVE
                 Vector4 wo = ray.dir.neg();
@@ -444,7 +446,6 @@ public class Camera extends SceneElement {
                 Color newColor = pathShade(reflectedRay, rayDepth - 1, stack);
 
                 pathColor = pathColor.add(color.mult(newColor).scalarMult(survival));
-            }
         } else if (objectMaterial.type == MaterialType.Glossy) {
 
         } else if (objectMaterial.type == MaterialType.Glass) {
@@ -527,7 +528,7 @@ public class Camera extends SceneElement {
 			// vector, to avoid rounding problems and intersecting with the same
 			// object we're starting from.
 			if (!scene.isIlluminati(collisionPointPlusDelta, light, stack)) {
-				continue;
+                continue;
 			}
 
 			final Vector4 lightVersor = light.getDirection(collisionPoint);

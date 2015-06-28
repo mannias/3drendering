@@ -7,7 +7,7 @@ import edu.ar.itba.raytracer.texture.Texture;
 
 public class Material {
 
-	public static final double MAX_SHININESS = 128;
+	public static final double MAX_SHININESS = 128.0;
 
 	public static final Material GOLD = new Material(new ConstantColorTexture(
 			0.24725, 0.1995, 0.0745), new ConstantColorTexture(0.75164,
@@ -60,7 +60,6 @@ public class Material {
         this.refractionIndex = refractionIndex;
         this.light = null;
         this.light = light;
-
         if(refractionIndex > 1) {
             this.type = MaterialType.Glass;
         }else if(shininess == 0){
