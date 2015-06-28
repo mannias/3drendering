@@ -69,4 +69,9 @@ public class Sphere extends GeometricObject {
         return new AABB(-radius, radius, -radius, radius, -radius, radius);
 	}
 
+    @Override
+    public Vector4 sampleObject() {
+        return null;
+    }
+
 }

@@ -1,13 +1,13 @@
 package edu.ar.itba.raytracer;
 
 import edu.ar.itba.raytracer.light.Light;
+import edu.ar.itba.raytracer.materials.MaterialType;
 import edu.ar.itba.raytracer.texture.ConstantColorTexture;
 import edu.ar.itba.raytracer.texture.Texture;
-import edu.ar.itba.raytracer.vector.Vector4;
 
 public class Material {
 
-	public static final double MAX_SHININESS = 128;
+	public static final double MAX_SHININESS = 128.0;
 
 	public static final Material GOLD = new Material(new ConstantColorTexture(
 			0.24725, 0.1995, 0.0745), new ConstantColorTexture(0.75164,
@@ -40,6 +40,8 @@ public class Material {
 
     public Light light;
 
+    public final MaterialType type;
+
 	public Material(final Texture ka, final Texture kd, final Texture ks,
 			final double shininess, final Texture transparency,
 			final double refractionIndex) {
@@ -58,6 +60,15 @@ public class Material {
         this.refractionIndex = refractionIndex;
         this.light = null;
         this.light = light;
+        if(refractionIndex > 1) {
+            this.type = MaterialType.Glass;
+        }else if(shininess == 0){
+            this.type = MaterialType.Matte;
+        }else if(shininess == MAX_SHININESS){
+            this.type = MaterialType.Specular;
+        }else{
+            this.type = MaterialType.Glossy;
+        }
     }
 
 

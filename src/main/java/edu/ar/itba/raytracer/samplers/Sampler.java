@@ -1,10 +1,9 @@
 package edu.ar.itba.raytracer.samplers;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.Stack;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import edu.ar.itba.raytracer.vector.Vector2;
@@ -60,9 +59,5 @@ public class Sampler {
             }
         }
     }
-
-    protected void shuffleIndices(){
-        Collections.shuffle(sampleList);
-    }
-
 }
+

@@ -2,17 +2,25 @@ package edu.ar.itba.raytracer.light;
 
 import edu.ar.itba.raytracer.Instance;
 import edu.ar.itba.raytracer.properties.Color;
+import edu.ar.itba.raytracer.shape.GeometricObject;
+import edu.ar.itba.raytracer.shape.Mesh;
 import edu.ar.itba.raytracer.vector.Matrix44;
 import edu.ar.itba.raytracer.vector.Vector4;
 
 public class AreaLight extends PositionLight{
 
-    public AreaLight(final Color color, final Instance obj, final Matrix44 transform) {
-        super(color,obj.getAABB().center,transform);
+    private Instance object;
+    private final Matrix44 transform;
+
+    public AreaLight(final Color color, Instance obj, final Matrix44 transform) {
+        super(color);
+        this.object = obj;
+        this.transform = transform;
     }
 
-    public AreaLight(final Color color) {
+    public AreaLight(final Color color, final Matrix44 transform) {
         super(color);
+        this.transform = transform;
     }
 
     @Override
@@ -28,8 +36,13 @@ public class AreaLight extends PositionLight{
         return color;
     }
 
-    public void setPosition(final Instance object, final Matrix44 transform){
+    public void setObject(Instance object){
+        this.object = object;
+    }
 
-        super.setPosition(object.getAABB().getCorners().get(0), transform);
+    public Vector4 getPosition(){
+        position = transform.multiplyVec(object.sampleObject());
+        position.z = position.z - 0.001;
+        return position;
     }
 }

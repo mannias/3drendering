@@ -212,4 +212,6 @@ public abstract class GeometricObject {
 
 	public abstract AABB getAABB();
 
+    public abstract Vector4 sampleObject();
+
 }
