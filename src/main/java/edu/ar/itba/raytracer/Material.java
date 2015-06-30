@@ -32,7 +32,9 @@ public class Material {
 	 */
 	public final Texture ks;
 
-	public final double shininess;
+	public final double roughness;
+
+    public final double shininess;
 
 	public final Texture transparency;
 
@@ -40,31 +42,36 @@ public class Material {
 
     public Light light;
 
+    public double fresnel;
+
     public final MaterialType type;
 
 	public Material(final Texture ka, final Texture kd, final Texture ks,
-			final double shininess, final Texture transparency,
+			final double roughness, final Texture transparency,
 			final double refractionIndex) {
-        this(ka,kd,ks,shininess,transparency,refractionIndex,null);
+        this(ka,kd,ks,roughness,transparency,refractionIndex,null);
 	}
 
     public Material(final Texture ka, final Texture kd, final Texture ks,
-                    final double shininess, final Texture transparency,
+                    final double roughness, final Texture transparency,
                     final double refractionIndex, Light light) {
 
         this.ka = ka;
         this.kd = kd;
         this.ks = ks;
-        this.shininess = shininess;
+        this.roughness = roughness;
         this.transparency = transparency;
         this.refractionIndex = refractionIndex;
-        this.light = null;
+        this.shininess = MAX_SHININESS*roughness;
         this.light = light;
+        this.fresnel = 0d;
+
+
         if(refractionIndex > 1) {
             this.type = MaterialType.Glass;
-        }else if(shininess == 0){
+        }else if(roughness == 0){
             this.type = MaterialType.Matte;
-        }else if(shininess == MAX_SHININESS){
+        }else if(roughness == MAX_SHININESS){
             this.type = MaterialType.Specular;
         }else{
             this.type = MaterialType.Glossy;
@@ -74,6 +81,10 @@ public class Material {
 
     public void setLight(Light light){
         this.light = light;
+    }
+
+    public void setFresnel(double fresnel){
+        this.fresnel = fresnel;
     }
 
 }

@@ -642,13 +642,13 @@ public class KdTree implements Serializable {
 		}
 	}
 
-	public boolean intersectionExists(final double tMax, final Ray ray,
+	public GeometricObject intersectionExists(final double tMax, final Ray ray,
 			final CustomStack stack, final int top) {
 		double tNear = EPSILON;
 		double tFar = tMax;
 
 		if (tNear > tFar) {
-			return false;
+			return null;
 		}
 
 		KdNode node = root;
@@ -701,13 +701,13 @@ public class KdTree implements Serializable {
 						.hit(ray, stack, stack.top);
 				if (collision != null && collision.getDistance() < tFar + EPSILON) {
 					stack.top = top;
-					return true;
+					return collision.getObj();
 				}
 			}
 
 			// If stack is empty
 			if (stack.top == top) {
-				return false;
+				return null;
 			}
 			StackElement e = stack.pop();
 			node = e.node;

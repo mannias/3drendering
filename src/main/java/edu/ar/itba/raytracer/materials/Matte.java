@@ -8,12 +8,11 @@ import edu.ar.itba.raytracer.texture.Texture;
 public class Matte extends Material {
 
 	public Matte(Color kd) {
-		super(ConstantColorTexture.BLACK, new ConstantColorTexture(kd),
-				ConstantColorTexture.BLACK, 0, ConstantColorTexture.BLACK, 0);
+		this(new ConstantColorTexture(kd));
 	}
 
 	public Matte(Texture tex) {
-		super(tex, tex, ConstantColorTexture.BLACK, 0,
+		super(tex, tex, ConstantColorTexture.BLACK, 1d,
 				ConstantColorTexture.BLACK, 0);
 	}
 }

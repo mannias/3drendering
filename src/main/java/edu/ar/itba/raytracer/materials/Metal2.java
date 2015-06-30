@@ -7,8 +7,9 @@ import edu.ar.itba.raytracer.texture.Texture;
 
 public class Metal2 extends Material {
 
-	public Metal2(final Texture kr, final double roughness) {
+	public Metal2(final Texture kr, final double roughness, final double fresnel) {
 		super(ConstantColorTexture.BLACK, kr, kr,
-				Material.MAX_SHININESS * Math.abs(1 - roughness), ConstantColorTexture.BLACK, 0d);
+				roughness, ConstantColorTexture.BLACK, 0d);
+        setFresnel(fresnel);
 	}
 }

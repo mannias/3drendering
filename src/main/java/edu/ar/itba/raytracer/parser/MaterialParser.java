@@ -117,7 +117,7 @@ public class MaterialParser {
     }
 
     private static Material parseMetal2(String line, Map<String,Texture> textureMap){
-        double roughness = 0.001, uroughness = 0.001, vroughness = 0.001;
+        double roughness = 0.001, uroughness = 0.001, vroughness = 0.001, fresnel = 0.1d;
         boolean simpleRough = false;
         Texture reflectivity = new ConstantColorTexture(new Color(1,1,1));
         Matcher m;
@@ -144,6 +144,6 @@ public class MaterialParser {
         if((m= Pattern.compile(krtexture).matcher(line)).find()) {
             reflectivity = textureMap.get(m.group(1));
         }
-        return new Metal2(reflectivity, roughness);
+        return new Metal2(reflectivity, roughness, fresnel);
     }
 }

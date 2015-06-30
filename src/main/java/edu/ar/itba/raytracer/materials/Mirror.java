@@ -8,7 +8,7 @@ public class Mirror extends Material {
 
 	public Mirror(Texture reflectivity) {
 		super(ConstantColorTexture.BLACK, ConstantColorTexture.BLACK,
-				reflectivity, Material.MAX_SHININESS,
+				reflectivity, 1d,
 				ConstantColorTexture.BLACK, 0d);
 	}
 

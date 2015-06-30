@@ -72,8 +72,11 @@ public class Scene {
 		Vector4 aux = new Vector4(position);
 		aux.sub(point);
 		Ray ray = new Ray(point, aux);
-		return !tree.intersectionExists(point.distanceTo(position),
-				ray, stack, 0);
+        GeometricObject obj = tree.intersectionExists(point.distanceTo(position), ray, stack, 0);
+        if(obj == null || obj.material.light != null){
+            return true;
+        }
+		return false;
 	}
 
 	public Color getAmbientLight() {
