@@ -1,7 +1,7 @@
 # Materials File
 
 Texture "D.001_color" "color" "imagemap"
-	"string filename" ["resources/texture/charizard.jpg"]
+	"string filename" ["charizard.jpg"]
 	"integer discardmipmaps" [0]
 	"float gain" [1.000000000000000]
 	"float gamma" [2.200000047683716]
@@ -19,7 +19,7 @@ MakeNamedMaterial "mat_1"
 	"string type" ["matte"]
 
 Texture "Kd_color" "color" "imagemap"
-	"string filename" ["resources/texture/charizard.jpg"]
+	"string filename" ["charizard.jpg"]
 	"integer discardmipmaps" [0]
 	"float gain" [1.000000000000000]
 	"float gamma" [2.200000047683716]

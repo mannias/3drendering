@@ -1,10 +1,10 @@
 # Materials File
 
 Texture "metalexample1"
-	"string filename" ["resources/texture/earth.jpg"]
+	"string filename" ["metal1.jpg"]
 
 Texture "metalexample2"
-	"string filename" ["resources/texture/metal2.jpg"]
+	"string filename" ["metal2.jpg"]
 
 MakeNamedMaterial "Material.006"
 	"float film" [0.000000000000000]

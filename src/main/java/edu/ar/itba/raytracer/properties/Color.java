@@ -81,7 +81,7 @@ public final class Color {
 		}
 		return true;
 	}
-	
+
 	public Color clamp() {
 		final double topValue = Math.max(r, Math.max(g, b));
 		final double lowerValue = Math.min(r, Math.min(g, b));
@@ -92,12 +92,12 @@ public final class Color {
 			}
 			
 			final double m = 1d / (topValue - lowerValue);
-			final double b = -m * lowerValue;
-			r = (m * r + b);
-			g = (m * g + b);
-			this.b = (m * b + b);
+			final double c = -m * lowerValue;
+			r = (m * r + c);
+			g = (m * g + c);
+			b = (m * b + c);
 		}
-		
+
 		return this;
 	}
 
