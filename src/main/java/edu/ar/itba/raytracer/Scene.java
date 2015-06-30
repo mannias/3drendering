@@ -10,6 +10,7 @@ import edu.ar.itba.raytracer.light.DirectionalLight;
 import edu.ar.itba.raytracer.light.Light;
 import edu.ar.itba.raytracer.light.PositionLight;
 import edu.ar.itba.raytracer.properties.Color;
+import edu.ar.itba.raytracer.properties.RayTracerParameters;
 import edu.ar.itba.raytracer.shape.CustomStack;
 import edu.ar.itba.raytracer.shape.GeometricObject;
 import edu.ar.itba.raytracer.vector.Matrix44;
@@ -34,10 +35,9 @@ public class Scene {
 
 	public Camera addCamera(final int width, final int height,
 			final double fov, final Vector4 position, final Vector4 lookAt,
-			final Vector4 up, final Matrix44 transform, final int aaSamples,
-			final int rayDepth) {
+			final Vector4 up, final Matrix44 transform, RayTracerParameters parameters) {
 		final Camera camera = new Camera(this, width, height, fov, position,
-				lookAt, up, transform, aaSamples, rayDepth);
+				lookAt, up, transform, parameters);
 		cameras.add(camera);
 		return camera;
 	}

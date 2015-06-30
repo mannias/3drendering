@@ -11,14 +11,12 @@ import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import edu.ar.itba.raytracer.Instance;
-import edu.ar.itba.raytracer.KdTree;
-import edu.ar.itba.raytracer.Material;
-import edu.ar.itba.raytracer.Scene;
+import edu.ar.itba.raytracer.*;
 import edu.ar.itba.raytracer.light.AreaLight;
 import edu.ar.itba.raytracer.light.Light;
 import edu.ar.itba.raytracer.materials.Matte;
 import edu.ar.itba.raytracer.properties.Color;
+import edu.ar.itba.raytracer.properties.RayTracerParameters;
 import edu.ar.itba.raytracer.shape.GeometricObject;
 import edu.ar.itba.raytracer.texture.Texture;
 import edu.ar.itba.raytracer.vector.Matrix44;
@@ -42,7 +40,7 @@ public class FileInput {
 		path = file.toPath();
 	}
 
-	public Scene parse(final int aaSamples, final int rayDepth) throws IOException {
+	public Scene parse(RayTracerParameters parameters) throws IOException {
 		String line;
 		transforms.push(Matrix44.ID);
 		Matrix44 cameraTransform = Matrix44.ID;
@@ -56,7 +54,7 @@ public class FileInput {
 			} else if (line.contains("Film")) {
 				cameraParser.parseDimension(mergeLine(line, file));
 			} else if (line.contains("WorldBegin")) {
-				cameraParser.setCamera(scene, cameraTransform, aaSamples, rayDepth);
+				cameraParser.setCamera(scene, cameraTransform, parameters);
 				parseWorld();
 			}
 		}

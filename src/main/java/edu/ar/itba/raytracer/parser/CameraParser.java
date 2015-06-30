@@ -5,6 +5,7 @@ import java.util.regex.Pattern;
 
 import edu.ar.itba.raytracer.Camera;
 import edu.ar.itba.raytracer.Scene;
+import edu.ar.itba.raytracer.properties.RayTracerParameters;
 import edu.ar.itba.raytracer.vector.Matrix44;
 import edu.ar.itba.raytracer.vector.Vector3;
 import edu.ar.itba.raytracer.vector.Vector4;
@@ -50,7 +51,7 @@ public class CameraParser {
     }
 
 
-    public Camera setCamera(Scene scene, final Matrix44 transform, final int aaSamples, final int rayDepth){
-        return scene.addCamera(width, height, fov, position, target, up, transform,aaSamples,rayDepth);
+    public Camera setCamera(Scene scene, final Matrix44 transform, RayTracerParameters parameters){
+        return scene.addCamera(width, height, fov, position, target, up, transform, parameters);
     }
 }
