@@ -40,6 +40,8 @@ public class Sampler {
         if(Double.isNaN(pu) || Double.isNaN(pv) || Double.isNaN(pw)) {
 			System.out.println("SASA");
 		}
+
+
         
         return new Vector3(pu, pv, pw);
     }

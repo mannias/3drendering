@@ -301,7 +301,7 @@ public class Camera extends SceneElement {
 				}
                 final long start = System.nanoTime();
                 
-                final int samps = 100;
+                final int samps = 20;
                 for (int s = 0 ; s< samps; s++) {
 						final double ppx = x - .5 * pictureWidth
 								+ Math.random();
@@ -316,7 +316,8 @@ public class Camera extends SceneElement {
 						if (Double.isNaN(c.getRed())
 								|| Double.isNaN(c.getBlue())
 								|| Double.isNaN(c.getGreen())) {
-						}else {
+                            System.out.println("justincase");
+                        }else {
                             pixelRed += c.getRed();// * Math.PI;
                             pixelGreen += c.getGreen();// * Math.PI;
                             pixelBlue += c.getBlue();// * Math.PI;
@@ -354,7 +355,7 @@ public class Camera extends SceneElement {
 //                        / Math.max(count, 1), pixelBlue / Math.max(count, 1));
 
                 Color result = new Color(pixelRed / samps, pixelGreen
-                        / samps, pixelBlue / samps);
+                        / samps, pixelBlue / samps).clamp();
 
                 picture[y][x] = result;
             }
@@ -422,7 +423,7 @@ public class Camera extends SceneElement {
         	if (rayDepth == this.rayDepth) {
         		c = new Color(objectMaterial.kd.getColor(collision));
         	} else {
-                c = new Color(objectMaterial.light.getIntensity(null)).scalarMult(10);
+                c = new Color(objectMaterial.light.getIntensity(collisionPoint)).scalarMult(10);
         	}
         	return c;
         }
@@ -448,13 +449,16 @@ public class Camera extends SceneElement {
         if (objectMaterial.type == MaterialType.Matte) {
             //DIRECT
             if(parameters.direct){
-                pathColor = pathColor.add(directLightDiffuse(collision,collisionPointPlusDelta,stack, survival));
-
+                Color resp2 = directLightDiffuse(collision,collisionPointPlusDelta,stack, survival);
+                pathColor = pathColor.add(resp2);
             }
+
             //INDIRECT
             if(parameters.indirect) {
                 Color resp = indirectLightDiffuse(collision, collisionPointPlusDelta, stack,survival);
-				pathColor = pathColor.add(resp);
+				pathColor = pathColor.add(resp);//.scalarMult(1 / (1 + Math.pow(collision.distance, 2))
+
+
             }
         } else if (objectMaterial.type == MaterialType.Specular) {
             pathColor = pathColor.add(indirectSpecular(collision,collisionPointPlusDelta,stack,survival));
@@ -484,11 +488,11 @@ public class Camera extends SceneElement {
             final double ln = lightVersor.dot(collision.normal);
 
             if (ln > 0) {
-                final Color lightColor = new Color(light.getIntensity(collisionPoint));
+                final Color lightColor = new Color(light.getIntensity(collisionPoint)).scalarMult(10);
 
                 final Color diffuse = new Color(lightColor);
                 diffuse.scalarMult(ln);
-                color.add(diffuse.mult(collision.getObj().material.kd.getColor(collision)));
+                color = color.add(diffuse.mult(collision.getObj().material.kd.getColor(collision)));
             }
         }
         return color;
@@ -505,6 +509,7 @@ public class Camera extends SceneElement {
         final Color f = objectMaterial.kd.getColor(collision);
 
         final Vector4 w = new Vector4(collision.normal);
+        // TODO : todo esto == new Vector4(.0034, 1, .0071, 0).neg()
         final Vector4 v = new Vector4(.0034, 1, .0071, 0).cross(w);
         v.normalize();
         final Vector4 u = v.cross(w);
@@ -554,6 +559,7 @@ public class Camera extends SceneElement {
         Vector4 wo = ray.dir.neg();
         double ndotwo = collision.normal.dot(wo);
         Vector4 w = wo.neg().add(new Vector4(collision.normal).scalarMult(2 * ndotwo));
+        // TODo : mas fruta!!
         Vector4 u = new Vector4(0.00424,1,0.00764,0).cross(w);
         u.normalize();
         Vector4 v = u.cross(w);

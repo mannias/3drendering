@@ -84,18 +84,12 @@ public final class Color {
 
 	public Color clamp() {
 		final double topValue = Math.max(r, Math.max(g, b));
-		final double lowerValue = Math.min(r, Math.min(g, b));
-		
+
 		if (topValue > 1d) {
-			if (topValue - lowerValue < 0.00001) {
-				return new Color(1,1,1);
-			}
-			
-			final double m = 1d / (topValue - lowerValue);
-			final double c = -m * lowerValue;
-			r = (m * r + c);
-			g = (m * g + c);
-			b = (m * b + c);
+			final double m = 1d / topValue;
+			r = m * r;
+			g = m * g;
+			b = m * b;
 		}
 
 		return this;

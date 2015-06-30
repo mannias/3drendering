@@ -102,6 +102,16 @@ public class Vector4 {
 				+ wDiff * wDiff);
 	}
 
+    public double distanceSquared(final Vector4 point){
+        final double xDiff = x - point.x;
+        final double yDiff = y - point.y;
+        final double zDiff = z - point.z;
+        final double wDiff = w - point.w;
+
+        return xDiff * xDiff + yDiff * yDiff + zDiff * zDiff
+                + wDiff * wDiff;
+    }
+
 	public Vector4 rotate(final Vector4 rotation) {
 		final double xRotation = (double) (rotation.x * Math.PI / 180.0f);
 		final double yRotation = (double) (rotation.y * Math.PI / 180.0f);

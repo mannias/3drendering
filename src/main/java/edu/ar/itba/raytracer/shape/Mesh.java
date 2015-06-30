@@ -5,9 +5,7 @@ import java.util.*;
 import edu.ar.itba.raytracer.KdTree;
 import edu.ar.itba.raytracer.Ray;
 import edu.ar.itba.raytracer.RayCollisionInfo;
-import edu.ar.itba.raytracer.vector.Vector2;
 import edu.ar.itba.raytracer.vector.Vector4;
-import javafx.scene.shape.TriangleMesh;
 
 public class Mesh extends GeometricObject {
 

@@ -33,7 +33,8 @@ public class AreaLight extends PositionLight{
 
     @Override
     public Color getIntensity(final Vector4 hitPoint) {
-        return color;
+        double distance = this.position.distanceSquared(hitPoint) + 1;
+        return new Color(color).scalarMult(1/distance);
     }
 
     public void setObject(Instance object){
