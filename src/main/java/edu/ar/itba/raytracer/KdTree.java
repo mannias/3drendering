@@ -745,7 +745,7 @@ public class KdTree implements Serializable {
 
 				final double d = (internal.splitPosition - sourceAxis)
 						/ dirAxis;
-				if (d > EPSILON) {
+				if (Math.abs(d) > EPSILON) {
 					if (sourceAxis < internal.splitPosition) {
 						near = internal.left;
 						far = internal.right;
