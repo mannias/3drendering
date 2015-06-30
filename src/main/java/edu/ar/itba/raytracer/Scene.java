@@ -21,7 +21,7 @@ public class Scene {
 	private final Set<Camera> cameras = new HashSet<>();
 	private final Set<Light> lights = new HashSet<>();
 
-	private Color ambientLight = new Color(0, 0, 0);
+	private Color ambientLight = new Color(0,0,0);
 
 	private KdTree tree;
 

@@ -45,20 +45,15 @@ public final class Color {
 		final double newRed = r + other.r;
 		final double newGreen = g + other.g;
 		final double newBlue = b + other.b;
-		final double max = Math.max(newRed, Math.max(newGreen, newBlue));
-		if (max > 1) {
-			return new Color(newRed / max, newGreen / max, newBlue / max);
-		} else {
-			return new Color(newRed, newGreen, newBlue);
-		}
+		return new Color(newRed, newGreen, newBlue);
 	}
 
 	public Color scalarMult(final double scalar) {
 		final double transformedScalar = Double.isInfinite(scalar) ? Double.MAX_VALUE
 				: scalar;
-		r = Math.max(0, Math.min(1, transformedScalar * r));
-		g = Math.max(0, Math.min(1, transformedScalar * g));
-		b = Math.max(0, Math.min(1, transformedScalar * b));
+		r = Math.max(0, transformedScalar * r);
+		g = Math.max(0, transformedScalar * g);
+		b = Math.max(0, transformedScalar * b);
 		return this;
 	}
 
@@ -85,6 +80,21 @@ public final class Color {
 			return false;
 		}
 		return true;
+	}
+	
+	public Color clamp() {
+		double topValue = Math.max(r, Math.max(r, g));
+		double lowerValue = Math.min(r, Math.min(g, b));
+
+		if (topValue > 1d) {
+			double m = 1d / (topValue - lowerValue);
+			double b = -m * lowerValue;
+			r = (m * r + b);
+			g = (m * g + b);
+			b = (m * b + b);
+		}
+		
+		return this;
 	}
 
 	@Override
