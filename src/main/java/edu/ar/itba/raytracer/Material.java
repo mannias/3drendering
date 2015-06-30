@@ -62,16 +62,16 @@ public class Material {
         this.roughness = roughness;
         this.transparency = transparency;
         this.refractionIndex = refractionIndex;
-        this.shininess = MAX_SHININESS*roughness;
+        this.shininess = MAX_SHININESS*(1d-roughness);
         this.light = light;
         this.fresnel = 0d;
 
 
         if(refractionIndex > 1) {
             this.type = MaterialType.Glass;
-        }else if(roughness == 0){
+        }else if(roughness == 1){
             this.type = MaterialType.Matte;
-        }else if(roughness == MAX_SHININESS){
+        }else if(shininess == MAX_SHININESS){
             this.type = MaterialType.Specular;
         }else{
             this.type = MaterialType.Glossy;
