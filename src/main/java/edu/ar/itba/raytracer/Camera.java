@@ -360,7 +360,13 @@ public class Camera extends SceneElement {
 
         double survival = 1d;
         if (objectMaterial.light != null) {
-            return new Color(objectMaterial.kd.getColor(collision)).scalarMult(100);
+        	final Color c;
+        	if (rayDepth == this.rayDepth) {
+        		c = new Color(objectMaterial.kd.getColor(collision));
+        	} else {
+        		c = new Color(objectMaterial.light.getIntensity(null));
+        	}
+        	return c.scalarMult(100);
         }
         Color pathColor = new Color(0,0,0);
 
@@ -435,14 +441,7 @@ public class Camera extends SceneElement {
 				v.normalize();
 				final Vector4 u = v.cross(w);
 				
-				final Vector4 sample = sampler.getSample();
-				
-//				final Vector4 wi = new Vector4(Math.random() -.5, Math.random() -.5, Math.random() - .5,0);
-//				wi.normalize();
-//				
-//				if (wi.dot(collision.normal) < 0) {
-//					wi.scalarMult(-1);
-//				}
+				final Vector4 sample = sampler.getSample(1);
 				
 				final Vector4 wi = u.scalarMult(sample.x).add(v.scalarMult(sample.y)).add(w.scalarMult(sample.z));
 				wi.normalize();
@@ -513,8 +512,15 @@ public class Camera extends SceneElement {
                     final Color refractedColor = shade(refractedRay,
                             rayDepth - 1, stack);
                     refractedColor.mult(materialRefractionColor);
+                    
+                    double pdf = Math.abs(collision.normal.dot(refractedDir));
+                    double phi = collision.normal.dot(refractedDir);
 
-                    return refractedColor;
+                    final Color color = new Color(objectMaterial.transparency.getColor(collision));
+                    
+    				final Color newColor = pathShade(new Ray(collisionPointPlusDelta, refractedDir), rayDepth-1, stack); 
+                    
+                    return pathColor.add(color.mult(newColor).scalarMult(phi/pdf));
                 }
             }
         }
