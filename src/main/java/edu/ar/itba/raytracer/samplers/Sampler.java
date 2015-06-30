@@ -24,14 +24,14 @@ public class Sampler {
         this.numSets = sets;
     }
 
-    public Vector4 getSample(){
+    public Vector4 getSample(final double e){
     	final int size = sampleList.size();
         int n = (int) Math.sqrt((float) samples);
         final Vector2 sample = new Vector2(Math.random(), Math.random());
     	
         double cos_phi = Math.cos(2.0 * Math.PI * sample.x);
         double sin_phi = Math.sin(2.0 * Math.PI * sample.x);
-        double cos_theta = Math.pow((1.0 - sample.y), 1.0 / (1 + 1.0));
+        double cos_theta = Math.pow((1.0 - sample.y), 1.0 / (e + 1.0));
         double sin_theta = Math.sqrt(1.0 - cos_theta * cos_theta);
         double pu = sin_theta * cos_phi;
         double pv = sin_theta * sin_phi;
