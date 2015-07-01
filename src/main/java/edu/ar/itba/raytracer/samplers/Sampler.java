@@ -6,9 +6,7 @@ import java.util.Queue;
 import java.util.Stack;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import edu.ar.itba.raytracer.vector.Vector2;
-import edu.ar.itba.raytracer.vector.Vector3;
-import edu.ar.itba.raytracer.vector.Vector4;
+import edu.ar.itba.raytracer.vector.*;
 
 public class Sampler {
 
@@ -44,6 +42,27 @@ public class Sampler {
 
 
         return new Vector3(pu, pv, pw);
+    }
+
+    public Vector4 getSample2(Vector4 normal, double e){
+        // Generate random numbers
+        double z, phi, theta;
+        z = Math.random();
+        phi = Math.random() * 2 * Math.PI;
+        theta = (e == 1 ? Math.acos(Math.sqrt(z)) : Math.acos(Math.pow(z, 1 / (e + 1))));
+
+        // Create vector aligned with z=(0,0,1)
+        double sintheta = Math.sin(theta);
+        Vector4 sample = new Vector4(sintheta*Math.cos(phi), sintheta*Math.sin(phi), z,0);
+
+        // Rotate sample to be aligned with normal
+        Vector4 t = new Vector4(Math.random(), Math.random(), Math.random(),0);
+        Vector4 u = t.cross(normal); u.normalize();
+        Vector4 v = new Vector4(normal).cross(u);
+
+        Matrix33 rot = new Matrix33(u, v, normal);
+        rot = rot.transpose();
+        return rot.multiplyVec(sample);
     }
 
 //    public Vector4 getSample() {
