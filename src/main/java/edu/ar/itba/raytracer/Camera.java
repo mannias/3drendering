@@ -456,7 +456,7 @@ public class Camera extends SceneElement {
 
             //INDIRECT
             if(parameters.indirect) {
-                Color resp = indirectLightDiffuse(collision, collisionPointPlusDelta, stack,survival,rayDepth,distance);
+                Color resp = indirectLightDiffuse(collision, collisionPointPlusDelta, stack,survival, rayDepth,distance);
 				pathColor = pathColor.add(resp);//
             }
         } else if (objectMaterial.type == MaterialType.Specular) {
@@ -494,7 +494,7 @@ public class Camera extends SceneElement {
     }
 
     private Color indirectLightDiffuse(RayCollisionInfo collision, Vector4 collisionPointPlusDelta, CustomStack stack,
-                                       double survival, double distance, final int rayDepth){
+                                       double survival, final int rayDepth, double distance){
         final double r1 = 2 * Math.PI * Math.random();
         final double r2 = Math.random();
         final double r2s = Math.sqrt(r2);
