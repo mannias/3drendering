@@ -117,7 +117,7 @@ public class Camera extends SceneElement {
 		this.rayDepth = parameters.rayDepth;
 
         //TODO: Wired
-        this.samplesPerPixel = 1;
+        this.samplesPerPixel = 20;
         sampler = new Sampler(samplesPerPixel, pictureWidth * pictureHeight);
 //        testSamples();
 //        sampler.generateSamples();
@@ -256,9 +256,9 @@ public class Camera extends SceneElement {
 				@Override
 				public void run() {
                     if(parameters.pathTracer) {
-                        trace(startPixel, pixelsPerTask, pixels, width, aaSamples,(x,y,z) -> shade(x,y,z));
+                    	trace(startPixel, pixelsPerTask, pixels, width, samplesPerPixel, (x,y,z) -> pathShade(x, y, z, 0));
                     }else{
-                        trace(startPixel, pixelsPerTask, pixels, width, samplesPerPixel, (x,y,z) -> pathShade(x, y, z, 0));
+                    	trace(startPixel, pixelsPerTask, pixels, width, aaSamples,(x,y,z) -> shade(x,y,z));
                     }
 				}
 			};
@@ -301,7 +301,7 @@ public class Camera extends SceneElement {
 				}
                 final long start = System.nanoTime();
                 
-                final int samps = 1;
+                final int samps = 20;
                 for (int s = 0 ; s< samps; s++) {
 						final double ppx = x - .5 * pictureWidth
 								+ Math.random();
@@ -454,11 +454,11 @@ public class Camera extends SceneElement {
                 pathColor = pathColor.add(resp2);
             }
 
-            //INDIRECT
-            if(parameters.indirect) {
-                Color resp = indirectLightDiffuse(collision, collisionPointPlusDelta, stack,survival, rayDepth,distance);
-				pathColor = pathColor.add(resp);//
-            }
+//            //INDIRECT
+//            if(parameters.indirect) {
+//                Color resp = indirectLightDiffuse(collision, collisionPointPlusDelta, stack,survival, rayDepth,distance);
+//				pathColor = pathColor.add(resp);//
+//            }
         } else if (objectMaterial.type == MaterialType.Specular) {
             pathColor = pathColor.add(indirectSpecular(collision,collisionPointPlusDelta,stack,survival,rayDepth,distance));
 
@@ -466,7 +466,7 @@ public class Camera extends SceneElement {
             pathColor = pathColor.add(indirectGlossy(collision,collisionPointPlusDelta,stack,survival,rayDepth, distance));
 
         } else if (objectMaterial.type == MaterialType.Glass) {
-            pathColor = pathColor.add(indirectGlass(collision, collisionPointPlusDelta, stack, survival,rayDepth, distance));
+            pathColor = pathColor.add(indirectGlass(collision, stack, rayDepth));
         }
         return pathColor;
 
@@ -578,47 +578,45 @@ public class Camera extends SceneElement {
         return color.mult(newColor).scalarMult(survival);
     }
 
-    private Color indirectGlass(RayCollisionInfo collision, Vector4 collisionPointPlusDelta, CustomStack stack,
-                                double survival, final int rayDepth, double distance){
+    private Color indirectGlass(RayCollisionInfo collision, CustomStack stack, final int rayDepth) {
+    	final Vector4 normal = collision.normal;
+		final double nv = normal.dot(v);
+    	final Vector4 tNormal = new Vector4(normal);
+		final Material objectMaterial = collision.obj.material;
+		
+		double cosThetaI = nv;
+		double eta = objectMaterial.refractionIndex;
+		if (nv < 0) {
+			eta = 1 / eta;
+			tNormal.scalarMult(-1);
+			cosThetaI = -cosThetaI;
+		}
 
-        Color finalcolor = new Color(0,0,0);
-        Ray ray = collision.getRay();
-        Vector4 collisionPoint = collision.getWorldCollisionPoint();
-        Material objectMaterial = collision.getObj().material;
-        Vector4 tNormal = new Vector4(collision.normal);
-        double nv = collision.normal.dot(ray.getDir());
-        double cosThetaI = nv;
-        double eta = objectMaterial.refractionIndex;
-        if (nv < 0) {
-            eta = 1 / eta;
-            tNormal.scalarMult(-1);
-            cosThetaI = -cosThetaI;
-        }
+		final double xx = 1 - (1 - cosThetaI * cosThetaI) / (eta * eta);
+		if (xx >= 0) {
+			final Color materialRefractionColor = objectMaterial.transparency
+					.getColor(collision);
+			if (materialRefractionColor.getRed() != 0
+					|| materialRefractionColor.getGreen() != 0
+					|| materialRefractionColor.getBlue() != 0) {
+				final Vector4 aux = new Vector4(tNormal);
+				aux.scalarMult(Math.sqrt(xx) - cosThetaI / eta);
+				final Vector4 refractedDir = new Vector4(v);
+				refractedDir.scalarMult(-1 / eta);
+				refractedDir.sub(aux);
+				final Vector4 aux2 = new Vector4(collision.getWorldCollisionPoint());
+				tNormal.scalarMult(.001f);
+				aux2.sub(tNormal);
+				final Ray refractedRay = new Ray(aux2, refractedDir);
 
-        final double xx = 1 - (1 - cosThetaI * cosThetaI) / (eta * eta);
-        if (xx >= 0) {
-            final Color materialRefractionColor = objectMaterial.transparency
-                    .getColor(collision);
-            if (materialRefractionColor.getRed() != 0
-                    || materialRefractionColor.getGreen() != 0
-                    || materialRefractionColor.getBlue() != 0) {
-                final Vector4 aux = new Vector4(tNormal);
-                aux.scalarMult(Math.sqrt(xx) - cosThetaI / eta);
-                final Vector4 refractedDir = new Vector4(v);
-                refractedDir.scalarMult(-1 / eta);
-                refractedDir.sub(aux);
-                final Vector4 aux2 = new Vector4(collisionPoint);
-                tNormal.scalarMult(.001f);
-                aux2.sub(tNormal);
-                final Ray refractedRay = new Ray(aux2, refractedDir);
+				final Color refractedColor = shade(refractedRay,
+						rayDepth - 1, stack);
+				refractedColor.mult(materialRefractionColor);
 
-                final Color refractedColor = pathShade(refractedRay,
-                        rayDepth - 1, stack,distance);
-                
-                finalcolor.add(refractedColor.mult(materialRefractionColor));
-            }
-        }
-        return finalcolor;
+				return refractedColor;
+			}
+		}
+		return new Color(0,0,0);
     }
 
 	private Color shade(final Ray ray, final int rayDepth,

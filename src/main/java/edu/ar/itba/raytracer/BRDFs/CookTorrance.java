@@ -73,7 +73,7 @@ public class CookTorrance {
                 double fresnel = Math.pow(1.0 - VdotH, 5.0);
                 fresnel *= (1.0 - F0);
                 fresnel += F0;
-                if(NdotV != 0d || NdotL != 0d){
+                if(NdotV != 0d && NdotL != 0d){
                     cook += (fresnel *geoAtt*roughness)/(Math.PI * NdotV * NdotL);
                 }
 
