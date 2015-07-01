@@ -13,8 +13,8 @@ public class SpotLight extends PositionLight {
 
 	public SpotLight(final Color color, final Vector4 from, final Vector4 to,
 			final double coneAngle, final double coneDeltaAngle,
-			final Matrix44 transform) {
-		super(color, from, transform);
+			final Matrix44 transform, final double gain) {
+		super(color.scalarMult(gain), from, transform);
 		final Vector4 dir = new Vector4(to);
 		dir.sub(from);
 

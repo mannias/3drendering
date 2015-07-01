@@ -42,7 +42,7 @@ public class Sampler {
 		}
 
 
-        
+
         return new Vector3(pu, pv, pw);
     }
 
@@ -60,6 +60,31 @@ public class Sampler {
                 }
             }
         }
+    }
+
+    public static Vector4 cosWeightedHemisphere( Vector4 oNormal )
+    {
+        double Xi1 = Math.random();
+        double Xi2 = Math.random();
+        double  theta = Math.acos(Math.sqrt(1.0-Xi1));
+        double  phi = 2.0 * Math.PI * Xi2;
+        double xs = Math.sin(theta) * Math.cos(phi);
+        double ys = Math.cos(theta);
+        double zs = Math.sin(theta) * Math.sin(phi);
+        Vector4 normal = new Vector4(oNormal).normalize();
+        Vector4 y = new Vector4(normal);
+        Vector4 h = y;
+        if (Math.abs(h.x)<=Math.abs(h.y) && Math.abs(h.x)<=Math.abs(h.z))
+            h.x= 1.0;
+        else if (Math.abs(h.y)<=Math.abs(h.x) && Math.abs(h.y)<=Math.abs(h.z))
+            h.y= 1.0;
+        else
+            h.z= 1.0;
+        Vector4 x = (h.cross(y)).normalize();
+        Vector4 z = (x.cross(y)).normalize();
+        Vector4 direction = x.scalarMult(xs).add(y.scalarMult(ys)).add(z.scalarMult(zs));
+        direction.w = 1;
+        return direction.normalize();
     }
 }
 

@@ -12,15 +12,16 @@ public class AreaLight extends PositionLight{
     private Instance object;
     private final Matrix44 transform;
 
-    public AreaLight(final Color color, Instance obj, final Matrix44 transform) {
-        super(color);
+    public AreaLight(final Color color, Instance obj, final Matrix44 transform, final double gain) {
+        super(color.scalarMult(gain));
         this.object = obj;
         this.transform = transform;
+        System.out.println(gain);
+        System.out.println(color);
     }
 
-    public AreaLight(final Color color, final Matrix44 transform) {
-        super(color);
-        this.transform = transform;
+    public AreaLight(final Color color, final Matrix44 transform, final double gain) {
+        this(color,null,transform,gain);
     }
 
     @Override
@@ -33,7 +34,6 @@ public class AreaLight extends PositionLight{
 
     @Override
     public Color getIntensity(final Vector4 hitPoint) {
-        double distance = this.position.distanceSquared(hitPoint) + 1;
         return new Color(color);
     }
 

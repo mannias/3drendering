@@ -17,6 +17,7 @@ public class LightParser {
     final static String to = "\"point to\" \\[(-?\\d+\\.\\d+) (-?\\d+\\.\\d+) (-?\\d+\\.\\d+)\\]";
     final static String coneanglerx = "\"float coneangle\" (-?\\d+\\.\\d+)";
     final static String conedeltaanglerx = "\"float conedeltaangle\" (-?\\d+\\.\\d+)";
+    final static String gainrx = "\"float gain\" \\[(\\d+\\.\\d+)\\]";
 
     public static Light parseLight(final String line, final Matrix44 transform){
         Light light = null;
@@ -41,7 +42,12 @@ public class LightParser {
         if((m = Pattern.compile(colorrx).matcher(line)).find()) {
             lightColor = new Color(Double.valueOf(m.group(1)), Double.valueOf(m.group(2)), Double.valueOf(m.group(3)));
         }
-        return new AreaLight(lightColor, transform);
+        double gain = 1d;
+        if((m = Pattern.compile(gainrx).matcher(line)).find()) {
+            gain = Double.valueOf(m.group(1));
+        }
+
+        return new AreaLight(lightColor, transform, gain);
     }
 
     private static Light parseSpotLight(String line, Matrix44 transform){
@@ -64,7 +70,11 @@ public class LightParser {
         if((m = Pattern.compile(conedeltaanglerx).matcher(line)).find()) {
             conedeltaangle = Double.valueOf(m.group(1));
         }
-        return new SpotLight(lightColor, fromPoint, toPoint, coneangle, conedeltaangle, transform);
+        double gain = 1d;
+        if((m = Pattern.compile(gainrx).matcher(line)).find()) {
+            gain = Double.valueOf(m.group(1));
+        }
+        return new SpotLight(lightColor, fromPoint, toPoint, coneangle, conedeltaangle, transform, gain);
 
     }
 
@@ -91,8 +101,11 @@ public class LightParser {
         if((m = Pattern.compile(to).matcher(line)).find()) {
             toPoint = new Vector4(Double.valueOf(m.group(1)), Double.valueOf(m.group(2)), Double.valueOf(m.group(3)), 1);
         }
-        
-        return new DirectionalLight(fromPoint, toPoint, transform, lightColor);
+        double gain = 1d;
+        if((m = Pattern.compile(gainrx).matcher(line)).find()) {
+            gain = Double.valueOf(m.group(1));
+        }
+        return new DirectionalLight(fromPoint, toPoint, transform, lightColor, gain);
 	}
 
 	private static Light parsePointLight(final String line, final Matrix44 transform){
@@ -106,6 +119,10 @@ public class LightParser {
             locationPoint = new Vector4(Double.valueOf(m.group(1)), Double.valueOf(m.group(2)),
                     Double.valueOf(m.group(3)),1);
         }
-        return new PointLight(locationPoint, transform, lightColor);
+        double gain = 1d;
+        if((m = Pattern.compile(gainrx).matcher(line)).find()) {
+            gain = Double.valueOf(m.group(1));
+        }
+        return new PointLight(locationPoint, transform, lightColor, gain);
     }
 }

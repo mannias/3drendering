@@ -9,8 +9,8 @@ public class DirectionalLight extends Light {
 	private final Vector4 dir;
 
 	public DirectionalLight(final Vector4 from, final Vector4 to, final Matrix44 transform,
-			final Color color) {
-		super(color);
+			final Color color, final double gain) {
+		super(color.scalarMult(gain));
 		final Vector4 dir = new Vector4(from);
 		dir.sub(to);
 		this.dir = transform.multiplyVec(dir);

@@ -6,9 +6,10 @@ import edu.ar.itba.raytracer.vector.Vector4;
 
 public class PointLight extends PositionLight {
 
+
 	public PointLight(final Vector4 position, final Matrix44 transform,
-			final Color color) {
-		super(color, position, transform);
+			final Color color, final double gain) {
+		super(color.scalarMult(gain), position, transform);
 	}
 
 	public Vector4 getDirection(final Vector4 hitPoint) {
