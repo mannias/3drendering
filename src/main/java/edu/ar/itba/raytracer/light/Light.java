@@ -15,5 +15,4 @@ public abstract class Light {
 	public abstract Vector4 getDirection(final Vector4 hitPoint);
 
 	public abstract Color getIntensity(final Vector4 hitPoint);
-	
 }

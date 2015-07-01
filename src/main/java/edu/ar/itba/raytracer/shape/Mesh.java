@@ -82,9 +82,9 @@ public class Mesh extends GeometricObject {
                 generateSampleList();
             }
         }
-        int index = (int)(sampleSize);
+        int index = (int)(sampleSize * Math.random());
         for(int i = 0; i < triangles.size(); i++){
-            if((index -= samplesPerTriangle.get(i)) <= 0){
+            if((index -= samplesPerTriangle.get(i)) < 0){
                 return triangles.get(i).getBaricentricPoint();
             }
 
@@ -104,8 +104,8 @@ public class Mesh extends GeometricObject {
             areas.add(area);
         }
         for(int j = 0; j< areas.size(); j++){
-            samplesPerTriangle.add(j, (int) Math.ceil(areas.get(j) / min));
-            sampleSize += (int)Math.ceil(areas.get(j)/min);
+            samplesPerTriangle.add(j, (int) (areas.get(j) / min));
+            sampleSize += (int)(areas.get(j)/min);
         }
     }
 

@@ -258,7 +258,7 @@ public class Camera extends SceneElement {
                     if(parameters.pathTracer) {
                         trace(startPixel, pixelsPerTask, pixels, width, aaSamples,(x,y,z) -> shade(x,y,z));
                     }else{
-                        trace(startPixel, pixelsPerTask, pixels, width, samplesPerPixel, (x,y,z) -> pathShade(x, y, z));
+                        trace(startPixel, pixelsPerTask, pixels, width, samplesPerPixel, (x,y,z) -> pathShade(x, y, z, 0));
                     }
 				}
 			};
@@ -397,7 +397,7 @@ public class Camera extends SceneElement {
 
 
     private Color pathShade(final Ray ray, final int rayDepth,
-                            final CustomStack stack) {
+                            final CustomStack stack, double distance) {
 
         final RayCollisionInfo collision = castRay(ray, stack);
         if (collision == null) {
@@ -416,6 +416,7 @@ public class Camera extends SceneElement {
         final Color ks = objectMaterial.ks.getColor(collision);
         final Color transparency = objectMaterial.transparency.getColor(collision);
 
+        distance += collision.distance;
 
         double survival = 1d;
         if (objectMaterial.light != null) {
@@ -423,7 +424,7 @@ public class Camera extends SceneElement {
         	if (rayDepth == this.rayDepth) {
         		c = new Color(objectMaterial.kd.getColor(collision));
         	} else {
-                c = new Color(objectMaterial.light.getIntensity(collisionPoint)).scalarMult(10);
+                c = new Color(objectMaterial.light.getIntensity(collisionPoint).scalarMult(100/Math.pow(distance,2)));
         	}
         	return c;
         }
@@ -449,25 +450,25 @@ public class Camera extends SceneElement {
         if (objectMaterial.type == MaterialType.Matte) {
             //DIRECT
             if(parameters.direct){
-                Color resp2 = directLightDiffuse(collision,collisionPointPlusDelta,stack, survival);
+                Color resp2 = directLightDiffuse(collision,collisionPointPlusDelta,stack, survival, distance);
                 pathColor = pathColor.add(resp2);
             }
 
             //INDIRECT
             if(parameters.indirect) {
-                Color resp = indirectLightDiffuse(collision, collisionPointPlusDelta, stack,survival);
-				pathColor = pathColor.add(resp);//.scalarMult(1 / (1 + Math.pow(collision.distance, 2))
+                Color resp = indirectLightDiffuse(collision, collisionPointPlusDelta, stack,survival,distance);
+				pathColor = pathColor.add(resp);//
 
 
             }
         } else if (objectMaterial.type == MaterialType.Specular) {
-            pathColor = pathColor.add(indirectSpecular(collision,collisionPointPlusDelta,stack,survival));
+            pathColor = pathColor.add(indirectSpecular(collision,collisionPointPlusDelta,stack,survival,distance));
 
         } else if (objectMaterial.type == MaterialType.Glossy) {
-            pathColor = pathColor.add(indirectGlossy(collision,collisionPointPlusDelta,stack,survival));
+            pathColor = pathColor.add(indirectGlossy(collision,collisionPointPlusDelta,stack,survival, distance));
 
         } else if (objectMaterial.type == MaterialType.Glass) {
-            pathColor = pathColor.add(indirectGlass(collision, collisionPointPlusDelta, stack, survival));
+            pathColor = pathColor.add(indirectGlass(collision, collisionPointPlusDelta, stack, survival, distance));
 
         }
         return pathColor;
@@ -475,7 +476,7 @@ public class Camera extends SceneElement {
     }
 
     private Color directLightDiffuse(RayCollisionInfo collision, Vector4 collisionPointPlusDelta,
-                                     CustomStack stack, double survival){
+                                     CustomStack stack, double survival, double distance){
         Vector4 collisionPoint = collision.getWorldCollisionPoint();
         Color color = new Color(0,0,0);
         for (final Light light : scene.getLights()) {
@@ -488,18 +489,15 @@ public class Camera extends SceneElement {
             final double ln = lightVersor.dot(collision.normal);
 
             if (ln > 0) {
-                final Color lightColor = new Color(light.getIntensity(collisionPoint)).scalarMult(10);
-
-                final Color diffuse = new Color(lightColor);
-                diffuse.scalarMult(ln);
-                color = color.add(diffuse.mult(collision.getObj().material.kd.getColor(collision)));
+                Color lightColor = pathShade(new Ray(collisionPointPlusDelta,lightVersor),rayDepth-1, stack, distance);
+                color = color.add(lightColor.mult(collision.getObj().material.kd.getColor(collision)));
             }
         }
         return color;
     }
 
     private Color indirectLightDiffuse(RayCollisionInfo collision, Vector4 collisionPointPlusDelta, CustomStack stack,
-                                       double survival){
+                                       double survival, double distance){
         final double r1 = 2 * Math.PI * Math.random();
         final double r2 = Math.random();
         final double r2s = Math.sqrt(r2);
@@ -528,13 +526,14 @@ public class Camera extends SceneElement {
 
         final double ndotwi = collision.normal.dot(new Vector4(wi));
 
-        final Color newColor = pathShade(new Ray(collisionPointPlusDelta, wi), rayDepth-1, stack);
+        final Color newColor = pathShade(new Ray(collisionPointPlusDelta, wi), rayDepth-1, stack,
+                distance);
 
         return color.mult(newColor).scalarMult(survival);
     }
 
     private Color indirectSpecular(RayCollisionInfo collision, Vector4 collisionPointPlusDelta, CustomStack stack,
-                                   double survival){
+                                   double survival, double distance){
         Ray ray = collision.getRay();
         Material objectMaterial = collision.getObj().material;
         Vector4 wo = ray.dir.neg();
@@ -548,13 +547,13 @@ public class Camera extends SceneElement {
         final Ray reflectedRay = new Ray(collisionPointPlusDelta,
                 reflectedDir);
 
-        Color newColor = pathShade(reflectedRay,rayDepth-1,stack);
+        Color newColor = pathShade(reflectedRay,rayDepth-1,stack, distance);
 
         return color.mult(newColor).scalarMult(phi/pdf*survival);
     }
 
     private Color indirectGlossy(RayCollisionInfo collision, Vector4 collisionPointPlusDelta, CustomStack stack,
-                                 double survival){
+                                 double survival, double distance){
         Ray ray = collision.getRay();
         Vector4 wo = ray.dir.neg();
         double ndotwo = collision.normal.dot(wo);
@@ -577,13 +576,13 @@ public class Camera extends SceneElement {
         final Ray reflectedRay = new Ray(collisionPointPlusDelta,
                 wi);
 
-        Color newColor = pathShade(reflectedRay, rayDepth - 1, stack);
+        Color newColor = pathShade(reflectedRay, rayDepth - 1, stack, distance);
 
         return color.mult(newColor).scalarMult(survival);
     }
 
     private Color indirectGlass(RayCollisionInfo collision, Vector4 collisionPointPlusDelta, CustomStack stack,
-                                double survival){
+                                double survival, double distance){
 
         Color finalcolor = new Color(0,0,0);
         Ray ray = collision.getRay();
@@ -617,7 +616,7 @@ public class Camera extends SceneElement {
                 final Ray refractedRay = new Ray(aux2, refractedDir);
 
                 final Color refractedColor = pathShade(refractedRay,
-                        rayDepth - 1, stack);
+                        rayDepth - 1, stack, distance);
                 refractedColor.mult(materialRefractionColor);
 
                 double pdf = Math.abs(collision.normal.dot(refractedDir));
@@ -625,7 +624,8 @@ public class Camera extends SceneElement {
 
                 final Color color = new Color(objectMaterial.transparency.getColor(collision));
 
-                final Color newColor = pathShade(new Ray(collisionPointPlusDelta, refractedDir), rayDepth-1, stack);
+                final Color newColor = pathShade(new Ray(collisionPointPlusDelta, refractedDir), rayDepth-1, stack,
+                        distance);
 
                 finalcolor.add(color.mult(newColor).scalarMult(phi / pdf));
             }
