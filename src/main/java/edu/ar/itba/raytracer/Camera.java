@@ -279,7 +279,7 @@ public class Camera extends SceneElement {
 		}
 //        dynamicRange();
 		
-//		toneMapping(width, height);
+		toneMapping(width, height);
         return takePicture();
 	}
 	
@@ -347,7 +347,7 @@ public class Camera extends SceneElement {
 				}
                 final long start = System.nanoTime();
                 
-                final int samps = 10;
+                final int samps = 20;
                 for (int s = 0 ; s< samps; s++) {
 						final double ppx = x - .5 * pictureWidth
 								+ Math.random();
@@ -535,34 +535,13 @@ public class Camera extends SceneElement {
             final Vector4 lightVersor = light.getDirection(collisionPoint);
             final double ln = lightVersor.dot(collision.normal);
             if (ln > 0) {
-                final Color lightColor = light.getIntensity(collision);
-
-                final Color diffuse = new Color(lightColor);//pathShade(new Ray(collisionPointPlusDelta, lightVersor), 0, stack, distance);
+                light.getIntensity(collision);
+                final Color diffuse = pathShade(new Ray(collisionPointPlusDelta, lightVersor), 0, stack, distance);
                 diffuse.scalarMult(ln);
-                diffuse.mult(collision.getObj().material.kd.getColor(collision));
+                diffuse.mult(new Color(collision.getObj().material.kd.getColor(collision)));
                 intensity = intensity.add(diffuse);
             }
         }
-
-//
-//        Vector4 collisionPoint = collision.getWorldCollisionPoint();
-//        Color color = new Color(0,0,0);
-//        for (final Light light : scene.getLights()) {
-//            if (!scene.isIlluminati(collisionPointPlusDelta, light, stack)) {
-//                continue;
-//            }
-//
-//
-//            final Vector4 lightVersor = light.getDirection(collisionPoint);
-//            final double ln = lightVersor.dot(collision.normal);
-//
-//            if (ln > 0) {
-//                Color objColor = new Color(collision.getObj().material.kd.getColor(collision)).scalarMult(0.3183098861837906715);
-//                Color lightColor = pathShade(new Ray(collisionPointPlusDelta, lightVersor), 0, stack, distance);
-//                color = color.add(lightColor.mult(objColor));
-//            }
-//        }
-//        return color;
         return intensity;
     }
 
