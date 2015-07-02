@@ -213,5 +213,7 @@ public abstract class GeometricObject {
 	public abstract AABB getAABB();
 
     public abstract Vector4 sampleObject();
+    
+    public abstract Vector4 normal(final Vector4 point);
 
 }

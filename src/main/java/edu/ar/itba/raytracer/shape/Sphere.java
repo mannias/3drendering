@@ -87,4 +87,11 @@ public class Sphere extends GeometricObject {
 
     }
 
+	@Override
+	public Vector4 normal(Vector4 point) {
+		final Vector4 n = new Vector4(point);
+		n.w = 0;
+		return n.normalize();
+	}
+
 }

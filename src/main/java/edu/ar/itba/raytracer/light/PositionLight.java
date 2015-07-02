@@ -1,5 +1,6 @@
 package edu.ar.itba.raytracer.light;
 
+import edu.ar.itba.raytracer.RayCollisionInfo;
 import edu.ar.itba.raytracer.properties.Color;
 import edu.ar.itba.raytracer.vector.Matrix44;
 import edu.ar.itba.raytracer.vector.Vector4;
@@ -17,8 +18,8 @@ public abstract class PositionLight extends Light {
         super(color);
     }
 
-    public Vector4 getPosition(){
-        return position;
+    public Vector4 getPosition(final RayCollisionInfo collision) {
+    	return position;
     }
 
 }

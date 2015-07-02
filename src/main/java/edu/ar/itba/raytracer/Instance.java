@@ -152,4 +152,9 @@ public class Instance extends GeometricObject {
         return obj.sampleObject();
     }
 
+	@Override
+	public Vector4 normal(Vector4 point) {
+		return obj.normal(point);
+	}
+
 }

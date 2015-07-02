@@ -1,7 +1,7 @@
 package edu.ar.itba.raytracer.light;
 
+import edu.ar.itba.raytracer.RayCollisionInfo;
 import edu.ar.itba.raytracer.properties.Color;
-import edu.ar.itba.raytracer.vector.Matrix44;
 import edu.ar.itba.raytracer.vector.Vector4;
 
 public abstract class Light {
@@ -14,5 +14,5 @@ public abstract class Light {
 
 	public abstract Vector4 getDirection(final Vector4 hitPoint);
 
-	public abstract Color getIntensity(final Vector4 hitPoint);
+	public abstract Color getIntensity(final RayCollisionInfo hitPoint);
 }

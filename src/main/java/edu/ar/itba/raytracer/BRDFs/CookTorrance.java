@@ -35,7 +35,7 @@ public class CookTorrance {
 
 
         for (final Light light : scene.getLights()) {
-            if (!scene.isIlluminati(collisionPointPlusDelta, light, stack)) {
+            if (!scene.isIlluminati(collisionPointPlusDelta, light, stack, collision)) {
                 continue;
             }
 

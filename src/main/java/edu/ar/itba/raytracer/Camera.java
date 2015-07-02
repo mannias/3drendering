@@ -121,7 +121,7 @@ public class Camera extends SceneElement {
 		this.rayDepth = parameters.rayDepth;
 
         //TODO: Wired
-        this.samplesPerPixel = 20;
+        this.samplesPerPixel = 30;
         sampler = new Sampler(samplesPerPixel, pictureWidth * pictureHeight);
 //        testSamples();
 //        sampler.generateSamples();
@@ -342,12 +342,12 @@ public class Camera extends SceneElement {
                 double pixelGreen = 0;
                 double pixelBlue = 0;
                 int count = 0;
-                if (x == 300 && y == 100) {
-					System.out.println("STAHP");
+                if (x == 450 && y == 95) {
+                	System.out.println("STAHP");
 				}
                 final long start = System.nanoTime();
                 
-                final int samps = 20;
+                final int samps = 10;
                 for (int s = 0 ; s< samps; s++) {
 						final double ppx = x - .5 * pictureWidth
 								+ Math.random();
@@ -383,8 +383,8 @@ public class Camera extends SceneElement {
 //                System.out.println(pixelsDone * 1.0/ pixels + " completed. About " + (remaining / 1e9) + " seconds remaining");
 
                 double n2 = samples;
-                 if (x == 400 && y == 100) {
-                 picture[y][x] = new Color(0, 0,0);
+                 if (x == 450 && y == 95) {
+                 picture[y][x] = new Color(1, 1, 1);
                  continue;
                  }
                  
@@ -403,7 +403,7 @@ public class Camera extends SceneElement {
                 Color result = new Color(pixelRed / samps, pixelGreen
                         / samps, pixelBlue / samps).clamp();
                 
-                picture[y][x] = result;//.gammaCorrect(2.2);
+                picture[y][x] = result.gammaCorrect(2.2);
             }
         }
     }
@@ -446,6 +446,7 @@ public class Camera extends SceneElement {
 
         final RayCollisionInfo collision = castRay(ray, stack);
         if (collision == null) {
+//        	return new Color(1,0,1);
             return scene.getAmbientLight();
         }
 
@@ -471,7 +472,7 @@ public class Camera extends SceneElement {
         	if (rayDepth == this.rayDepth) {
         		c = new Color(objectMaterial.kd.getColor(collision));
         	} else {
-                c = new Color(objectMaterial.light.getIntensity(collisionPoint)).scalarMult(1.5d/(1d+0.15*Math.abs(distance)+0.02*distance*distance));
+                c = new Color(objectMaterial.light.getIntensity(collision)).scalarMult(1.5d/(1d+0.15*Math.abs(distance)+0.02*distance*distance));
         	}
         	return c;
         }
@@ -479,29 +480,31 @@ public class Camera extends SceneElement {
         Color pathColor = new Color(0,0,0);
 
         if (rayDepth <= 0) {
-            Color weight = new Color(0,0,0);
-            switch(objectMaterial.type){
-                case Matte: weight = kd; break;
-                case Specular: weight = ks; break;
-                case Glass: weight = transparency; break;
-                case Glossy: new Color(kd).mult(ks);break;
-            }
-            double max = Math.max(weight.getRed(), Math.max(weight.getGreen(), weight.getBlue()));
-            survival = 1/max;
-            if(max > Math.random()){
-                return pathColor;
-            }
-
+        	return pathColor;
         }
+//            Color weight = new Color(0,0,0);
+//            switch(objectMaterial.type){
+//                case Matte: weight = kd; break;
+//                case Specular: weight = ks; break;
+//                case Glass: weight = transparency; break;
+//                case Glossy: new Color(kd).mult(ks);break;
+//            }
+//            double max = Math.max(weight.getRed(), Math.max(weight.getGreen(), weight.getBlue()));
+//            survival = 1/max;
+//            if(max > Math.random()){
+//                return pathColor;
+//            }
+//
+//        }
 
         if (objectMaterial.type == MaterialType.Matte) {
-//            //DIRECT
-//            if(parameters.direct){
-//                Color resp2 = directLightDiffuse(collision,collisionPointPlusDelta,stack, survival, rayDepth, distance);
-//                pathColor = pathColor.add(resp2);
-//            }
+            //DIRECT
+            if(parameters.direct){
+                Color resp2 = directLightDiffuse(collision,collisionPointPlusDelta,stack, survival, rayDepth, distance);
+                pathColor = pathColor.add(resp2);
+            }
 
-            //INDIRECT
+//            INDIRECT
             if(parameters.indirect) {
                 Color resp = indirectLightDiffuse(collision, collisionPointPlusDelta, stack,survival, rayDepth,distance);
 				pathColor = pathColor.add(resp);//
@@ -525,16 +528,16 @@ public class Camera extends SceneElement {
         Vector4 collisionPoint = collision.getWorldCollisionPoint();
         Color intensity = new Color(0,0,0);
         for (final Light light : scene.getLights()) {
-            if (!scene.isIlluminati(collisionPointPlusDelta, light, stack)) {
+            if (!scene.isIlluminati(collisionPointPlusDelta, light, stack, collision)) {
                 continue;
             }
 
             final Vector4 lightVersor = light.getDirection(collisionPoint);
             final double ln = lightVersor.dot(collision.normal);
             if (ln > 0) {
-                final Color lightColor = light.getIntensity(collisionPoint);
+                final Color lightColor = light.getIntensity(collision);
 
-                final Color diffuse = pathShade(new Ray(collisionPointPlusDelta, lightVersor), 0, stack, distance);
+                final Color diffuse = new Color(lightColor);//pathShade(new Ray(collisionPointPlusDelta, lightVersor), 0, stack, distance);
                 diffuse.scalarMult(ln);
                 diffuse.mult(collision.getObj().material.kd.getColor(collision));
                 intensity = intensity.add(diffuse);
@@ -597,6 +600,10 @@ public class Camera extends SceneElement {
 
         final Color newColor = pathShade(new Ray(collisionPointPlusDelta, wi), rayDepth - 1, stack,
                 distance);
+        
+//        if (newColor.getRed() == 1 && newColor.getBlue() == 1 && newColor.getGreen() == 0) {
+//        	return new Color(1,0,1);
+//        }
 
         return color.mult(newColor).scalarMult(survival);
     }
@@ -721,14 +728,17 @@ public class Camera extends SceneElement {
 		intensity.mult(ka);
 
         if(objectMaterial.light != null){
-            return objectMaterial.light.getIntensity(collisionPoint);
+        	if (rayDepth == this.rayDepth) {
+        		return objectMaterial.kd.getColor(collision);
+        	}
+            return objectMaterial.light.getIntensity(collision);
         }
 
 		for (final Light light : scene.getLights()) {
 			// Move the from point a little in the direction of the normal
 			// vector, to avoid rounding problems and intersecting with the same
 			// object we're starting from.
-			if (!scene.isIlluminati(collisionPointPlusDelta, light, stack)) {
+			if (!scene.isIlluminati(collisionPointPlusDelta, light, stack, collision)) {
                 continue;
 			}
 
@@ -742,11 +752,11 @@ public class Camera extends SceneElement {
 			final double ln = lightVersor.dot(normal);
 
 			if (ln > 0) {
-				final Color lightColor = light.getIntensity(collisionPoint);
+				final Color lightColor = light.getIntensity(collision);
 
 				final Color diffuse = new Color(lightColor);
 				diffuse.scalarMult(ln);
-				diffuse.mult(kd);
+				diffuse.mult(kd).scalarMult(1/Math.PI);
 
 				// final Color diffuse = new Color(diffuseRed, diffuseGreen,
 				// diffuseBlue);

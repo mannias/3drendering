@@ -149,4 +149,10 @@ public class Triangle extends GeometricObject {
 				+ ", vertex2=" + vertex2 + ", normal=" + normal + "]";
 	}
 
+    // TODO: Not used.
+	@Override
+	public Vector4 normal(Vector4 point) {
+		return null;
+	}
+
 }

@@ -1,5 +1,6 @@
 package edu.ar.itba.raytracer.light;
 
+import edu.ar.itba.raytracer.RayCollisionInfo;
 import edu.ar.itba.raytracer.properties.Color;
 import edu.ar.itba.raytracer.vector.Vector4;
 
@@ -15,7 +16,7 @@ public class AmbientLight extends Light {
 	}
 
 	@Override
-	public Color getIntensity(Vector4 hitPoint) {
+	public Color getIntensity(RayCollisionInfo hitPoint) {
 		return color;
 	}
 

@@ -23,6 +23,8 @@ public class MeshTriangle extends GeometricObject {
 
 	private final Vector4 e1;
 	private final Vector4 e2;
+	
+	private final Vector4 normal;
 
     public MeshTriangle(final Vector4 vertex0, final Vector4 vertex1,
                         final Vector4 vertex2){
@@ -40,7 +42,14 @@ public class MeshTriangle extends GeometricObject {
         this.uv0 = null;
         this.uv1 = null;
         this.uv2 = null;
-
+        
+        final Vector4 n = e1.cross(e2);
+		if (n.dot(n0) > 0) {
+			this.normal = n;
+		} else {
+			this.normal = n.neg();
+		}
+		this.normal.normalize();
     }
 
 	public MeshTriangle(final Vector4 vertex0, final Vector4 vertex1,
@@ -72,6 +81,14 @@ public class MeshTriangle extends GeometricObject {
 		e1.sub(vertex0);
 		e2 = new Vector4(vertex2);
 		e2.sub(vertex0);
+		
+		final Vector4 n = e1.cross(e2);
+		if (n.dot(n0) > 0) {
+			this.normal = n;
+		} else {
+			this.normal = n.neg();
+		}
+		this.normal.normalize();
 	}
 
 	@Override
@@ -219,5 +236,10 @@ public class MeshTriangle extends GeometricObject {
         result = 31 * result + n2.hashCode();
         return result;
     }
+
+	@Override
+	public Vector4 normal(Vector4 point) {
+		return normal;
+	}
 }
 

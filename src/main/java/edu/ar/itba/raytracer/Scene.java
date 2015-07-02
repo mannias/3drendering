@@ -63,12 +63,12 @@ public class Scene {
 	}
 
 	public boolean isIlluminati(final Vector4 point, Light light,
-			CustomStack stack) {
+			CustomStack stack, final RayCollisionInfo collision) {
 		if (light instanceof DirectionalLight) {
 			return true;
 		}
 		final PositionLight pointLight = (PositionLight) light;
-        Vector4 position = pointLight.getPosition();
+        Vector4 position = pointLight.getPosition(collision);
 		Vector4 aux = new Vector4(position);
 		aux.sub(point);
 		Ray ray = new Ray(point, aux);

@@ -109,4 +109,13 @@ public class Mesh extends GeometricObject {
         }
     }
 
+    // FIXME: This only works for planes.
+	@Override
+	public Vector4 normal(Vector4 point) {
+		for (final MeshTriangle t : triangles) {
+			return t.normal(point);
+		}
+		return null;
+	}
+
 }
