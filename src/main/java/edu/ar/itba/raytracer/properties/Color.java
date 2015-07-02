@@ -84,23 +84,30 @@ public final class Color {
 
 	public Color clamp() {
 
-        r = Math.min(1d, r);
-        g = Math.min(1d, g);
-        b = Math.min(1d, b);
+//        r = Math.min(1d, r);
+//        g = Math.min(1d, g);
+//        b = Math.min(1d, b);
+		
+		final double topValue = Math.max(r, Math.max(g, b));
 
-//		final double topValue = Math.max(r, Math.max(g, b));
-//
-//		if (topValue > 1d) {
-//			final double m = 1d / topValue;
-//			r = m * r;
-//			g = m * g;
-//			b = m * b;
-//		}
-//
-//		return this;
+		if (topValue > 1d) {
+			final double m = 1d / topValue;
+			r = m * r;
+			g = m * g;
+			b = m * b;
+		}
+
         return this;
 	}
 
+	
+	public Color gammaCorrect(final double gamma) {
+		r = Math.pow(r, 1 / gamma);
+		g = Math.pow(g, 1 / gamma);
+		b = Math.pow(b, 1 / gamma);
+		return this;
+	}
+	
 	@Override
 	public String toString() {
 		return "Color [r=" + r + ", g=" + g + ", b=" + b + "]";

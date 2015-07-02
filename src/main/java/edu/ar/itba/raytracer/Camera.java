@@ -1,11 +1,13 @@
 package edu.ar.itba.raytracer;
 
+import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.ForkJoinTask;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import edu.ar.itba.raytracer.BRDFs.CookTorrance;
 import edu.ar.itba.raytracer.light.Light;
 import edu.ar.itba.raytracer.materials.MaterialType;
@@ -14,7 +16,9 @@ import edu.ar.itba.raytracer.properties.RayTracerParameters;
 import edu.ar.itba.raytracer.samplers.Sampler;
 import edu.ar.itba.raytracer.shape.CustomStack;
 import edu.ar.itba.raytracer.shape.GeometricObject;
+import edu.ar.itba.raytracer.vector.Matrix33;
 import edu.ar.itba.raytracer.vector.Matrix44;
+import edu.ar.itba.raytracer.vector.Vector3;
 import edu.ar.itba.raytracer.vector.Vector4;
 
 public class Camera extends SceneElement {
@@ -274,7 +278,49 @@ public class Camera extends SceneElement {
 			fjt.join();
 		}
 //        dynamicRange();
+		
+//		toneMapping(width, height);
         return takePicture();
+	}
+	
+	private void toneMapping(final int w, final int h) {
+		
+		final Matrix33 rgb2xyz = new Matrix33(0.4124564, 0.3575761, 0.1804375,
+				0.2126729, 0.7151522, 0.0721750, 0.0193339, 0.1191920,
+				0.9503041);
+		
+		final Matrix33 xyz2rgb = new Matrix33(3.2404542, -1.5371385,
+				-0.4985314, -0.9692660, 1.8760108, 0.0415560, 0.0556434,
+				-0.2040259, 1.0572252);
+		
+		final Vector3[][] xyzs = new Vector3[h][w];
+		
+		double maxLuminosity = 0;
+		for (int i = 0; i < w; i++) {
+			for (int j = 0; j < h; j++) {
+				final Color rgb = picture[j][i];
+				final Vector3 rgbVec = new Vector3(rgb.getRed(), rgb.getGreen(), rgb.getBlue());
+				
+				final Vector3 xyzVec = rgb2xyz.multiplyVec(rgbVec);
+				
+				maxLuminosity = Math.max(maxLuminosity, xyzVec.y);
+				
+				xyzs[j][i] = xyzVec;
+			}
+		}
+		
+		final double scale = 1 / maxLuminosity;
+		
+		
+		for (int i = 0; i < w; i++) {
+			for (int j = 0; j < h; j++) {
+				final Vector3 xyz = xyzs[j][i];
+				xyz.scalarMult(scale);
+				final Vector3 rgb = xyz2rgb.multiplyVec(xyz);
+				picture[j][i] = new Color(rgb.x, rgb.y, rgb.z);
+			}
+		}
+		
 	}
 	
 	private final AtomicInteger done = new AtomicInteger();
@@ -296,12 +342,12 @@ public class Camera extends SceneElement {
                 double pixelGreen = 0;
                 double pixelBlue = 0;
                 int count = 0;
-                if (x == 400 && y == 130) {
-//					System.out.println("STAHP");
+                if (x == 300 && y == 100) {
+					System.out.println("STAHP");
 				}
                 final long start = System.nanoTime();
                 
-                final int samps = 100;
+                final int samps = 20;
                 for (int s = 0 ; s< samps; s++) {
 						final double ppx = x - .5 * pictureWidth
 								+ Math.random();
@@ -337,8 +383,8 @@ public class Camera extends SceneElement {
 //                System.out.println(pixelsDone * 1.0/ pixels + " completed. About " + (remaining / 1e9) + " seconds remaining");
 
                 double n2 = samples;
-                 if (x == 480 && y == 150) {
-                 picture[y][x] = new Color(1, 1, 1);
+                 if (x == 400 && y == 100) {
+                 picture[y][x] = new Color(0, 0,0);
                  continue;
                  }
                  
@@ -356,11 +402,10 @@ public class Camera extends SceneElement {
 
                 Color result = new Color(pixelRed / samps, pixelGreen
                         / samps, pixelBlue / samps).clamp();
-
-                picture[y][x] = result;
+                
+                picture[y][x] = result;//.gammaCorrect(2.2);
             }
         }
-
     }
 
     private void dynamicRange(){
@@ -450,13 +495,13 @@ public class Camera extends SceneElement {
         }
 
         if (objectMaterial.type == MaterialType.Matte) {
-            //DIRECT
-            if(parameters.direct){
-                Color resp2 = directLightDiffuse(collision,collisionPointPlusDelta,stack, survival, rayDepth, distance);
-                pathColor = pathColor.add(resp2);
-            }
+//            //DIRECT
+//            if(parameters.direct){
+//                Color resp2 = directLightDiffuse(collision,collisionPointPlusDelta,stack, survival, rayDepth, distance);
+//                pathColor = pathColor.add(resp2);
+//            }
 
-//            //INDIRECT
+            //INDIRECT
             if(parameters.indirect) {
                 Color resp = indirectLightDiffuse(collision, collisionPointPlusDelta, stack,survival, rayDepth,distance);
 				pathColor = pathColor.add(resp);//
