@@ -121,6 +121,7 @@ public class MaterialParser {
         double roughness = 0.001, uroughness = 0.001, vroughness = 0.001, fresnel = 5.0d;
         boolean simpleRough = false;
         Texture reflectivity = new ConstantColorTexture(new Color(1,1,1));
+        Texture diffuse = new ConstantColorTexture(new Color(0,0,0));
         Matcher m;
         if((m = Pattern.compile(roughnessrx).matcher(line)).find()) {
             roughness = Double.valueOf(m.group(1));
@@ -148,6 +149,13 @@ public class MaterialParser {
         if((m= Pattern.compile(krtexture).matcher(line)).find()) {
             reflectivity = textureMap.get(m.group(1));
         }
-        return new Metal2(reflectivity, roughness, fresnel);
+        if((m = Pattern.compile(kdcolor).matcher(line)).find()) {
+            diffuse = new ConstantColorTexture(new Color(Double.valueOf(m.group(1)),
+                    Double.valueOf(m.group(2)), Double.valueOf(m.group(3))));
+        }
+        if((m= Pattern.compile(kdtexture).matcher(line)).find()) {
+            diffuse = textureMap.get(m.group(1));
+        }
+        return new Metal2(reflectivity, diffuse, roughness, fresnel);
     }
 }
