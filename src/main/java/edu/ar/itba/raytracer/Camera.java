@@ -280,7 +280,7 @@ public class Camera extends SceneElement {
 		}
 //        dynamicRange();
 		
-//		toneMapping(width, height);
+		toneMapping(width, height);
         return takePicture();
 	}
 	
@@ -511,20 +511,15 @@ public class Camera extends SceneElement {
 			}
 
 			final Vector4 lightVersor = li.dir;
-
 			final double ln = lightVersor.dot(normal);
-
 			if (ln > 0) {
 				final Color lightColor = light.getIntensity(li.rci);
-
 				final Color diffuse = new Color(lightColor);
 				diffuse.scalarMult(ln);
 				diffuse.mult(kd).scalarMult(1/Math.PI);
-
 				intensity = intensity.add(diffuse);
 			}
 		}
-
 
         return intensity;
     }

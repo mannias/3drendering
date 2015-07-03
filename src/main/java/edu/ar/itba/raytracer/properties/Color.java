@@ -87,18 +87,16 @@ public final class Color {
 //        r = Math.min(1d, r);
 //        g = Math.min(1d, g);
 //        b = Math.min(1d, b);
-		
-		final double topValue = Math.max(r, Math.max(g, b));
+        final double topValue = Math.max(r, Math.max(g, b));
 
-		if (topValue > 1d) {
-			final double m = 1d / topValue;
-			r = m * r;
-			g = m * g;
-			b = m * b;
-		}
-
+        if (topValue > 1d) {
+            final double m = 1d / topValue;
+            r = m * r;
+            g = m * g;
+            b = m * b;
+        }
         return this;
-	}
+    }
 
 	
 	public Color gammaCorrect(final double gamma) {

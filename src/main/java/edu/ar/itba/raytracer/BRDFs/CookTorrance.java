@@ -3,6 +3,7 @@ package edu.ar.itba.raytracer.BRDFs;
 import edu.ar.itba.raytracer.Material;
 import edu.ar.itba.raytracer.RayCollisionInfo;
 import edu.ar.itba.raytracer.Scene;
+import edu.ar.itba.raytracer.Scene.LightingInfo;
 import edu.ar.itba.raytracer.light.Light;
 import edu.ar.itba.raytracer.properties.Color;
 import edu.ar.itba.raytracer.shape.CustomStack;
@@ -30,15 +31,14 @@ public class CookTorrance {
 
         Vector4 cameraDirection = new Vector4(cameraPosition).sub(collisionPoint);
 
-
-
         for (final Light light : scene.getLights()) {
-            if (!scene.isIlluminati(collisionPointPlusDelta, light, stack, collision)) {
+        	final LightingInfo li = scene.isIlluminati(collisionPointPlusDelta, light, stack, collision);
+            if (!li.lightHits) {
                 continue;
             }
 
 
-            final Vector4 lightVersor = light.getDirection(collision);
+            final Vector4 lightVersor = li.dir;
             Vector4 normal = collision.normal.normalize();
 
             // do the lighting calculation for each fragment.
@@ -48,7 +48,7 @@ public class CookTorrance {
                 Vector4 eyeDir = cameraDirection.normalize();
 
                 // calculate intermediary values
-                Vector4 halfVector = new Vector4(light.getDirection(collision)).add(eyeDir).normalize();
+                Vector4 halfVector = new Vector4(lightVersor).add(eyeDir).normalize();
                 double NdotH = Math.max(normal.dot(halfVector), 0.0);
                 double NdotV = Math.max(normal.dot(eyeDir), 0.0); // note: this could also be NdotL, which is the same value
                 double VdotH = Math.max(eyeDir.dot(halfVector), 0.0);

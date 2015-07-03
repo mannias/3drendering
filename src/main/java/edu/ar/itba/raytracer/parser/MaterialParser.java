@@ -25,6 +25,7 @@ public class MaterialParser {
     final static String roughnessrx = "\"float roughness\" \\[(\\d?\\.\\d+)\\]";
     final static String uroughnessrx = "\"float uroughness\" \\[(\\d?\\.\\d+)\\]";
     final static String vroughnessrx = "\"float vroughness\" \\[(\\d?\\.\\d+)\\]";
+    final static String fresnelrx = "\"float fresnel\" \\[(\\d+\\.\\d+)\\]";
     final static String index = "\"float index\" \\[(\\d*\\.\\d+)\\]";
 
     public static Material Parse(String line,Map<String,Texture> textureMap){
@@ -117,7 +118,7 @@ public class MaterialParser {
     }
 
     private static Material parseMetal2(String line, Map<String,Texture> textureMap){
-        double roughness = 0.001, uroughness = 0.001, vroughness = 0.001, fresnel = 0.1d;
+        double roughness = 0.001, uroughness = 0.001, vroughness = 0.001, fresnel = 5.0d;
         boolean simpleRough = false;
         Texture reflectivity = new ConstantColorTexture(new Color(1,1,1));
         Matcher m;
@@ -133,6 +134,9 @@ public class MaterialParser {
         }
         if((m = Pattern.compile(vroughnessrx).matcher(line)).find()) {
             vroughness = Double.valueOf(m.group(1));
+        }
+        if((m = Pattern.compile(fresnelrx).matcher(line)).find()) {
+            fresnel = Double.valueOf(m.group(1));
         }
         if(!simpleRough){
             roughness = Math.sqrt(Math.pow(uroughness,2)+Math.pow(vroughness,2));
