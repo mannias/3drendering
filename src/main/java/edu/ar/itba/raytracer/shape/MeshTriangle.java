@@ -66,6 +66,8 @@ public class MeshTriangle extends GeometricObject {
 		this.vertex1 = vertex1;
 		this.vertex2 = vertex2;
 
+		normal = new Vector4(n0);//.add(n1).add(n2).scalarMult(1/3).normalize();
+		
 		this.n0 = n0;
 		this.n0.normalize();
 		this.n1 = n1;
@@ -82,13 +84,6 @@ public class MeshTriangle extends GeometricObject {
 		e2 = new Vector4(vertex2);
 		e2.sub(vertex0);
 		
-		final Vector4 n = e1.cross(e2);
-		if (n.dot(n0) > 0) {
-			this.normal = n;
-		} else {
-			this.normal = n.neg();
-		}
-		this.normal.normalize();
 	}
 
 	@Override

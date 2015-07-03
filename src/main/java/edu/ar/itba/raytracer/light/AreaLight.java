@@ -36,13 +36,10 @@ public class AreaLight extends PositionLight{
 
     @Override
     public Color getIntensity(final RayCollisionInfo hitPoint) {
-    	final double ndotd = -object.normal(hitPoint.getLocalCollisionPoint()).dot(hitPoint.getRay().dir);
+    	final double ndotd = Math.abs(object.normal(hitPoint.getLocalCollisionPoint()).dot(hitPoint.getRay().dir));
     	
-    	if (ndotd > 0) {
-    		final Color c = new Color(color).scalarMult(ndotd);//.clamp();
-    		return c;
-    	}
-        return new Color(0,0,0);
+		final Color c = new Color(color).scalarMult(ndotd);//.clamp();
+		return c;
     }
 
     public void setObject(Instance object){

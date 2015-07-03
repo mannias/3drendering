@@ -333,6 +333,8 @@ public class Camera extends SceneElement {
         int currentStart;
         int samplesSqrt = (int)Math.sqrt(samples);
         
+        final int fivePercent = pixels / 20;
+        
         while ((currentStart = startPixel.getAndAdd(pixelsPerTask)) < pixels) {
             final int endPixel = (currentStart + pixelsPerTask) >= pixels ? pixels
                     : currentStart + pixelsPerTask;
@@ -348,7 +350,7 @@ public class Camera extends SceneElement {
 				}
                 final long start = System.nanoTime();
                 
-                final int samps = 1;
+                final int samps = 10;
                 for (int s = 0 ; s< samps; s++) {
 						final double ppx = x - .5 * pictureWidth
 								+ Math.random();
@@ -375,10 +377,16 @@ public class Camera extends SceneElement {
                 }
 //                System.out.println("AVG LIGHT =" + (count * 1.0 / samples));
                 final long time = System.nanoTime() - start;
-                
                 final int pixelsDone = done.incrementAndGet();
                 
+
+                if (pixelsDone % fivePercent == 0) {
+                	System.out.println("Done " + (pixelsDone / fivePercent) + "%");
+                }
+                
+                
                 final long remaining = (pixels - pixelsDone) * time;
+                
                 
                 
 //                System.out.println(pixelsDone * 1.0/ pixels + " completed. About " + (remaining / 1e9) + " seconds remaining");
@@ -442,6 +450,9 @@ public class Camera extends SceneElement {
         	} else {
                 c = new Color(objectMaterial.light.getIntensity(collision));//.scalarMult(1.5d/(1d+0.15*Math.abs(distance)+0.02*distance*distance));
         	}
+//        	System.out.println("Distance " + distance);
+//        	System.out.println("Ray depth " + rayDepth);
+//        	System.out.println("Color " + c);
         	return c;
         }
 
@@ -794,17 +805,17 @@ public class Camera extends SceneElement {
 	}
 
 	public RayCollisionInfo castRay(final Ray ray, final CustomStack stack) {
-		double dist = Double.MAX_VALUE;
-		 RayCollisionInfo minCollision = null;
-		 for (final GeometricObject obj : scene.getGObjects()) {
-		 final RayCollisionInfo collision = obj.hit(ray, stack, 0);
-		 if (collision != null && collision.distance < dist) {
-		 dist = collision.distance;
-		 minCollision = collision;
-		 }
-		 }
-		 return minCollision;
-//		return scene.getTree().getCollision(Double.MAX_VALUE, ray, stack, 0);
+//		double dist = Double.MAX_VALUE;
+//		 RayCollisionInfo minCollision = null;
+//		 for (final GeometricObject obj : scene.getGObjects()) {
+//		 final RayCollisionInfo collision = obj.hit(ray, stack, 0);
+//		 if (collision != null && collision.distance < dist) {
+//		 dist = collision.distance;
+//		 minCollision = collision;
+//		 }
+//		 }
+//		 return minCollision;
+		return scene.getTree().getCollision(Double.MAX_VALUE, ray, stack, 0);
 	}
 
     public interface ShadeFunction{
