@@ -11,7 +11,7 @@ public class AmbientLight extends Light {
 	}
 
 	@Override
-	public Vector4 getDirection(Vector4 hitPoint) {
+	public Vector4 getDirection(final Vector4 hitPoint) {
 		return null;
 	}
 

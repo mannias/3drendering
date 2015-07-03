@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import edu.ar.itba.raytracer.light.AmbientLight;
+import edu.ar.itba.raytracer.light.AreaLight;
 import edu.ar.itba.raytracer.light.DirectionalLight;
 import edu.ar.itba.raytracer.light.Light;
 import edu.ar.itba.raytracer.light.PositionLight;
@@ -61,22 +62,44 @@ public class Scene {
 	public Set<Light> getLights() {
 		return lights;
 	}
+	
+	public static class LightingInfo {
+		public final RayCollisionInfo rci;
+		public final boolean lightHits;
+		public final Vector4 dir;
+		
+		private LightingInfo(final RayCollisionInfo rci, final boolean lightHits, final Vector4 dir) {
+			this.rci = rci;
+			this.lightHits = lightHits;
+			this.dir = dir;
+		}
+	}
 
-	public boolean isIlluminati(final Vector4 point, Light light,
+	public LightingInfo isIlluminati(final Vector4 point, Light light,
 			CustomStack stack, final RayCollisionInfo collision) {
 		if (light instanceof DirectionalLight) {
-			return true;
+			return new LightingInfo(null, true, light.getDirection(point));
 		}
+		
 		final PositionLight pointLight = (PositionLight) light;
-        Vector4 position = pointLight.getPosition(collision);
+        Vector4 position = pointLight.getPosition();
 		Vector4 aux = new Vector4(position);
 		aux.sub(point);
 		Ray ray = new Ray(point, aux);
-        GeometricObject obj = tree.intersectionExists(point.distanceTo(position), ray, stack, 0);
-        if(obj == null || obj.material.light != null){
-            return true;
+		
+		RayCollisionInfo rci = tree.getCollision(point.distanceTo(position) + 0.0001, ray, stack, 0);
+		
+		if (rci == null) {
+			if (light instanceof AreaLight) {
+				System.out.println("LALALA");
+			}
+			return new LightingInfo(null, !(light instanceof AreaLight), light.getDirection(point));
+		}
+		
+        if (rci.obj.material.light != null) {
+            return new LightingInfo(rci, true, rci.getRay().getDir());
         }
-		return false;
+		return new LightingInfo(null, false, null);
 	}
 
 	public Color getAmbientLight() {

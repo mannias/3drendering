@@ -13,6 +13,7 @@ public class PointLight extends PositionLight {
 		super(color.scalarMult(gain), position, transform);
 	}
 
+	@Override
 	public Vector4 getDirection(final Vector4 hitPoint) {
 		final Vector4 ret = new Vector4(position);
 		ret.sub(hitPoint);
