@@ -90,9 +90,6 @@ public class Scene {
 		RayCollisionInfo rci = tree.getCollision(point.distanceTo(position) + 0.0001, ray, stack, 0);
 		
 		if (rci == null) {
-//			if (light instanceof AreaLight) {
-//				System.out.println("LALALA");
-//			}
 			return new LightingInfo(null, !(light instanceof AreaLight), light.getDirection(point));
 		}
 		
