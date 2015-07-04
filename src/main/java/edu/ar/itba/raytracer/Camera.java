@@ -448,7 +448,7 @@ public class Camera extends SceneElement {
         	if (rayDepth == this.rayDepth) {
         		c = new Color(objectMaterial.kd.getColor(collision));
         	} else {
-                c = new Color(objectMaterial.light.getIntensity(collision));//.scalarMult(1.5d/(1d+0.15*Math.abs(distance)+0.02*distance*distance));
+                c = new Color(objectMaterial.light.getIntensity(collision)).scalarMult(1.5d/(1d+0.15*Math.abs(distance)+0.02*distance*distance));
         	}
 //        	System.out.println("Distance " + distance);
 //        	System.out.println("Ray depth " + rayDepth);

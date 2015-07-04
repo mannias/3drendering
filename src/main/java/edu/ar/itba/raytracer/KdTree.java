@@ -364,9 +364,7 @@ public class KdTree implements Serializable {
 		}
 
 		KdTree tree = new KdTree();
-		// tree.rootBb = new BB(minX, maxX, minY, maxY, minZ, maxZ);
-		double size = 30;
-		tree.rootBb = new AABB(-size, size, -size, size, -size, size);
+		 tree.rootBb = new AABB(minX, maxX, minY, maxY, minZ, maxZ);
 
 		final List<Event> eventList = new ArrayList<>();
 		for (final GeometricObject obj : objs) {
