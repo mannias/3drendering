@@ -71,17 +71,17 @@ public class Sphere extends GeometricObject {
 
     @Override
     public Vector4 sampleObject() {
-        double u = Math.random();
-        double v = Math.random();
+//        double u = Math.random();
+//        double v = Math.random();
+//
+//        double tita = 2*Math.PI*u;
+//        double phi = Math.acos(2*v-1);
+//
+//        double x = Math.sqrt(1d-phi*phi)* Math.cos(tita);
+//        double y = Math.sqrt(1d-phi*phi)* Math.sin(tita);
+//        double z = phi;
 
-        double tita = 2*Math.PI*u;
-        double phi = Math.acos(2*v-1);
-
-        double x = Math.sqrt(1d-phi*phi)* Math.cos(tita);
-        double y = Math.sqrt(1d-phi*phi)* Math.sin(tita);
-        double z = phi;
-
-        return new Vector4(x*radius, y*radius, z*radius,1);
+        return new Vector4(Math.random()*radius, Math.random()*radius, Math.random()*radius,1);
 
 
 
