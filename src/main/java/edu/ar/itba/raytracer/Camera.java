@@ -347,7 +347,7 @@ public class Camera extends SceneElement {
                 double pixelGreen = 0;
                 double pixelBlue = 0;
                 int count = 0;
-                if (x == 450 && y == 250) {
+                if (x == 300 && y == 150) {
                 	System.out.println("STAHP");
 				}
                 final long start = System.nanoTime();
@@ -389,7 +389,7 @@ public class Camera extends SceneElement {
                 
                 final long remaining = (pixels - pixelsDone) * time;
                 double n2 = samples;
-                 if (x == 450 && y == 250) {
+                 if (x == 300 && y == 150) {
                  picture[y][x] = new Color(1, 1, 1);
                  continue;
                  }
