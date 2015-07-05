@@ -63,7 +63,7 @@ public class FileInput {
         final long start = System.currentTimeMillis();
 		KdTree tree = KdTree.from(scene);
 		System.out.println("Finished building tree in "
-				+ (System.currentTimeMillis() - start));
+				+ (System.currentTimeMillis() - start) + " ms");
 
 		scene.setTree(tree);
 		

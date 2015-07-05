@@ -18,8 +18,6 @@ public class AreaLight extends PositionLight{
         super(color.scalarMult(gain));
         this.object = obj;
         this.transform = transform;
-        System.out.println(gain);
-        System.out.println(color);
     }
 
     public AreaLight(final Color color, final Matrix44 transform, final double gain) {

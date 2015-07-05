@@ -74,7 +74,7 @@ public class ShapeParser {
         if((m = Pattern.compile(triindicesrx).matcher(line)).find()){
             instance = new Instance(new Mesh(calculateTriangles(m.group(1), normals,vertex, uv)));
         }
-        System.out.println("Total mesh parse time: " + (System.currentTimeMillis() - time));
+        System.out.println("Total mesh parse time: " + (System.currentTimeMillis() - time) + " ms");
         return instance;
     }
 
@@ -92,7 +92,7 @@ public class ShapeParser {
         if((m = Pattern.compile(indicesrx).matcher(line)).find()){
             instance = new Instance(new Mesh(calculateTriangles(m.group(1), normals,vertex, uv)));
         }
-        System.out.println("Total Parse: " + (System.currentTimeMillis() - time));
+        System.out.println("Total Parse: " + (System.currentTimeMillis() - time) + " ms");
         return instance;
     }
 
