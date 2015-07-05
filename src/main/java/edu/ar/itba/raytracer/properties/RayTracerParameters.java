@@ -25,8 +25,8 @@ public class RayTracerParameters {
     public int traceDepth = 5;
     @Parameter(names="-s", description = "Define la cantidad de samples por pixel.")
     public int traceSamples = 20;
-    @Parameter(names="-nodirect", description = "No se calcula la iluminación directa.", arity = 1, hidden = true)
+    @Parameter(names="-direct", description = "Calcula la iluminación directa.", arity = 1, hidden = true)
     public boolean direct = true;
-    @Parameter(names="-noindirect", description = "No se calcula la iluminación directa.", arity = 1, hidden = true)
+    @Parameter(names="-indirect", description = "Calcula la iluminación directa.", arity = 1, hidden = true)
     public boolean indirect = true;
 }

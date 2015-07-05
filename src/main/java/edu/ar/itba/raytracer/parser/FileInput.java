@@ -59,7 +59,7 @@ public class FileInput {
 				parseWorld();
 			}
 		}
-        System.out.println("Total parsing time: " + (System.currentTimeMillis() - parsingStart));
+        System.out.println("Total parsing time: " + (System.currentTimeMillis() - parsingStart) + " ms");
         final long start = System.currentTimeMillis();
 		KdTree tree = KdTree.from(scene);
 		System.out.println("Finished building tree in "
