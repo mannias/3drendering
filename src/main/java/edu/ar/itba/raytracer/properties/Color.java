@@ -105,6 +105,13 @@ public final class Color {
 		b = Math.pow(b, 1 / gamma);
 		return this;
 	}
+
+    public boolean isBlack(){
+        if(r ==0 && g == 0 && b == 0){
+            return true;
+        }
+        return false;
+    }
 	
 	@Override
 	public String toString() {
