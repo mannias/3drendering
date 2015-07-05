@@ -74,14 +74,21 @@ Transform [1.000000000000000 0.000000000000000 0.000000000000000 0.0000000000000
 
 LightGroup "default"
 
-LightSource "point"
-	"float gain" [1.000000000000000]
-	"float importance" [1.000000000000000]
-	"color L" [1.00000000 1.00000000 1.00000000]
-	"bool flipz" ["true"]
-	"float power" [0.000000000000000]
-	"float efficacy" [0.000000000000000]
-	"point from" [0.000000000000000 0.000000000000000 0.000000000000000]
+NamedMaterial "Area"
 
+AreaLightSource "area"
+	"float importance" [1.000000000000000]
+	"float power" [100.000000000000000]
+	"float efficacy" [17.000000000000000]
+	"color L" [1.00000000 0.91917193 0.62339652]
+	"integer nsamples" [1]
+	"float gain" [2.000000000000000]
+
+Shape "sphere"
+	"float radius" [0.10]
+
+AttributeEnd
+	
 TransformEnd # ""
+
 WorldEnd
