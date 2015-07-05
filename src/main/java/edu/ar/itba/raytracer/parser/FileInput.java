@@ -45,6 +45,7 @@ public class FileInput {
 		transforms.push(Matrix44.ID);
 		Matrix44 cameraTransform = Matrix44.ID;
 		CameraParser cameraParser = new CameraParser();
+        final long parsingStart = System.currentTimeMillis();
 		while ((line = file.readLine()) != null) {
 			if (line.contains("LookAt")) {
 				cameraParser.parseLookAt(mergeLine(line, file));
@@ -58,8 +59,8 @@ public class FileInput {
 				parseWorld();
 			}
 		}
-
-		final long start = System.currentTimeMillis();
+        System.out.println("Total parsing time: " + (System.currentTimeMillis() - parsingStart));
+        final long start = System.currentTimeMillis();
 		KdTree tree = KdTree.from(scene);
 		System.out.println("Finished building tree in "
 				+ (System.currentTimeMillis() - start));

@@ -62,10 +62,8 @@ public class ShapeParser {
         Matcher m;
         long time = System.currentTimeMillis();
         if((m = Pattern.compile(vertexrx).matcher(line)).find()){
-            System.out.println("Match vertex: " + (System.currentTimeMillis() - time));
             long time2 = System.currentTimeMillis();
             vertex = parseVectors(m.group(1));
-            System.out.println("Parse Vectors vertex: " + (System.currentTimeMillis() - time2));
         }
         if((m = Pattern.compile(normalsrx).matcher(line)).find()){
             normals = parseVectors(m.group(1));
@@ -76,7 +74,7 @@ public class ShapeParser {
         if((m = Pattern.compile(triindicesrx).matcher(line)).find()){
             instance = new Instance(new Mesh(calculateTriangles(m.group(1), normals,vertex, uv)));
         }
-        System.out.println("Total Parse: " + (System.currentTimeMillis() - time));
+        System.out.println("Total mesh parse time: " + (System.currentTimeMillis() - time));
         return instance;
     }
 
@@ -102,7 +100,6 @@ public class ShapeParser {
         List<Vector4> list = new ArrayList<>();
         long time = System.currentTimeMillis();
         String[] elems = line.split("[\\s]+");
-        System.out.println("Split: " + (System.currentTimeMillis() - time));
         for(int i = 0; i+2 < elems.length; i+=3){
             if(i == 0 && elems[i].isEmpty()){
                 i++;
