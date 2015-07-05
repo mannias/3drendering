@@ -45,7 +45,6 @@ public class Camera extends SceneElement {
 	private final double distToPixels;
 	private final Color[][] picture;
 
-	private final int aaSamples;
 	private final int rayDepth;
     private final int samplesPerPixel;
 
@@ -118,15 +117,14 @@ public class Camera extends SceneElement {
 
         this.parameters = parameters;
 
-		this.aaSamples = parameters.aaSamples;
-		this.rayDepth = parameters.rayDepth;
-
-        //TODO: Wired
-        this.samplesPerPixel = 30;
+		if (parameters.pathTracer) {
+			this.samplesPerPixel = parameters.traceSamples;
+			this.rayDepth = parameters.traceDepth;
+		} else {
+			this.samplesPerPixel = parameters.aaSamples;
+			this.rayDepth = parameters.rayDepth;
+		}
         sampler = new Sampler(samplesPerPixel, pictureWidth * pictureHeight);
-//        testSamples();
-//        sampler.generateSamples();
-//        sampler.sampleHemisphere(1);
         profiler = new Profiler(pictureWidth*pictureHeight);
 	}
 
@@ -261,9 +259,9 @@ public class Camera extends SceneElement {
 				@Override
 				public void run() {
                     if(parameters.pathTracer) {
-                    	trace(startPixel, pixelsPerTask, pixels, width, samplesPerPixel, (x,y,z) -> pathShade(x, y, z, 0));
+                    	trace(startPixel, pixelsPerTask, pixels, width, (x,y,z) -> pathShade(x, y, z, 0));
                     }else{
-                    	trace(startPixel, pixelsPerTask, pixels, width, aaSamples,(x,y,z) -> shade(x, y, z));
+                    	trace(startPixel, pixelsPerTask, pixels, width,(x,y,z) -> shade(x, y, z));
                     }
 				}
 			};
@@ -328,14 +326,12 @@ public class Camera extends SceneElement {
 	private final AtomicInteger done = new AtomicInteger();
     private final Profiler profiler;
 
-    private void trace(AtomicInteger startPixel, int pixelsPerTask, int pixels, int width, int samples,
+    private void trace(AtomicInteger startPixel, int pixelsPerTask, int pixels, int width,
                        ShadeFunction func){
 
         final CustomStack stack = new CustomStack();
         int currentStart;
-        int samplesSqrt = (int)Math.sqrt(samples);
         
-        final int fivePercent = pixels / 20;
         
         while ((currentStart = startPixel.getAndAdd(pixelsPerTask)) < pixels) {
             final int endPixel = (currentStart + pixelsPerTask) >= pixels ? pixels
@@ -346,22 +342,13 @@ public class Camera extends SceneElement {
                 double pixelRed = 0;
                 double pixelGreen = 0;
                 double pixelBlue = 0;
-                int count = 0;
-                if (x == 300 && y == 150) {
-                	System.out.println("STAHP");
-				}
-                final long start = System.nanoTime();
                 
-                final int samps = 100;
-                for (int s = 0 ; s< samps; s++) {
+                for (int s = 0 ; s< samplesPerPixel; s++) {
 						final double ppx = x - .5 * pictureWidth
 								+ Math.random();
 						final double ppy = -y + .5 * pictureHeight
 								+ Math.random();
 						stack.reset();
-//		                 if (x == 270 && y == 130) {
-//							System.out.println("STAHP");
-//						}
 						Color c = func.shade(getPrimaryRay(ppx, ppy), rayDepth,
 								stack);
 						if (Double.isNaN(c.getRed())
@@ -369,51 +356,18 @@ public class Camera extends SceneElement {
 								|| Double.isNaN(c.getGreen())) {
                             System.out.println("justincase");
                         }else {
-                            pixelRed += c.getRed();// * Math.PI;
-                            pixelGreen += c.getGreen();// * Math.PI;
-                            pixelBlue += c.getBlue();// * Math.PI;
-                            if (c.getRed() + c.getGreen() + c.getBlue() > 0) {
-                                count++;
-                            }
+                            pixelRed += c.getRed();
+                            pixelGreen += c.getGreen();
+                            pixelBlue += c.getBlue();
                         }
                 }
-//                System.out.println("AVG LIGHT =" + (count * 1.0 / samples));
-                final long time = System.nanoTime() - start;
-                final int pixelsDone = done.incrementAndGet();
-                
-
-                if (pixelsDone % fivePercent == 0) {
-                	System.out.println("Done " + (pixelsDone / fivePercent) + "%");
-                }
-                
-                
-                final long remaining = (pixels - pixelsDone) * time;
-                double n2 = samples;
-                 if (x == 300 && y == 150) {
-                 picture[y][x] = new Color(1, 1, 1);
-                 continue;
-                 }
-                 
-//
-//                 picture[y][x] = new Color(r,g,b);
-                 
-//                 final int iplus = iteration + 1;
-                 
-//                 picture[y][x] = picture[y][x].add(new Color(pixelRed, pixelGreen, pixelBlue));
-//                 final double max = Math.max(Math.max(r,g),b);
-                 
-//                 picture[y][x] = new Color(r/iplus,g/iplus,b/iplus);
-//                picture[y][x] = new Color(pixelRed / Math.max(count, 1), pixelGreen
-//                        / Math.max(count, 1), pixelBlue / Math.max(count, 1));
-
-                Color result = new Color(pixelRed / samps, pixelGreen
-                        / samps, pixelBlue / samps).clamp();
+                Color result = new Color(pixelRed / samplesPerPixel, pixelGreen
+                        / samplesPerPixel, pixelBlue / samplesPerPixel).clamp();
                 
                 picture[y][x] = result.gammaCorrect(2.2);
                 profiler.sumValue();
             }
         }
-        System.out.println("FINISH");
     }
 
     private Color pathShade(final Ray ray, final int rayDepth,
