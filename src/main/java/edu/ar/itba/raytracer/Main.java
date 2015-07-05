@@ -77,7 +77,7 @@ public class Main {
 //			if (it  % 100 == 0) {
 //			ImageIO.write(image, extension, new File(parameters.output));
 //			}
-			System.out.println(it);
+//			System.out.println(it);
 			it++;
 //			}
 //			if (parameters.time) {
