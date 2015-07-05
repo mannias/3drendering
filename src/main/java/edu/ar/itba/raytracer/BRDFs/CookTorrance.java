@@ -21,7 +21,7 @@ public class CookTorrance {
 
         // set important material values
         double roughnessValue = collision.getObj().material.roughness;//1- objectMaterial.roughness; // 0 : smooth, 1: rough
-        double F0 = 0.88; // fresnel reflectance at normal incidence
+        double F0 = collision.getObj().material.fresnel; // fresnel reflectance at normal incidence
 
 
 
